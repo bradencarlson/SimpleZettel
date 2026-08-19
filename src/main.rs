@@ -9,6 +9,9 @@ fn main() {
         Some(("box", sub_matches)) => {
             println!("box command found");
         },
+        Some(("add", sub_matches)) => {
+            println!("add command found");
+        },
         _ => {
             println!("no subcommand matched.");
         }
