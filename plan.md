@@ -33,9 +33,9 @@ List of subcommands desired:
 - tags: list all tags found in notes
 - rm: for removing an existing note
 - show: for showing an existing note
-    - subcommand for showing based on numbering in front matter.
 - ls: for listing all files in a box
     - this could have subcommands just like real `ls`
+    - subcommand for showing based on numbering in front matter.
 - search: searches for a string amoung files in box
 - box: for managing boxes
     - add: for adding a box
