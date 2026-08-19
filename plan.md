@@ -18,6 +18,8 @@
     - file updated
     - error of some kind?
 - [ ] handle any backlinks?
+- [ ] convert any 'numbered' links to 'named' links (for compatibility with
+  other systems)?
 - [ ] Prompt user if they would like to add a commit message
 - [ ] Commit changes to box `git` tracking.
 
@@ -31,6 +33,7 @@ List of subcommands desired:
 - tags: list all tags found in notes
 - rm: for removing an existing note
 - show: for showing an existing note
+    - subcommand for showing based on numbering in front matter.
 - ls: for listing all files in a box
     - this could have subcommands just like real `ls`
 - search: searches for a string amoung files in box
