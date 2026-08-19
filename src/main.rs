@@ -1,3 +1,6 @@
+use std::process::{Command,Stdio};
 fn main() {
-    println!("Hello, world!");
+    let cmd = Command::new("vim")
+        .status()
+        .expect("Failed to start vim");
 }
