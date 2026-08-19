@@ -12,7 +12,8 @@
 
 (user edits file, no need to handle anything here)
 
-- [ ] Depending on the exit code, print out what has happened: 
+- [ ] Depending on the exit code (this might have to be based on hashes instead), 
+  print out what has happened: 
     - new file saved
     - file updated
     - error of some kind?
@@ -26,11 +27,13 @@
 
 List of subcommands desired:
 - add: for adding a new note
-- todo?: managing todos (this could be in a `.todos` file in the box directory
 - edit: for editing an existing note
 - tags: list all tags found in notes
 - rm: for removing an existing note
 - show: for showing an existing note
+- ls: for listing all files in a box
+    - this could have subcommands just like real `ls`
+- search: searches for a string amoung files in box
 - box: for managing boxes
     - add: for adding a box
     - remove: for removing a box (only removes tracking, not files)
@@ -51,7 +54,8 @@ cache directories. Meaning, if I were to drop a bunch of markdown files into a
 directory, it could detect it and add any needed information for faster
 processing in the future.
 
-The `.current` file simple denotes which box I am currently looking at.
+The `.current` file simple denotes which box I am currently looking at. If this
+is absent, `zk` should report that it is in a "headless" state.
 
 The `.track` file in a box directory simply denotes that that box is tracked by
 `zk`. Removing a box simply means deleting this file.
@@ -92,3 +96,6 @@ I could also keep track of numbering in a dotfile in the box directory as well,
 this is what `nb` does (a huge inspiration and a great project!)
 
 ## Things that are *not* implemented
+
+- todos: I'm just going to focus on the zettelkasten, not the todo lists. I like
+  `nb` for this anyway.
