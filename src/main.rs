@@ -1,6 +1,17 @@
 use std::process::{Command,Stdio};
+
+pub mod args;
 fn main() {
-    let cmd = Command::new("vim")
-        .status()
-        .expect("Failed to start vim");
+
+    let matches = args::parse_args();
+
+    match matches.subcommand() {
+        Some(("box", sub_matches)) => {
+            println!("box command found");
+        },
+        _ => {
+            println!("no subcommand matched.");
+        }
+    };
+
 }
