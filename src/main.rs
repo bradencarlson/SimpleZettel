@@ -1,27 +1,28 @@
 use std::process::{Command,Stdio};
 
-pub mod args;
+mod args;
+mod boxes;
 fn main() {
 
     let matches = args::parse_args();
 
     match matches.subcommand() {
-        Some(("box", sub_matches)) => {
-            println!("box command found");
+        Some(("box", sub_m)) => {
+            boxes::handle_subcommand(sub_m);
         },
-        Some(("add", sub_matches)) => {
+        Some(("add", sub_m)) => {
             println!("add command found");
         },
-        Some(("edit", sub_matches)) => {
+        Some(("edit", sub_m)) => {
             println!("edit command found");
         },
-        Some(("rm", sub_matches)) => {
+        Some(("rm", sub_m)) => {
             println!("rm command found");
         },
-        Some(("show", sub_matches)) => {
+        Some(("show", sub_m)) => {
             println!("show command found");
         },
-        Some(("ls", sub_matches)) => {
+        Some(("ls", sub_m)) => {
             println!("ls command found");
         },
         _ => {

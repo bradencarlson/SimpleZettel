@@ -21,7 +21,7 @@ pub fn parse_args() -> ArgMatches {
                     )
                 )
                 .subcommand(
-                    Command::new("remove")
+                    Command::new("rm")
                     .arg(
                         Arg::new("name")
                         .required(true)
