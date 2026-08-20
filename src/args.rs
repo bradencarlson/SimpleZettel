@@ -6,9 +6,9 @@ pub fn parse_args() -> ArgMatches {
         .subcommand(
             Command::new("box")
                 .about("command for managing boxes")
-                .arg(
-                    Arg::new("ls")
-                    .action(ArgAction::True)
+                .subcommand(
+                    Command::new("ls")
+                    .about("list boxes")
                 )
                 .subcommand(
                     Command::new("add")
