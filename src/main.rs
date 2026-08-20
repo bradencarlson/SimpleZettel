@@ -8,7 +8,12 @@ fn main() {
 
     match matches.subcommand() {
         Some(("box", sub_m)) => {
-            boxes::handle_subcommand(sub_m);
+            match boxes::handle_subcommand(sub_m) {
+                Ok(_) => {},
+                Err(e) => {
+                    println!("Error: {e}");
+                }
+            };
         },
         Some(("add", sub_m)) => {
             println!("add command found");
