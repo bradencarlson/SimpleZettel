@@ -27,19 +27,22 @@
 
 ### High level commands
 
+An 'x' here simply means that the command/option has been built into `clap`, not
+necessarily that it has been fully implemented yet.
+
 List of subcommands desired:
-- add: for adding a new note
-- edit: for editing an existing note
-- tags: list all tags found in notes
-- rm: for removing an existing note
-- show: for showing an existing note
-- ls: for listing all files in a box
+- [x] add: for adding a new note
+- [x] edit: for editing an existing note
+- [x] rm: for removing an existing note
+- [x] show: for showing an existing note
+- [x] ls: for listing all files in a box
     - this could have subcommands just like real `ls`
+        - [ ] `-t` for listing tags
     - subcommand for showing based on numbering in front matter.
-- search: searches for a string amoung files in box
-- box: for managing boxes
-    - add: for adding a box
-    - remove: for removing a box (only removes tracking, not files)
+- search: searches for a string among files in box
+- [x] box: for managing boxes
+    - [x] add: for adding a box
+    - [x] remove: for removing a box (only removes tracking, not files)
     - track: for tracking a box previously removed
 
 ### Low level commands
