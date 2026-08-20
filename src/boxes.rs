@@ -1,8 +1,10 @@
 use std::fs::DirBuilder;
-use clap::ArgMatches;
+use std::env;
 use std::io;
 use std::fmt;
 use std::fs;
+use std::path::PathBuf;
+use clap::ArgMatches;
 
 #[derive(Debug)]
 pub enum BoxError {
@@ -10,6 +12,9 @@ pub enum BoxError {
     BoxExists,
     NoName,
     CheckFail,
+    NoHome,
+    ZkHomeCreate,
+
 } 
 
 impl fmt::Display for BoxError {
@@ -19,6 +24,8 @@ impl fmt::Display for BoxError {
             BoxError::BoxExists => write!(f, "box already exists"),
             BoxError::NoName => write!(f, "you must provide a name for the box"),
             BoxError::CheckFail => write!(f, "failed to check box existence"),
+            BoxError::NoHome => write!(f, "failed to find user's home directory"),
+            BoxError::ZkHomeCreate => write!(f, "failed to create ~/.zk directory"),
         }
     }
 }
@@ -43,29 +50,43 @@ pub fn handle_subcommand(matches: &ArgMatches) -> Result<(), BoxError> {
     Ok(())
 }
 
-fn create_box(matches: &ArgMatches) -> Result<(), BoxError> {
-    let mut path = String::from("~/.zk/");
-
-    if let Ok(false) = fs::exists(path.as_str()) {
-
+fn get_zk_dir() -> Result<PathBuf, BoxError> {
+    if let Some(mut path) = env::home_dir() {
+        path.push(".zk/");
+        match fs::exists(&path) {
+            Ok(true) => Ok(path), 
+            Ok(false) => {
+                match fs::create_dir(&path) {
+                    Ok(_) => Ok(path),
+                    Err(_) => Err(BoxError::ZkHomeCreate)
+                }
+            }, 
+            Err(_) => Err(BoxError::ZkHomeCreate)
+        }
+    } else {
+        Err(BoxError::NoHome)
     }
+
+}
+
+fn create_box(matches: &ArgMatches) -> Result<(), BoxError> {
+    let mut path = get_zk_dir()?;
+
     if let Some(name) = matches.get_one::<String>("name") {
-        path.push_str(name.as_str());
+        path.push(name.as_str());
 
-        if let Ok(exist) = fs::exists(path.as_str()) {
-            if exist {
-                return Err(BoxError::BoxExists);
-            }
-        } else {
-            return Err(BoxError::CheckFail);
+        match fs::exists(&path) {
+            Ok(true) => Err(BoxError::BoxExists),
+            Ok(false) => {
+                match fs::create_dir(&path) {
+                    Ok(_) => Ok(()),
+                    Err(_) => Err(BoxError::CreateFail)
+                }
+            },
+            Err(_) => return Err(BoxError::CheckFail)
         }
 
-        match DirBuilder::new().create(path) {
-            Ok(_) => return Ok(()),
-            Err(_) => return Err(BoxError::CreateFail)
-        }
     } else {
         Err(BoxError::NoName)
     }
-
 }
