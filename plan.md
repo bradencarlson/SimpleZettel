@@ -41,9 +41,11 @@ List of subcommands desired:
     - subcommand for showing based on numbering in front matter.
 - search: searches for a string among files in box
 - [x] box: for managing boxes
-    - [x] add: for adding a box
+    - [x] ls: for listing boxes (maybe this should be the default behavior if no
+      subcommand is found
+    - [x] add: for adding a box 
     - [x] remove: for removing a box (only removes tracking, not files)
-    - track: for tracking a box previously removed
+    - [ ] track: for tracking a box previously removed
 
 ### Low level commands
 

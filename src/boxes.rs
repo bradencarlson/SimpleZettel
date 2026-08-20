@@ -1,9 +1,9 @@
-use std::fs::DirBuilder;
 use std::env;
-use std::io;
 use std::fmt;
 use std::fs;
 use std::path::PathBuf;
+use std::process::Command;
+use std::cmp::Ordering;
 use clap::ArgMatches;
 
 #[derive(Debug)]
@@ -14,8 +14,9 @@ pub enum BoxError {
     CheckFail,
     NoHome,
     ZkHomeCreate,
-
-} 
+    InvalidPath,
+    GitInit,
+}
 
 impl fmt::Display for BoxError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -26,6 +27,8 @@ impl fmt::Display for BoxError {
             BoxError::CheckFail => write!(f, "failed to check box existence"),
             BoxError::NoHome => write!(f, "failed to find user's home directory"),
             BoxError::ZkHomeCreate => write!(f, "failed to create ~/.zk directory"),
+            BoxError::InvalidPath => write!(f, "Something weird has happened; I tried to access a directory outside of ~/.zk"),
+            BoxError::GitInit => write!(f, "failed to initialize git repo for box"),
         }
     }
 }
@@ -54,13 +57,13 @@ fn get_zk_dir() -> Result<PathBuf, BoxError> {
     if let Some(mut path) = env::home_dir() {
         path.push(".zk/");
         match fs::exists(&path) {
-            Ok(true) => Ok(path), 
+            Ok(true) => Ok(path),
             Ok(false) => {
                 match fs::create_dir(&path) {
                     Ok(_) => Ok(path),
                     Err(_) => Err(BoxError::ZkHomeCreate)
                 }
-            }, 
+            },
             Err(_) => Err(BoxError::ZkHomeCreate)
         }
     } else {
@@ -79,7 +82,10 @@ fn create_box(matches: &ArgMatches) -> Result<(), BoxError> {
             Ok(true) => Err(BoxError::BoxExists),
             Ok(false) => {
                 match fs::create_dir(&path) {
-                    Ok(_) => Ok(()),
+                    Ok(_) => {
+                        git_init(&path)?;
+                        Ok(())
+                    },
                     Err(_) => Err(BoxError::CreateFail)
                 }
             },
@@ -89,4 +95,30 @@ fn create_box(matches: &ArgMatches) -> Result<(), BoxError> {
     } else {
         Err(BoxError::NoName)
     }
+}
+
+fn git_init(path: &PathBuf) -> Result<(), BoxError> {
+    verify_path(path)?;
+    match Command::new("git")
+        .arg("init")
+        .arg(path)
+        .output() {
+            Ok(_) => Ok(()),
+            Err(_) => Err(BoxError::GitInit)
+    }
+}
+
+fn verify_path(path: &PathBuf) -> Result<(), BoxError> {
+    let zk_home = get_zk_dir()?;
+    match zk_home.partial_cmp(path) {
+        Some(Ordering::Less) => Ok(()),
+        _ => Err(BoxError::InvalidPath)
+    }
+
+}
+
+fn track(path: &PathBuf) -> Result<(), BoxError> {
+    verify_path()?;
+
+    Ok(())
 }
