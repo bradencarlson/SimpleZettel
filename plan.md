@@ -48,7 +48,7 @@ List of subcommands desired:
 
 ### Low level commands
 
-- [ ] log: view git log for box
+- [ ], [ ] log: view git log for box
     - could optionally be able to pass `git log` options to this command
 
 ## Implementation
