@@ -2,6 +2,7 @@ mod args;
 mod boxes;
 mod notes;
 mod utils;
+mod error;
 
 fn main() {
 
