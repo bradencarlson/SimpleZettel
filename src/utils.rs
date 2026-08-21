@@ -1,6 +1,7 @@
 use std::env;
 use std::fs;
 use std::fmt;
+use std::fmt::Display;
 use std::path::PathBuf;
 
 use crate::error::ZkError;
@@ -45,6 +46,33 @@ pub fn verify_path(path: &PathBuf) -> Result<(), ZkError> {
         Err(ZkError::InvalidPath)
     }
 
+}
+
+pub fn verify_note_path(path: &PathBuf) -> Result<(), ZkError> {
+    let zk_home = get_zk_dir()?;
+    match path.starts_with(zk_home) {
+        true => Ok(()),
+        false => Err(ZkError::InvalidNotePath(path.clone()))
+    }
+}
+
+pub fn get_current_box() -> Result<PathBuf, ZkError> {
+    let mut current = get_zk_dir()?;
+    current.push(".current");
+    match fs::read_to_string(&current) {
+        Ok(content) => {
+            let current = path_from_name(&content.trim())?;
+            match current.try_exists() {
+                Ok(_) => {
+                    Ok(current)
+                },
+                Err(e) => {
+                    Err(ZkError::Other(String::from("invalid current box")))
+                }
+            }
+        },
+        Err(e) => Err(ZkError::Other(String::from("failed to read ~/.zk/.current")))
+    }
 }
 
 #[test]
