@@ -11,10 +11,12 @@ pub enum BoxError {
     CreateFail,
     BoxExists,
     NoName,
-    CheckFail,
+    Access,
     NoHome,
     ZkHomeCreate,
     InvalidPath,
+    TrackFail,
+    IndexFail,
     GitInit,
 }
 
@@ -44,10 +46,12 @@ impl fmt::Display for BoxError {
             BoxError::CreateFail => write!(f, "failed to create box"),
             BoxError::BoxExists => write!(f, "box already exists"),
             BoxError::NoName => write!(f, "you must provide a name for the box"),
-            BoxError::CheckFail => write!(f, "failed to check box existence"),
+            BoxError::Access => write!(f, "failed to access ~/.zk"),
             BoxError::NoHome => write!(f, "failed to find user's home directory"),
             BoxError::ZkHomeCreate => write!(f, "failed to create ~/.zk directory"),
             BoxError::InvalidPath => write!(f, "Something weird has happened; I tried to access a directory outside of ~/.zk"),
+            BoxError::TrackFail => write!(f, "Failed to track box"),
+            BoxError::IndexFail => write!(f, "Failed to create index file"),
             BoxError::GitInit => write!(f, "failed to initialize git repo for box"),
         }
     }
@@ -64,7 +68,7 @@ pub fn handle_subcommand(matches: &ArgMatches) -> Result<(), BoxError> {
             create_box(ssub_m)?;
         },
         Some(("rm", ssub_m)) => {
-            println!("rm subcommand found");
+            remove_tracking(ssub_m)?;
         },
         _ => {
             println!("No subcommand found.");
@@ -104,12 +108,14 @@ fn create_box(matches: &ArgMatches) -> Result<(), BoxError> {
                 match fs::create_dir(&path) {
                     Ok(_) => {
                         git_init(&path)?;
+                        track(&path)?;
+                        create_index(&path)?;
                         Ok(())
                     },
                     Err(_) => Err(BoxError::CreateFail)
                 }
             },
-            Err(_) => return Err(BoxError::CheckFail)
+            Err(_) => return Err(BoxError::Access)
         }
 
     } else {
@@ -142,9 +148,65 @@ fn verify_path(path: &PathBuf) -> Result<(), BoxError> {
 
 }
 
-fn track(zkb: &ZkBox) -> Result<(), BoxError> {
-    let path = zkb.get_path();
-    Ok(())
+fn track(path: &PathBuf) -> Result<(), BoxError> {
+    match verify_path(path) {
+        Ok(_) => {
+            let mut track_file = PathBuf::from(path);
+            track_file.push(".track");
+            match fs::File::create(track_file) {
+                Ok(_) => Ok(()),
+                Err(_) => Err(BoxError::TrackFail)
+            }
+        },
+        Err(e) => Err(e)
+    }
+}
+
+fn remove_tracking(matches: &ArgMatches) -> Result<(), BoxError> {
+    if let Some(name) = matches.get_one::<String>("name") {
+        let mut path = get_zk_dir()?;
+        path.push(name);
+        verify_path(&path)?;
+        remove_track_file(&path);
+        return Ok(());
+    }
+    Err(BoxError::NoName)
+        
+}
+
+fn remove_track_file(path: &PathBuf) {
+    match is_tracked(path) {
+        Ok(true) => {
+            let mut track_file = PathBuf::from(path);
+            track_file.push(".track");
+            fs::remove_file(track_file);
+        },
+        _ => {}
+    };
+}
+
+fn is_tracked(path: &PathBuf) -> Result<bool, BoxError> {
+    verify_path(path)?;
+    let mut track_file = PathBuf::from(path);
+    track_file.push(".track");
+    match fs::exists(track_file) {
+        Ok(e) => Ok(e),
+        Err(_) => Err(BoxError::Access)
+    } 
+}
+
+fn create_index(path: &PathBuf) -> Result<(), BoxError> {
+    match verify_path(path) {
+        Ok(_) => {
+            let mut index_file = PathBuf::from(path);
+            index_file.push(".index");
+            match fs::File::create(index_file) {
+                Ok(_) => Ok(()),
+                Err(_) => Err(BoxError::TrackFail)
+            }
+        },
+        Err(e) => Err(e)
+    }
 }
 
 #[test]
@@ -160,4 +222,12 @@ fn valid_path() {
 fn invalid_path() {
     let invalid_path = PathBuf::from("~/Documents/dir");
     assert_eq!(verify_path(&invalid_path), Err(BoxError::InvalidPath));
+}
+
+#[test]
+fn deep_path() {
+    if let Some(mut invalid_path) = env::home_dir() {
+        invalid_path.push(".zk/test/one");
+        assert_eq!(verify_path(&invalid_path), Err(BoxError::InvalidPath));
+    }
 }

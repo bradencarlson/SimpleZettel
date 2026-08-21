@@ -27,29 +27,28 @@
 
 ### High level commands
 
-An 'x' here simply means that the command/option has been built into `clap`, not
-necessarily that it has been fully implemented yet.
-
+An 'x' here in the second box simply means that the command/option has been built into `clap`, an 
+'x' in the first box indicates that the feature has been implemented.
 List of subcommands desired:
-- [x] add: for adding a new note
-- [x] edit: for editing an existing note
-- [x] rm: for removing an existing note
-- [x] show: for showing an existing note
-- [x] ls: for listing all files in a box
+- [ ], [x] add: for adding a new note
+- [ ], [x] edit: for editing an existing note
+- [ ], [x] rm: for removing an existing note
+- [ ], [x] show: for showing an existing note
+- [ ], [x] ls: for listing all files in a box
     - this could have subcommands just like real `ls`
-        - [ ] `-t` for listing tags
+        - [ ], [ ] `-t` for listing tags
     - subcommand for showing based on numbering in front matter.
 - search: searches for a string among files in box
-- [x] box: for managing boxes
-    - [x] ls: for listing boxes (maybe this should be the default behavior if no
+- [x], [x] box: for managing boxes
+    - [ ], [x] ls: for listing boxes (maybe this should be the default behavior if no
       subcommand is found
-    - [x] add: for adding a box 
-    - [x] remove: for removing a box (only removes tracking, not files)
-    - [ ] track: for tracking a box previously removed
+    - [x], [x] add: for adding a box 
+    - [x], [x] remove: for removing a box (only removes tracking, not files)
+    - [ ], [ ] track: for tracking a box previously removed
 
 ### Low level commands
 
-- log: view git log for box
+- [ ] log: view git log for box
     - could optionally be able to pass `git log` options to this command
 
 ## Implementation
