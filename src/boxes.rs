@@ -6,7 +6,7 @@ use std::process::Command;
 use std::cmp::Ordering;
 use clap::ArgMatches;
 
-#[derive(Debug)]
+#[derive(Debug,PartialEq)]
 pub enum BoxError {
     CreateFail,
     BoxExists,
@@ -16,6 +16,26 @@ pub enum BoxError {
     ZkHomeCreate,
     InvalidPath,
     GitInit,
+}
+
+struct ZkBox {
+    name: String
+}
+
+impl ZkBox {
+    pub fn get_path(&self) -> Option<PathBuf> {
+        if let Ok(mut path) = get_zk_dir() {
+            if self.name.len() > 0 {
+                path.push(&self.name);
+                return Some(path);
+            } else {
+                return None;
+            }
+        }
+
+        None
+    }
+
 }
 
 impl fmt::Display for BoxError {
@@ -110,15 +130,34 @@ fn git_init(path: &PathBuf) -> Result<(), BoxError> {
 
 fn verify_path(path: &PathBuf) -> Result<(), BoxError> {
     let zk_home = get_zk_dir()?;
-    match zk_home.partial_cmp(path) {
-        Some(Ordering::Less) => Ok(()),
-        _ => Err(BoxError::InvalidPath)
+    if let Some(parent) = path.parent() {
+        if parent == zk_home {
+            Ok(())
+        } else {
+            Err(BoxError::InvalidPath)
+        }
+    } else {
+        Err(BoxError::InvalidPath)
     }
 
 }
 
-fn track(path: &PathBuf) -> Result<(), BoxError> {
-    verify_path()?;
-
+fn track(zkb: &ZkBox) -> Result<(), BoxError> {
+    let path = zkb.get_path();
     Ok(())
+}
+
+#[test]
+fn valid_path() {
+    if let Some(mut path) = env::home_dir() {
+        path.push(".zk/test");
+        assert_eq!(verify_path(&path), Ok(()));
+    }
+
+}
+
+#[test]
+fn invalid_path() {
+    let invalid_path = PathBuf::from("~/Documents/dir");
+    assert_eq!(verify_path(&invalid_path), Err(BoxError::InvalidPath));
 }
