@@ -1,5 +1,6 @@
 mod args;
 mod boxes;
+mod notes;
 mod utils;
 
 fn main() {
@@ -9,14 +10,23 @@ fn main() {
     match matches.subcommand() {
         Some(("box", sub_m)) => {
             match boxes::handle_subcommand(sub_m) {
-                Ok(_) => {},
+                Ok(_) => {
+                    println!("Box added successfully.");
+                },
                 Err(e) => {
                     println!("Error: {e}");
                 }
             };
         },
         Some(("add", sub_m)) => {
-            println!("add command found");
+            match notes::add_note(sub_m) {
+                Ok(_) => {
+                    println!("Note added successfully.");
+                },
+                Err(e) => {
+                    println!("Error: {e}");
+                },
+            }
         },
         Some(("edit", sub_m)) => {
             println!("edit command found");

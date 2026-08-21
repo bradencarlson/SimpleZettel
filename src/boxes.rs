@@ -85,10 +85,9 @@ pub fn handle_subcommand(matches: &ArgMatches) -> Result<(), BoxError> {
 
 
 fn create_box(matches: &ArgMatches) -> Result<(), BoxError> {
-    let mut path = utils::get_zk_dir()?;
 
     if let Some(name) = matches.get_one::<String>("name") {
-        path.push(name.as_str());
+        let path = utils::path_from_name(name)?;
 
         match fs::exists(&path) {
             Ok(true) => Err(BoxError::BoxExists),
@@ -137,9 +136,7 @@ fn track(path: &PathBuf) -> Result<(), BoxError> {
 
 fn remove_tracking(matches: &ArgMatches) -> Result<(), BoxError> {
     if let Some(name) = matches.get_one::<String>("name") {
-        let mut path = utils::get_zk_dir()?;
-        path.push(name);
-        utils::verify_path(&path)?;
+        let path = utils::path_from_name(name)?;
         remove_track_file(&path);
         return Ok(());
     }
