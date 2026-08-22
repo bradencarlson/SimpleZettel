@@ -32,8 +32,8 @@ impl ZkBox {
 
 pub fn handle_subcommand(matches: &ArgMatches) -> Result<(), ZkError> {
     match matches.subcommand() {
-        Some(("ls", ssub_m)) => {
-            println!("ls command found");
+        Some(("ls", _ssub_m)) => {
+            list_boxes()?;
         },
         Some(("add", ssub_m)) => {
             create_box(ssub_m)?;
@@ -73,6 +73,32 @@ fn create_box(matches: &ArgMatches) -> Result<(), ZkError> {
     } else {
         Err(ZkError::NoName)
     }
+}
+
+fn list_boxes() -> Result<(), ZkError> {
+    let zk_dir = utils::get_zk_dir()?;
+    match fs::read_dir(&zk_dir) {
+        Ok(iter) => {
+            for entry in iter {
+                match entry {
+                    Ok(e) => {
+                        let path = e.path();
+                        if path.is_dir() {
+                            println!("{}", path.display());
+                        }
+                    },
+                    Err(_) => {
+                        return Err(ZkError::Other(String::from("error")));
+                    }
+                }
+            }
+            Ok(())
+        },
+        Err(_) => {
+            Err(ZkError::Other(String::from("error")))
+        }
+    }
+        
 }
 
 fn git_init(path: &PathBuf) -> Result<(), ZkError> {
