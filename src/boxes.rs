@@ -59,16 +59,21 @@ fn create_box(matches: &ArgMatches) -> Result<(), ZkError> {
 
 fn list_boxes() -> Result<(), ZkError> {
     let zk_dir = utils::get_zk_dir()?;
+    let current = utils::get_current_box()?;
     match fs::read_dir(&zk_dir) {
         Ok(iter) => {
             for entry in iter {
+                let mut pre = "  ";
                 match entry {
                     Ok(e) => {
                         let path = e.path();
-                        if let Some(name) = path.file_name() {
-                            if let Some(dir_name) = name.to_str() {
-                                if path.is_dir() {
-                                    println!("{}", dir_name);
+                        if path == current {
+                            pre = "->";
+                        }
+                        if path.is_dir() {
+                            if let Some(name) = path.file_name() {
+                                if let Some(dir_name) = name.to_str() {
+                                        println!("{}{}", pre, dir_name);
                                 }
                             }
                         }
