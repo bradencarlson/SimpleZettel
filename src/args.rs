@@ -30,6 +30,15 @@ pub fn parse_args() -> ArgMatches {
                         .help("The name of the box to remove from tracking")
                     )
                 )
+                .subcommand(
+                    Command::new("use")
+                    .about("set a box as currently in use")
+                    .arg(
+                        Arg::new("name")
+                        .required(true)
+                        .help("the name of the box to use")
+                    )
+                )
         )
         .subcommand(
             Command::new("add")

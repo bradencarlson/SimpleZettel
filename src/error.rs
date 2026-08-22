@@ -8,6 +8,7 @@ pub enum ZkError {
     InvalidPath,
     InvalidNotePath(PathBuf),
     BoxCreateFail,
+    InvalidBox,
     NoteCreate,
     NoteExists,
     NoteRead(PathBuf),
@@ -17,6 +18,7 @@ pub enum ZkError {
     TrackFail,
     IndexFail,
     GitInit,
+    Current,
     Other(String),
 }
 
@@ -28,6 +30,7 @@ impl fmt::Display for ZkError {
             ZkError::InvalidPath => write!(f, "Something weird has happened; I tried to access a directory outside of ~/.zk"),
             ZkError::InvalidNotePath(path) => write!(f, "invalid note path: {}", path.display()),
             ZkError::BoxCreateFail => write!(f, "failed to create box"),
+            ZkError::InvalidBox => write!(f, "box does not exist"),
             ZkError::NoteCreate => write!(f, "failed to create note"),
             ZkError::NoteExists => write!(f, "note already exists"),
             ZkError::NoteRead(path) => write!(f, "failed to read note: {}", path.display()),
@@ -37,6 +40,7 @@ impl fmt::Display for ZkError {
             ZkError::TrackFail => write!(f, "failed to track box"),
             ZkError::IndexFail => write!(f, "failed to create index file"),
             ZkError::GitInit => write!(f, "failed to innitialize git repo for box"),
+            ZkError::Current => write!(f, "failed to update current box"),
             ZkError::Other(msg) => write!(f, "{}", msg),
         }
     }

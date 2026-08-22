@@ -41,6 +41,9 @@ pub fn handle_subcommand(matches: &ArgMatches) -> Result<(), ZkError> {
         Some(("rm", ssub_m)) => {
             remove_tracking(ssub_m)?;
         },
+        Some(("use", ssub_m)) => {
+            use_box(ssub_m)?;
+        },
         _ => {
             println!("No subcommand found.");
         }
@@ -99,6 +102,27 @@ fn list_boxes() -> Result<(), ZkError> {
         }
     }
         
+}
+
+fn use_box(matches: &ArgMatches) -> Result<(), ZkError> {
+    if let Some(name) = matches.get_one::<String>("name") {
+        let path = utils::path_from_name(&name)?;
+        match fs::exists(&path) {
+            Ok(true) => {
+                let mut current = utils::get_zk_dir()?;
+                current.push(".current");
+                match fs::write(current, name) {
+                    Ok(_) => Ok(()),
+                    Err(e) => Err(ZkError::Current)
+                }
+            },
+            _ => {
+                Err(ZkError::InvalidBox)
+            }
+        }
+    } else {
+        Err(ZkError::NoName)
+    }
 }
 
 fn git_init(path: &PathBuf) -> Result<(), ZkError> {
