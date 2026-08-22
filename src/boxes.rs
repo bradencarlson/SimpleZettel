@@ -65,8 +65,12 @@ fn list_boxes() -> Result<(), ZkError> {
                 match entry {
                     Ok(e) => {
                         let path = e.path();
-                        if path.is_dir() {
-                            println!("{}", path.display());
+                        if let Some(name) = path.file_name() {
+                            if let Some(dir_name) = name.to_str() {
+                                if path.is_dir() {
+                                    println!("{}", dir_name);
+                                }
+                            }
                         }
                     },
                     Err(_) => {
