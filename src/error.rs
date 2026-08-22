@@ -1,6 +1,8 @@
 use std::fmt;
 use std::path::PathBuf;
 
+use anstream::println;
+
 #[derive(Debug,PartialEq)]
 pub enum ZkError {
     HomeCreate,
@@ -53,3 +55,18 @@ impl fmt::Display for ZkError {
 }
 
 impl std::error::Error for ZkError {}
+
+pub fn critical(msg: &str) {
+    let red = anstyle::Style::new().fg_color(Some(anstyle::AnsiColor::Red.into()));
+    println!("{red}Error:{red:#} {}", msg.trim());
+}
+
+pub fn warning(msg: &str) {
+    let yellow = anstyle::Style::new().fg_color(Some(anstyle::AnsiColor::Yellow.into()));
+    println!("{yellow}Error:{yellow:#} {}", msg.trim());
+}
+
+pub fn info(msg: &str) {
+    let blue = anstyle::Style::new().fg_color(Some(anstyle::AnsiColor::Blue.into()));
+    println!("{blue}Error:{blue:#} {}", msg.trim());
+}

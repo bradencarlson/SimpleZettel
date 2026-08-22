@@ -13,7 +13,7 @@ fn main() {
             match boxes::handle_subcommand(sub_m) {
                 Ok(_) => {},
                 Err(e) => {
-                    println!("Error: {e}");
+                    error::info(&e.to_string());
                 }
             };
         },
