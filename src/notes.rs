@@ -33,6 +33,13 @@ pub fn add_note(matches: &ArgMatches) -> Result<(), ZkError> {
 pub fn show_note(matches: &ArgMatches) -> Result<(), ZkError> {
     if let Some(name) = matches.get_one::<String>("name") {
         let note = utils::note_path_from_name(name)?;
+        match fs::exists(&note) {
+            Ok(true) => {}, 
+            Ok(false) => {
+                return Err(ZkError::NoteNotExists);
+            }
+            _ => {}
+        };
         if let Ok(content) = fs::read_to_string(&note) {
             print!("{}", content);
             Ok(())
@@ -60,7 +67,7 @@ pub fn rm_note(matches: &ArgMatches) -> Result<(), ZkError> {
                 }
             },
             _ => {
-                Err(ZkError::Other(String::from("note does not exist")))
+                Err(ZkError::NoteNotExists)
             }
         }
     } else {
