@@ -1,34 +1,10 @@
-use std::env;
-use std::fmt;
 use std::fs;
 use std::path::PathBuf;
 use std::process::Command;
-use std::cmp::Ordering;
 use clap::ArgMatches;
-use std::error::Error;
 
 use crate::utils;
 use crate::error::ZkError;
-
-struct ZkBox {
-    name: String
-}
-
-impl ZkBox {
-    pub fn get_path(&self) -> Option<PathBuf> {
-        if let Ok(mut path) = utils::get_zk_dir() {
-            if self.name.len() > 0 {
-                path.push(&self.name);
-                return Some(path);
-            } else {
-                return None;
-            }
-        }
-
-        None
-    }
-
-}
 
 pub fn handle_subcommand(matches: &ArgMatches) -> Result<(), ZkError> {
     match matches.subcommand() {
@@ -116,7 +92,7 @@ fn use_box(matches: &ArgMatches) -> Result<(), ZkError> {
                 current.push(".current");
                 match fs::write(current, name) {
                     Ok(_) => Ok(()),
-                    Err(e) => Err(ZkError::Current)
+                    Err(_e) => Err(ZkError::Current)
                 }
             },
             _ => {
@@ -150,16 +126,12 @@ fn git_init(path: &PathBuf) -> Result<(), ZkError> {
 }
 
 fn track(path: &PathBuf) -> Result<(), ZkError> {
-    match utils::verify_path(path) {
-        Ok(_) => {
-            let mut track_file = PathBuf::from(path);
-            track_file.push(".track");
-            match fs::File::create(track_file) {
-                Ok(_) => Ok(()),
-                Err(_) => Err(ZkError::TrackFail)
-            }
-        },
-        Err(e) => Err(e.into())
+    utils::verify_path(path)?;
+    let mut track_file = PathBuf::from(path);
+    track_file.push(".track");
+    match fs::File::create(track_file) {
+        Ok(_) => Ok(()),
+        Err(_) => Err(ZkError::TrackFail)
     }
 }
 

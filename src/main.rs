@@ -27,7 +27,7 @@ fn main() {
                 },
             }
         },
-        Some(("edit", sub_m)) => {
+        Some(("edit", _sub_m)) => {
             println!("edit command found");
         },
         Some(("rm", sub_m)) => {
@@ -46,11 +46,11 @@ fn main() {
                 }
             }
         },
-        Some(("ls", sub_m)) => {
+        Some(("ls", _sub_m)) => {
             println!("ls command found");
         },
         _ => {
-            println!("no subcommand matched.");
+            println!("No subcommand matched. Run with -h for help.");
         }
     };
 

@@ -1,7 +1,5 @@
 use std::env;
 use std::fs;
-use std::fmt;
-use std::fmt::Display;
 use std::path::PathBuf;
 
 use crate::error::ZkError;
@@ -73,11 +71,11 @@ pub fn get_current_box() -> Result<PathBuf, ZkError> {
                     Ok(current)
                 },
                 Err(e) => {
-                    Err(ZkError::Other(String::from("invalid current box")))
+                    Err(ZkError::Other(String::from(e.to_string())))
                 }
             }
         },
-        Err(e) => Err(ZkError::Other(String::from("failed to read ~/.zk/.current")))
+        Err(e) => Err(ZkError::Other(String::from(e.to_string())))
     }
 }
 

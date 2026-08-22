@@ -1,5 +1,4 @@
 use std::fs;
-use std::fmt;
 use std::path::PathBuf;
 use std::fs::File;
 use std::process::Command;
@@ -19,7 +18,7 @@ pub fn add_note(matches: &ArgMatches) -> Result<(), ZkError> {
             _ => {}
         };
         match File::create(&file) {
-            Ok(F) => {
+            Ok(_f) => {
                 edit_file(&file)?;
                 Ok(())
             },
@@ -55,7 +54,7 @@ pub fn rm_note(matches: &ArgMatches) -> Result<(), ZkError> {
                         println!("succesfully removed note");
                         Ok(())
                     }, 
-                    Err(e) => {
+                    Err(_e) => {
                         Err(ZkError::Other(String::from("could not remove note")))
                     }
                 }
