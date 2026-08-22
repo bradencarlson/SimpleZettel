@@ -20,7 +20,7 @@ pub fn add_note(matches: &ArgMatches) -> Result<(), ZkError> {
         };
         match File::create(&file) {
             Ok(F) => {
-                edit_note(&file)?;
+                edit_file(&file)?;
                 Ok(())
             },
             Err(_) => Err(ZkError::NoteCreate)
@@ -31,7 +31,23 @@ pub fn add_note(matches: &ArgMatches) -> Result<(), ZkError> {
 
 }
 
-fn edit_note(path: &PathBuf) -> Result<(), ZkError> {
+pub fn show_note(matches: &ArgMatches) -> Result<(), ZkError> {
+    if let Some(name) = matches.get_one::<String>("name") {
+        let mut note = utils::get_current_box()?;
+        note.push(name);
+        if let Ok(content) = fs::read_to_string(&note) {
+            print!("{}", content);
+            Ok(())
+        } else {
+            Err(ZkError::NoteRead(note))
+        }
+    } else {
+        Err(ZkError::NoName)
+    }
+}
+
+
+fn edit_file(path: &PathBuf) -> Result<(), ZkError> {
     utils::verify_note_path(path)?;
     match Command::new("vim")
         .arg(path)

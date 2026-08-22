@@ -22,6 +22,7 @@ pub fn parse_args() -> ArgMatches {
                 )
                 .subcommand(
                     Command::new("rm")
+                    .about("Remove a box (does not delete files)")
                     .arg(
                         Arg::new("name")
                         .required(true)
@@ -60,6 +61,12 @@ pub fn parse_args() -> ArgMatches {
         .subcommand(
             Command::new("show")
             .about("show a note")
+            .arg(
+                Arg::new("name")
+                .required(true)
+                .help("The name of the note to show")
+            )
+
         )
         .subcommand(
             Command::new("ls")

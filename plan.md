@@ -2,13 +2,9 @@
 
 ## Program flow
 
-- [ ] Process all command line args and subcommands (see Subcommands and Args
+- [x] Process all command line args and subcommands (see Subcommands and Args
   below)
-- [ ] Create file (or find file if it exists)
-    - [ ] Note that this will require some sort of data structure to keep track 
-    of all the files already made.
-        - list of hashes? Could store these after every operation in a dotfile.
-          This way, even if it is deleted, it is not hard to recreate.
+- [x] Create file (or find file if it exists)
 
 (user edits file, no need to handle anything here)
 
@@ -30,10 +26,11 @@
 An 'x' here in the second box simply means that the command/option has been built into `clap`, an 
 'x' in the first box indicates that the feature has been implemented.
 List of subcommands desired:
-- [ ], [x] add: for adding a new note
+- [x], [x] add: for adding a new note
 - [ ], [x] edit: for editing an existing note
 - [ ], [x] rm: for removing an existing note
-- [ ], [x] show: for showing an existing note
+- [x], [x] show: for showing an existing note
+    - this currently uses just a print statement
 - [ ], [x] ls: for listing all files in a box
     - this could have subcommands just like real `ls`
         - [ ], [ ] `-t` for listing tags

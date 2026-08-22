@@ -11,9 +11,7 @@ fn main() {
     match matches.subcommand() {
         Some(("box", sub_m)) => {
             match boxes::handle_subcommand(sub_m) {
-                Ok(_) => {
-                    println!("Box added successfully.");
-                },
+                Ok(_) => {},
                 Err(e) => {
                     println!("Error: {e}");
                 }
@@ -36,7 +34,12 @@ fn main() {
             println!("rm command found");
         },
         Some(("show", sub_m)) => {
-            println!("show command found");
+            match notes::show_note(sub_m) {
+                Ok(_) => {},
+                Err(e) => {
+                    println!("Error: {e}");
+                }
+            }
         },
         Some(("ls", sub_m)) => {
             println!("ls command found");

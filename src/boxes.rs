@@ -62,6 +62,7 @@ fn create_box(matches: &ArgMatches) -> Result<(), ZkError> {
                         git_init(&path)?;
                         track(&path)?;
                         create_index(&path)?;
+                        println!("Created box successfully");
                         Ok(())
                     },
                     Err(_) => Err(ZkError::BoxCreateFail)
