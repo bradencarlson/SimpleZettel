@@ -39,6 +39,15 @@ pub fn parse_args() -> ArgMatches {
                         .help("the name of the box to use")
                     )
                 )
+                .subcommand(
+                    Command::new("track")
+                    .about("track a previously removed box")
+                    .arg(
+                        Arg::new("name")
+                        .required(true)
+                        .help("name of the box to track")
+                    )
+                )
         )
         .subcommand(
             Command::new("add")

@@ -44,6 +44,9 @@ pub fn handle_subcommand(matches: &ArgMatches) -> Result<(), ZkError> {
         Some(("use", ssub_m)) => {
             use_box(ssub_m)?;
         },
+        Some(("track", ssub_m)) => {
+            track_box(ssub_m)?;
+        },
         _ => {
             println!("No subcommand found.");
         }
@@ -120,6 +123,16 @@ fn use_box(matches: &ArgMatches) -> Result<(), ZkError> {
                 Err(ZkError::InvalidBox)
             }
         }
+    } else {
+        Err(ZkError::NoName)
+    }
+}
+
+fn track_box(matches: &ArgMatches) -> Result<(), ZkError> {
+    if let Some(name) = matches.get_one::<String>("name") {
+        let path = utils::path_from_name(&name)?;
+        track(&path)?;
+        Ok(())
     } else {
         Err(ZkError::NoName)
     }

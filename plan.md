@@ -41,7 +41,7 @@ List of subcommands desired:
       subcommand is found
     - [x], [x] add: for adding a box 
     - [x], [x] remove: for removing a box (only removes tracking, not files)
-    - [ ], [ ] track: for tracking a box previously removed
+    - [x], [x] track: for tracking a box previously removed
     - [x], [x] use: select a box to use
 
 ### Low level commands
