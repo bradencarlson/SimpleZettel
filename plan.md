@@ -8,8 +8,8 @@
 
 (user edits file, no need to handle anything here)
 
-- [ ] Depending on the exit code (this might have to be based on hashes instead), 
-  print out what has happened: 
+- [ ] Depending on the exit code (this might have to be based on hashes instead),
+  print out what has happened:
     - new file saved
     - file updated
     - error of some kind?
@@ -23,7 +23,7 @@
 
 ### High level commands
 
-An 'x' here in the second box simply means that the command/option has been built into `clap`, an 
+An 'x' here in the second box simply means that the command/option has been built into `clap`, an
 'x' in the first box indicates that the feature has been implemented.
 List of subcommands desired:
 - [x], [x] add: for adding a new note
@@ -39,7 +39,7 @@ List of subcommands desired:
 - [x], [x] box: for managing boxes
     - [x], [x] ls: for listing boxes (maybe this should be the default behavior if no
       subcommand is found
-    - [x], [x] add: for adding a box 
+    - [x], [x] add: for adding a box
     - [x], [x] remove: for removing a box (only removes tracking, not files)
     - [x], [x] track: for tracking a box previously removed
     - [x], [x] use: select a box to use
@@ -76,7 +76,7 @@ You will see that each box has a `.git` directory, the command `zk box add ...`
 should not only create the box, but initialize git tracking there as well.
 
 ~/.zk
-|-- .current    
+|-- .current
 |-- box1
 |-- box2
 |-- ...
@@ -89,7 +89,7 @@ should not only create the box, but initialize git tracking there as well.
 |   |   |-- file2
 |   |   |-- ...
 |   |   |-- filen
-|   |-- cache   
+|   |-- cache
 |   |   |-- info
 
 ### Numbering of files
@@ -99,6 +99,19 @@ do if I would like to add other file types.
 
 I could also keep track of numbering in a dotfile in the box directory as well,
 this is what `nb` does (a huge inspiration and a great project!)
+
+### Listing of files
+
+This could be done based to front matter, as explained in the previous section.
+
+I could also simply use whatever argument the user passes as a regex to select
+which files to show.  This makes it the user's job to use some numbering system
+as the names of the notes.  For example, if they run `zk add 1.1.2.1`, they
+could later run something like `zk ls 1.1.*` and that note would show up.
+
+I think I like the idea of using front matter, since I believe that I would want
+to use this for links and references anyway, but I worry about the time it
+might take to process all the files in a box.
 
 ## Things that are *not* implemented
 
