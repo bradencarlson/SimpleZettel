@@ -15,6 +15,12 @@ pub fn path_from_name(name: &str) -> Result<PathBuf, ZkError> {
     }
 }
 
+pub fn note_path_from_name(name: &str) -> Result<PathBuf, ZkError> {
+    let mut file = get_current_box()?;
+    file.push(name);
+    Ok(file)
+}
+
 pub fn get_zk_dir() -> Result<PathBuf, ZkError> {
     if let Some(mut path) = env::home_dir() {
         path.push(".zk/");

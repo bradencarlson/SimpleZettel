@@ -28,7 +28,7 @@ An 'x' here in the second box simply means that the command/option has been buil
 List of subcommands desired:
 - [x], [x] add: for adding a new note
 - [ ], [x] edit: for editing an existing note
-- [ ], [x] rm: for removing an existing note
+- [x], [x] rm: for removing an existing note
 - [x], [x] show: for showing an existing note
     - this currently uses just a print statement
 - [ ], [x] ls: for listing all files in a box

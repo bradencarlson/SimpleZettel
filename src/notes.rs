@@ -33,13 +33,36 @@ pub fn add_note(matches: &ArgMatches) -> Result<(), ZkError> {
 
 pub fn show_note(matches: &ArgMatches) -> Result<(), ZkError> {
     if let Some(name) = matches.get_one::<String>("name") {
-        let mut note = utils::get_current_box()?;
-        note.push(name);
+        let note = utils::note_path_from_name(name)?;
         if let Ok(content) = fs::read_to_string(&note) {
             print!("{}", content);
             Ok(())
         } else {
             Err(ZkError::NoteRead(note))
+        }
+    } else {
+        Err(ZkError::NoName)
+    }
+}
+
+pub fn rm_note(matches: &ArgMatches) -> Result<(), ZkError> {
+    if let Some(name) = matches.get_one::<String>("name") {
+        let note = utils::note_path_from_name(name)?;
+        match fs::exists(&note) {
+            Ok(true) => {
+                match fs::remove_file(&note) {
+                    Ok(()) => {
+                        println!("succesfully removed note");
+                        Ok(())
+                    }, 
+                    Err(e) => {
+                        Err(ZkError::Other(String::from("could not remove note")))
+                    }
+                }
+            },
+            _ => {
+                Err(ZkError::Other(String::from("note does not exist")))
+            }
         }
     } else {
         Err(ZkError::NoName)

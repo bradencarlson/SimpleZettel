@@ -31,7 +31,12 @@ fn main() {
             println!("edit command found");
         },
         Some(("rm", sub_m)) => {
-            println!("rm command found");
+            match notes::rm_note(sub_m) {
+                Ok(_) => {},
+                Err(e) => {
+                    println!("Error: {e}");
+                }
+            }
         },
         Some(("show", sub_m)) => {
             match notes::show_note(sub_m) {
