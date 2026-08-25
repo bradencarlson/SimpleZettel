@@ -128,5 +128,7 @@ dependencies = [
 name = "zk"
 version = "0.1.0"
 dependencies = [
+ "anstream",
+ "anstyle",
  "clap",
 ]
