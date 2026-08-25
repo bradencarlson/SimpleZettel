@@ -51,8 +51,13 @@ fn main() {
                 }
             }
         },
-        Some(("ls", _sub_m)) => {
-            println!("ls command found");
+        Some(("ls", sub_m)) => {
+            match notes::list_notes(sub_m) {
+                Ok(_) => {},
+                Err(e) => {
+                    error::warning(&e.to_string());
+                }
+            }
         },
         _ => {
             println!("No subcommand matched. Run with -h for help.");

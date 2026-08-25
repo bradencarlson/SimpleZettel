@@ -3,6 +3,7 @@ use std::path::PathBuf;
 use std::fs::File;
 use std::process::Command;
 use clap::ArgMatches;
+use regex::Regex;
 
 use crate::error::ZkError;
 use crate::utils;
@@ -111,6 +112,53 @@ pub fn edit_note(matches: &ArgMatches) -> Result<(), ZkError> {
     } else {
         Err(ZkError::NoName)
     }
+}
+
+pub fn list_notes(matches: &ArgMatches) -> Result<(), ZkError> {
+    if let Some(pat) = matches.get_one::<String>("pattern") {
+        let r = match Regex::new(pat) {
+            Ok(p) => p,
+            Err(e) => {
+                return Err(ZkError::Other(e.to_string()));
+            }
+        };
+        list_files(&r)?;
+        Ok(())
+    } else {
+        let r = Regex::new("").unwrap();
+        list_files(&r)?;
+        Ok(())
+    }
+}
+
+fn list_files(pat: &Regex) -> Result<(), ZkError> {
+    let current = utils::get_current_box()?;
+    let hidden = Regex::new(r"^\.").unwrap();
+    if let Ok(iter) = fs::read_dir(current) {
+        for entry in iter {
+            let e = match entry {
+                Ok(e) => {e},
+                Err(_) => {continue;}
+            };
+            let path = e.path();
+            let filename = match path.file_name() {
+                Some(f) => {
+                    match f.to_str() {
+                        Some(s) => s,
+                        None => {continue;}
+                    }
+                },
+                None => {continue;}
+            };
+            if hidden.is_match(&filename) {
+                continue;
+            }
+            if pat.is_match(&filename) {
+                println!("{}", filename);
+            }
+        }
+    }
+    Ok(())
 }
 
 
