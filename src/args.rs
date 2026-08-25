@@ -54,8 +54,17 @@ pub fn parse_args() -> ArgMatches {
             .about("Add a new note to the current box")
             .arg(
                 Arg::new("name")
+                .required(false)
                 .action(ArgAction::Set)
                 .help("The name of the new note")
+            )
+            .arg(
+                Arg::new("number")
+                .required(false)
+                .short('n')
+                .long("number")
+                .action(ArgAction::Set)
+                .help("The number of the new note")
             )
         )
         .subcommand(

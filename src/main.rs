@@ -29,7 +29,7 @@ fn main() {
         },
         Some(("edit", sub_m)) => {
             match notes::edit_note(sub_m) {
-                Ok(_) => {}, 
+                Ok(_) => {},
                 Err(e) => {
                     error::warning(&e.to_string());
                 }

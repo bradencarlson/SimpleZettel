@@ -94,7 +94,7 @@ fn list_boxes() -> Result<(), ZkError> {
             Err(ZkError::Other(String::from("error")))
         }
     }
-        
+
 }
 
 fn use_box(matches: &ArgMatches) -> Result<(), ZkError> {
@@ -114,7 +114,7 @@ fn use_box(matches: &ArgMatches) -> Result<(), ZkError> {
                 }
             },
             _ => {
-                Err(ZkError::InvalidBox)
+                Err(ZkError::BoxInvalid)
             }
         }
     } else {
@@ -203,7 +203,7 @@ fn is_tracked(path: &PathBuf) -> Result<bool, ZkError> {
     match fs::exists(&track_file) {
         Ok(true) => {},
         Ok(false) => {
-            return Err(ZkError::InvalidBox)
+            return Err(ZkError::BoxInvalid)
         },
         Err(_) => {
             return Err(ZkError::BoxCheck)
@@ -213,7 +213,7 @@ fn is_tracked(path: &PathBuf) -> Result<bool, ZkError> {
     match fs::exists(&track_file) {
         Ok(e) => Ok(e),
         Err(_) => Err(ZkError::Access(track_file))
-    } 
+    }
 }
 
 fn create_index(path: &PathBuf) -> Result<(), ZkError> {

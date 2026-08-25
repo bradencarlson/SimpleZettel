@@ -9,8 +9,7 @@ use crate::utils;
 
 pub fn add_note(matches: &ArgMatches) -> Result<(), ZkError> {
     if let Some(name) = matches.get_one::<String>("name") {
-        let mut file = utils::get_current_box()?;
-        file.push(name);
+        let file = utils::path_from_name(name)?;
         match fs::exists(&file) {
             Ok(true) => {
                 return Err(ZkError::NoteExists);
@@ -20,21 +19,25 @@ pub fn add_note(matches: &ArgMatches) -> Result<(), ZkError> {
         match File::create(&file) {
             Ok(_f) => {
                 edit_file(&file)?;
-                Ok(())
+                return Ok(());
             },
-            Err(_) => Err(ZkError::NoteCreate)
+            Err(_) => {
+                return Err(ZkError::NoteCreate);
+            }
         }
-    } else {
-        Err(ZkError::NoName)
     }
-
+    if let Some(num) = matches.get_one::<String>("number") {
+        let v = parse_number(&num)?;
+        return Ok(())
+    }
+    Err(ZkError::NoteAddArgs)
 }
 
 pub fn show_note(matches: &ArgMatches) -> Result<(), ZkError> {
     if let Some(name) = matches.get_one::<String>("name") {
         let note = utils::note_path_from_name(name)?;
         match fs::exists(&note) {
-            Ok(true) => {}, 
+            Ok(true) => {},
             Ok(false) => {
                 return Err(ZkError::NoteNotExists);
             }
@@ -60,7 +63,7 @@ pub fn rm_note(matches: &ArgMatches) -> Result<(), ZkError> {
                     Ok(()) => {
                         println!("succesfully removed note");
                         Ok(())
-                    }, 
+                    },
                     Err(_e) => {
                         Err(ZkError::Other(String::from("could not remove note")))
                     }
@@ -85,7 +88,7 @@ pub fn edit_note(matches: &ArgMatches) -> Result<(), ZkError> {
             },
             Ok(false) => {
                 return Err(ZkError::NoteNotExists)
-            }, 
+            },
             Err(_) => {
                 return Err(ZkError::Other(String::from("Could not check existence of note")))
             }
@@ -107,7 +110,22 @@ fn edit_file(path: &PathBuf) -> Result<(), ZkError> {
                 } else {
                     Err(ZkError::Other(String::from("something went wrong while opening vim for the user")))
                 }
-            }, 
+            },
             Err(_) => Err(ZkError::Other(String::from("something went wrong while opening vim for the user")))
     }
+}
+
+fn parse_number(num: &str) -> Result<Vec::<usize>, ZkError> {
+    let mut v = Vec::<usize>::new();
+    for number in num.split('.') {
+        match number.parse::<usize>() {
+            Ok(n) => {
+                v.push(n);
+            },
+            Err(_) => {
+                return Err(ZkError::NoteNumber);
+            }
+        };
+    }
+    Ok(v)
 }
