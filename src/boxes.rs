@@ -5,6 +5,7 @@ use clap::ArgMatches;
 
 use crate::utils;
 use crate::error::ZkError;
+use crate::error;
 
 pub fn handle_subcommand(matches: &ArgMatches) -> Result<(), ZkError> {
     match matches.subcommand() {
@@ -24,7 +25,7 @@ pub fn handle_subcommand(matches: &ArgMatches) -> Result<(), ZkError> {
             track_box(ssub_m)?;
         },
         _ => {
-            println!("No subcommand found.");
+            error::critical("no subcommand found");
         }
     }
     Ok(())
