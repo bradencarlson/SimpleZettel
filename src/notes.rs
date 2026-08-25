@@ -68,6 +68,26 @@ pub fn rm_note(matches: &ArgMatches) -> Result<(), ZkError> {
     }
 }
 
+pub fn edit_note(matches: &ArgMatches) -> Result<(), ZkError> {
+    if let Some(name) = matches.get_one::<String>("name") {
+        let note = utils::note_path_from_name(name)?;
+        match fs::exists(&note) {
+            Ok(true) => {
+                edit_file(&note)?;
+                return Ok(())
+            },
+            Ok(false) => {
+                return Err(ZkError::NoteNotExists)
+            }, 
+            Err(_) => {
+                return Err(ZkError::Other(String::from("Could not check existence of note")))
+            }
+        }
+    } else {
+        Err(ZkError::NoName)
+    }
+}
+
 
 fn edit_file(path: &PathBuf) -> Result<(), ZkError> {
     utils::verify_note_path(path)?;

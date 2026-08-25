@@ -13,7 +13,7 @@ fn main() {
             match boxes::handle_subcommand(sub_m) {
                 Ok(_) => {},
                 Err(e) => {
-                    println!("Error: {e}");
+                    error::info(&e.to_string());
                 }
             };
         },
@@ -23,18 +23,23 @@ fn main() {
                     println!("Note added successfully.");
                 },
                 Err(e) => {
-                    println!("Error: {e}");
+                    error::warning(&e.to_string());
                 },
             }
         },
-        Some(("edit", _sub_m)) => {
-            println!("edit command found");
+        Some(("edit", sub_m)) => {
+            match notes::edit_note(sub_m) {
+                Ok(_) => {}, 
+                Err(e) => {
+                    error::warning(&e.to_string());
+                }
+            }
         },
         Some(("rm", sub_m)) => {
             match notes::rm_note(sub_m) {
                 Ok(_) => {},
                 Err(e) => {
-                    println!("Error: {e}");
+                    error::warning(&e.to_string());
                 }
             }
         },
@@ -42,7 +47,7 @@ fn main() {
             match notes::show_note(sub_m) {
                 Ok(_) => {},
                 Err(e) => {
-                    println!("Error: {e}");
+                    error::warning(&e.to_string());
                 }
             }
         },
