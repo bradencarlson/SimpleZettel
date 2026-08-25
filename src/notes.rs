@@ -9,7 +9,7 @@ use crate::utils;
 
 pub fn add_note(matches: &ArgMatches) -> Result<(), ZkError> {
     if let Some(name) = matches.get_one::<String>("name") {
-        let file = utils::path_from_name(name)?;
+        let file = utils::note_path_from_name(name)?;
         match fs::exists(&file) {
             Ok(true) => {
                 return Err(ZkError::NoteExists);
@@ -17,7 +17,7 @@ pub fn add_note(matches: &ArgMatches) -> Result<(), ZkError> {
             _ => {}
         };
         match File::create(&file) {
-            Ok(_f) => {
+            Ok(_) => {
                 edit_file(&file)?;
                 return Ok(());
             },
@@ -28,7 +28,22 @@ pub fn add_note(matches: &ArgMatches) -> Result<(), ZkError> {
     }
     if let Some(num) = matches.get_one::<String>("number") {
         let v = parse_number(&num)?;
-        return Ok(())
+        let file = utils::note_path_from_name(num)?;
+        match fs::exists(&file) {
+            Ok(true) => {
+                return Err(ZkError::NoteExists);
+            },
+            _ => {}
+        };
+        match File::create(&file) {
+            Ok(_) => {
+                edit_file(&file)?;
+                return Ok(());
+            },
+            Err(_) => {
+                return Err(ZkError::NoteCreate);
+            }
+        }
     }
     Err(ZkError::NoteAddArgs)
 }
