@@ -200,6 +200,15 @@ fn remove_track_file(path: &PathBuf) -> Result<(), ZkError> {
 fn is_tracked(path: &PathBuf) -> Result<bool, ZkError> {
     utils::verify_path(path)?;
     let mut track_file = PathBuf::from(path);
+    match fs::exists(&track_file) {
+        Ok(true) => {},
+        Ok(false) => {
+            return Err(ZkError::InvalidBox)
+        },
+        Err(_) => {
+            return Err(ZkError::BoxCheck)
+        }
+    };
     track_file.push(".track");
     match fs::exists(&track_file) {
         Ok(e) => Ok(e),
