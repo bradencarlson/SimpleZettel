@@ -144,3 +144,7 @@ fn parse_number(num: &str) -> Result<Vec::<usize>, ZkError> {
     }
     Ok(v)
 }
+
+fn insert_number(path: &PathBuf, num: &Vec::<usize>) -> Result<(), ZkError> {
+    Ok(())
+}

@@ -98,6 +98,12 @@ pub fn parse_args() -> ArgMatches {
         .subcommand(
             Command::new("ls")
             .about("List notes in box")
+            .arg(
+                Arg::new("pattern")
+                .required(false)
+                .action(ArgAction::Set)
+                .help("pattern to use to match filenames")
+            )
         )
         .get_matches()
 }
