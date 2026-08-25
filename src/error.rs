@@ -58,15 +58,15 @@ impl std::error::Error for ZkError {}
 
 pub fn critical(msg: &str) {
     let red = anstyle::Style::new().fg_color(Some(anstyle::AnsiColor::Red.into())).bold();
-    println!("{red}Error:{red:#} {}", msg.trim());
+    println!("{red}error:{red:#} {}", msg.trim());
 }
 
 pub fn warning(msg: &str) {
     let yellow = anstyle::Style::new().fg_color(Some(anstyle::AnsiColor::Yellow.into())).bold();
-    println!("{yellow}Error:{yellow:#} {}", msg.trim());
+    println!("{yellow}warning:{yellow:#} {}", msg.trim());
 }
 
 pub fn info(msg: &str) {
     let blue = anstyle::Style::new().fg_color(Some(anstyle::AnsiColor::Blue.into())).bold();
-    println!("{blue}Error:{blue:#} {}", msg.trim());
+    println!("{blue}info:{blue:#} {}", msg.trim());
 }
