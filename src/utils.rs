@@ -16,6 +16,7 @@ pub fn path_from_name(name: &str) -> Result<PathBuf, ZkError> {
 pub fn note_path_from_name(name: &str) -> Result<PathBuf, ZkError> {
     let mut file = get_current_box()?;
     file.push(name);
+    file.add_extension("md");
     Ok(file)
 }
 
