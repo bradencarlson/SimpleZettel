@@ -109,7 +109,10 @@ fn use_box(matches: &ArgMatches) -> Result<(), ZkError> {
                 let mut current = utils::get_zk_dir()?;
                 current.push(".current");
                 match fs::write(current, name) {
-                    Ok(_) => Ok(()),
+                    Ok(_) => {
+                        list_boxes()?;
+                        Ok(())
+                    },
                     Err(_e) => Err(ZkError::Current)
                 }
             },
