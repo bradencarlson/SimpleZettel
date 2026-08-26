@@ -2,6 +2,8 @@ use std::fs;
 use std::path::PathBuf;
 use std::fs::File;
 use std::process::Command;
+use std::io::BufReader;
+use std::io::BufRead;
 use clap::ArgMatches;
 use regex::Regex;
 
@@ -154,7 +156,15 @@ fn list_files(pat: &Regex) -> Result<(), ZkError> {
                 continue;
             }
             if pat.is_match(&filename) {
-                println!("{}", filename);
+                print!("{}\t", filename);
+                match get_first_header(&path) {
+                    Ok(header) => {
+                        print!("{}\n", header);
+                    }, 
+                    Err(_) => {
+                        print!("header not found");
+                    }
+                };
             }
         }
     }
@@ -195,4 +205,26 @@ fn parse_number(num: &str) -> Result<Vec::<usize>, ZkError> {
 
 fn insert_number(path: &PathBuf, num: &Vec::<usize>) -> Result<(), ZkError> {
     Ok(())
+}
+
+fn get_first_header(path: &PathBuf) -> Result<String, ZkError> {
+    utils::verify_note_path(&path)?;
+    if let Ok(f) = File::open(path) {
+        let mut reader = BufReader::new(f);
+        let header = Regex::new("^[[:space:]]*#[[:space:]]*(?<label>([a-zA-Z]+[ ]?)+)").unwrap();
+        let mut iter = reader.lines();
+        while let Some(line_result) = iter.next() {
+            if let Ok(line) = line_result {
+                if header.is_match(&line) {
+                    let mut matches = header.captures_iter(&line);
+                    if let Some(h) = matches.next() {
+                        return Ok(String::from(&h["label"]));
+                    }
+                } 
+            }
+        }
+        return Err(ZkError::NoteHeader);
+    } else {
+        Err(ZkError::Access(path.to_path_buf()))
+    }
 }
