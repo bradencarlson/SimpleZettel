@@ -44,7 +44,6 @@ fn create_box(matches: &ArgMatches) -> Result<(), ZkError> {
                     Ok(_) => {
                         git_init(&path)?;
                         track(&path)?;
-                        create_index(&path)?;
                         println!("Created box successfully");
                         Ok(())
                     },
@@ -218,18 +217,3 @@ fn is_tracked(path: &PathBuf) -> Result<bool, ZkError> {
         Err(_) => Err(ZkError::Access(track_file))
     }
 }
-
-fn create_index(path: &PathBuf) -> Result<(), ZkError> {
-    match utils::verify_path(path) {
-        Ok(_) => {
-            let mut index_file = PathBuf::from(path);
-            index_file.push(".index");
-            match fs::File::create(index_file) {
-                Ok(_) => Ok(()),
-                Err(_) => Err(ZkError::TrackFail)
-            }
-        },
-        Err(e) => Err(e.into())
-    }
-}
-

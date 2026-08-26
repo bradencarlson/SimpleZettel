@@ -27,12 +27,13 @@ An 'x' here in the second box simply means that the command/option has been buil
 'x' in the first box indicates that the feature has been implemented.
 List of subcommands desired:
 - [x], [x] add: for adding a new note
-- [ ], [x] edit: for editing an existing note
+- [x], [x] edit: for editing an existing note
 - [x], [x] rm: for removing an existing note
 - [x], [x] show: for showing an existing note
     - this currently uses just a print statement
-- [ ], [x] ls: for listing all files in a box
+- [x], [x] ls: for listing all files in a box
     - this could have subcommands just like real `ls`
+        - [x], [x] patters can be passed for matching filenames
         - [ ], [ ] `-t` for listing tags
     - subcommand for showing based on numbering in front matter.
 - search: searches for a string among files in box
@@ -83,7 +84,6 @@ should not only create the box, but initialize git tracking there as well.
 |-- boxn
 |   |-- .git
 |   |-- .track
-|   |-- .index
 |   |-- files
 |   |   |-- file1
 |   |   |-- file2
