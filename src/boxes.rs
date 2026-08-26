@@ -25,7 +25,7 @@ pub fn handle_subcommand(matches: &ArgMatches) -> Result<(), ZkError> {
             track_box(ssub_m)?;
         },
         _ => {
-            error::critical("no subcommand found");
+            list_boxes()?;
         }
     }
     Ok(())
