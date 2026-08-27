@@ -33,8 +33,10 @@ List of subcommands desired:
     - this currently uses just a print statement
 - [x], [x] ls: for listing all files in a box
     - this could have subcommands just like real `ls`
-        - [x], [x] patters can be passed for matching filenames
+        - [x], [x] patterns can be passed for matching filenames
         - [ ], [ ] `-t` for listing tags
+        - [ ] files which are numbered (1.1.1.md) are listed in their numerical
+          order.
     - subcommand for showing based on numbering in front matter.
 - search: searches for a string among files in box
 - [x], [x] box: for managing boxes

@@ -10,6 +10,13 @@ use regex::Regex;
 use crate::error::ZkError;
 use crate::utils;
 
+pub enum ZkNumber {
+    Num(Vec::<usize>),
+    Alpha(String)
+}
+
+
+
 pub fn add_note(matches: &ArgMatches) -> Result<(), ZkError> {
     if let Some(name) = matches.get_one::<String>("name") {
         let file = utils::note_path_from_name(name)?;
