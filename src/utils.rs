@@ -2,7 +2,14 @@ use std::env;
 use std::fs;
 use std::path::PathBuf;
 
+use anstream::println;
+
 use crate::error::ZkError;
+
+pub fn print_blue(msg: &str) {
+    let blue = anstyle::Style::new().fg_color(Some(anstyle::AnsiColor::Blue.into())).bold();
+    print!("{blue}{}{blue:#}", msg);
+}
 
 pub fn path_from_name(name: &str) -> Result<PathBuf, ZkError> {
     let mut root = get_zk_dir()?;

@@ -143,7 +143,7 @@ fn list_files(pat: &Regex) -> Result<(), ZkError> {
                 Err(_) => {continue;}
             };
             let path = e.path();
-            let filename = match path.file_name() {
+            let filename = match path.file_prefix() {
                 Some(f) => {
                     match f.to_str() {
                         Some(s) => s,
@@ -156,13 +156,13 @@ fn list_files(pat: &Regex) -> Result<(), ZkError> {
                 continue;
             }
             if pat.is_match(&filename) {
-                print!("{}\t", filename);
+                utils::print_blue(filename);
                 match get_first_header(&path) {
                     Ok(header) => {
-                        print!("{}\n", header);
+                        print!("\t{}\n", header);
                     }, 
                     Err(_) => {
-                        print!("header not found");
+                        print!("header not found\n");
                     }
                 };
             }

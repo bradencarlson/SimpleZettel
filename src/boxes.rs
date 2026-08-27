@@ -78,7 +78,8 @@ fn list_boxes() -> Result<(), ZkError> {
                         }
                         if let Some(name) = path.file_name() {
                             if let Some(dir_name) = name.to_str() {
-                                    println!("{}{}", pre, dir_name);
+                                utils::print_blue(pre);
+                                println!("{}", dir_name);
                             }
                         }
                     },
