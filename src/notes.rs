@@ -10,101 +10,116 @@ use regex::Regex;
 use crate::error::ZkError;
 use crate::utils;
 
-#[derive(PartialEq)]
+#[derive(PartialEq,Debug)]
 pub enum ZkNumber {
     Num(Vec::<usize>),
     Alpha(String),
     Invalid
 }
 
+#[derive(Debug)]
 pub struct ZkCard {
     path: PathBuf,
-    number: ZkNumber
+    number: ZkNumber,
+    header: String
+        
 }
 
 impl ZkCard {
     pub fn from(path: PathBuf) -> Self {
-        if let Some(filename) = path.file_stem() {
-            let f = match filename.to_str() {
-                Some(s) => s,
-                None => {
-                    return ZkCard{
-                        path: path,
-                        number: ZkNumber::Invalid
-                    };
-                }
+        if let Ok(true) = fs::exists(&path) {
+            let header = match get_first_header(&path) {
+                Ok(s) => s,
+                Err(_) => String::from("no valid header found")
             };
-            let name = String::from(f);
-            match parse_number(&f) {
-                Ok(v) => {
-                    return ZkCard{
-                        path: path,
-                        number: ZkNumber::Num(v)
-                    };
-                },
-                Err(_) => {
-                    return ZkCard{
-                        path: path,
-                        number: ZkNumber::Alpha(name)
-                    };
+            if let Some(filename) = path.file_stem() {
+                let f = match filename.to_str() {
+                    Some(s) => s,
+                    None => {
+                        return ZkCard{
+                            path: path,
+                            number: ZkNumber::Invalid,
+                            header: header
+                        };
+                    }
+                };
+                let name = String::from(f);
+                match parse_number(&f) {
+                    Ok(v) => {
+                        return ZkCard{
+                            path: path,
+                            number: ZkNumber::Num(v),
+                            header: header
+                        };
+                    },
+                    Err(_) => {
+                        return ZkCard{
+                            path: path,
+                            number: ZkNumber::Alpha(name),
+                            header: header
+                        };
+                    }
+                }
+            } else {
+                ZkCard{
+                    path: path,
+                    number: ZkNumber::Invalid,
+                    header: header
                 }
             }
         } else {
-            ZkCard{
-                path: path,
-                number: ZkNumber::Invalid
+            if let Some(filename) = path.file_stem() {
+                let f = match filename.to_str() {
+                    Some(s) => s,
+                    None => {
+                        return ZkCard{
+                            path: path,
+                            number: ZkNumber::Invalid,
+                            header: String::from("")
+                        };
+                    }
+                };
+                let name = String::from(f);
+                match parse_number(&f) {
+                    Ok(v) => {
+                        return ZkCard{
+                            path: path,
+                            number: ZkNumber::Num(v),
+                            header: String::from("")
+                        };
+                    },
+                    Err(_) => {
+                        return ZkCard{
+                            path: path,
+                            number: ZkNumber::Alpha(name),
+                            header: String::from("")
+                        };
+                    }
+                }
+            } else {
+                ZkCard{
+                    path: path,
+                    number: ZkNumber::Invalid,
+                    header: String::from("")
+                }
             }
         }
     }
 }
 
-
-
+impl std::fmt::Display for ZkCard {
+    fn fmt(&self, f: &mut std::fmt::Formatter ) -> Result<(), std::fmt::Error> {
+        match self.number {
+            ZkNumber::Num(ref v) => write!(f, "{:?}\t{}", v, self.header),
+            ZkNumber::Alpha(ref s) => write!(f, "{:?}\t{}", s, self.header),
+            ZkNumber::Invalid => write!(f, "{}", self.path.display())
+        }
+    }
+}
 
 impl std::cmp::PartialOrd for ZkCard {
     fn partial_cmp(&self, other: &ZkCard) -> Option<Ordering> {
-        match self.number {
-            ZkNumber::Num(ref v) => {
-                match other.number {
-                    ZkNumber::Num(ref v_rhs) => {
-                        return Some(v.cmp(&v_rhs));
-                    },
-                    ZkNumber::Alpha(ref s) => {
-                        return Some(Ordering::Less);
-                    },
-                    ZkNumber::Invalid => {
-                        return Some(Ordering::Less);
-                    }
-                };
-            },
-            ZkNumber::Alpha(ref s) => {
-                match other.number {
-                    ZkNumber::Num(ref v_rhs) => {
-                        return Some(Ordering::Greater);
-                    },
-                    ZkNumber::Alpha(ref s_rhs) => {
-                        return Some(s.cmp(&s_rhs));
-                    },
-                    ZkNumber::Invalid => {
-                        return Some(Ordering::Less);
-                    }
-                };
-            },
-            ZkNumber::Invalid => {
-                match other.number {
-                    ZkNumber::Num(ref v_rhs) => {
-                        return Some(Ordering::Greater);
-                    },
-                    ZkNumber::Alpha(ref s_rhs) => {
-                        return Some(Ordering::Greater);
-                    },
-                    ZkNumber::Invalid => {
-                        return Some(Ordering::Equal);
-                    }
-                };
-            }
-
-        };
+        Some(self.cmp(other))
     }
 }
 
@@ -112,6 +127,55 @@ impl std::cmp::PartialEq for ZkCard {
     fn eq(&self, other: &ZkCard) -> bool {
         self.path == other.path &&
             self.number == other.number
+    }
+}
+
+impl std::cmp::Eq for ZkCard {}
+
+impl std::cmp::Ord for ZkCard {
+    fn cmp(&self, other: &ZkCard) -> Ordering {
+        match self.number {
+            ZkNumber::Num(ref v) => {
+                match other.number {
+                    ZkNumber::Num(ref v_rhs) => {
+                        return v.cmp(&v_rhs);
+                    },
+                    ZkNumber::Alpha(ref s) => {
+                        return Ordering::Less;
+                    },
+                    ZkNumber::Invalid => {
+                        return Ordering::Less;
+                    }
+                };
+            },
+            ZkNumber::Alpha(ref s) => {
+                match other.number {
+                    ZkNumber::Num(ref v_rhs) => {
+                        return Ordering::Greater;
+                    },
+                    ZkNumber::Alpha(ref s_rhs) => {
+                        return s.cmp(&s_rhs);
+                    },
+                    ZkNumber::Invalid => {
+                        return Ordering::Less;
+                    }
+                };
+            },
+            ZkNumber::Invalid => {
+                match other.number {
+                    ZkNumber::Num(ref v_rhs) => {
+                        return Ordering::Greater;
+                    },
+                    ZkNumber::Alpha(ref s_rhs) => {
+                        return Ordering::Greater;
+                    },
+                    ZkNumber::Invalid => {
+                        return Ordering::Equal;
+                    }
+                };
+            }
+
+        };
     }
 }
 
@@ -242,6 +306,7 @@ pub fn list_notes(matches: &ArgMatches) -> Result<(), ZkError> {
 fn list_files(pat: &Regex) -> Result<(), ZkError> {
     let current = utils::get_current_box()?;
     let hidden = Regex::new(r"^\.").unwrap();
+    let mut files = Vec::<ZkCard>::new();
     if let Ok(iter) = fs::read_dir(current) {
         for entry in iter {
             let e = match entry {
@@ -262,17 +327,13 @@ fn list_files(pat: &Regex) -> Result<(), ZkError> {
                 continue;
             }
             if pat.is_match(&filename) {
-                utils::print_blue(filename);
-                match get_first_header(&path) {
-                    Ok(header) => {
-                        print!("\t{}\n", header);
-                    },
-                    Err(_) => {
-                        print!("header not found\n");
-                    }
-                };
+                files.push(ZkCard::from(path));
             }
         }
+    }
+    files.sort();
+    for file in files.iter() {
+        println!("{:?}", file);
     }
     Ok(())
 }
