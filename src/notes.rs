@@ -109,10 +109,12 @@ impl ZkCard {
 
 impl std::fmt::Display for ZkCard {
     fn fmt(&self, f: &mut std::fmt::Formatter ) -> Result<(), std::fmt::Error> {
+        let blue = anstyle::Style::new().fg_color(Some(anstyle::AnsiColor::Blue.into())).bold();
+        let red = anstyle::Style::new().fg_color(Some(anstyle::AnsiColor::Red.into())).bold();
         match self.number {
-            ZkNumber::Num(ref v) => write!(f, "{:?}\t{}", v, self.header),
-            ZkNumber::Alpha(ref s) => write!(f, "{:?}\t{}", s, self.header),
-            ZkNumber::Invalid => write!(f, "{}", self.path.display())
+            ZkNumber::Num(ref v) => write!(f, "{blue}{:?}{blue:#}\t{}", v, self.header),
+            ZkNumber::Alpha(ref s) => write!(f, "{blue}{:?}{blue:#}\t{}", s, self.header),
+            ZkNumber::Invalid => write!(f, "{red}{}{red:#}", self.path.display())
         }
     }
 }
@@ -333,7 +335,7 @@ fn list_files(pat: &Regex) -> Result<(), ZkError> {
     }
     files.sort();
     for file in files.iter() {
-        println!("{:?}", file);
+        println!("{}", file);
     }
     Ok(())
 }
