@@ -13,13 +13,53 @@ use crate::utils;
 #[derive(PartialEq)]
 pub enum ZkNumber {
     Num(Vec::<usize>),
-    Alpha(String)
+    Alpha(String),
+    Invalid
 }
 
 pub struct ZkCard {
-    path: PathBuf, 
+    path: PathBuf,
     number: ZkNumber
 }
+
+impl ZkCard {
+    pub fn from(path: PathBuf) -> Self {
+        if let Some(filename) = path.file_stem() {
+            let f = match filename.to_str() {
+                Some(s) => s,
+                None => {
+                    return ZkCard{
+                        path: path,
+                        number: ZkNumber::Invalid
+                    };
+                }
+            };
+            let name = String::from(f);
+            match parse_number(&f) {
+                Ok(v) => {
+                    return ZkCard{
+                        path: path,
+                        number: ZkNumber::Num(v)
+                    };
+                },
+                Err(_) => {
+                    return ZkCard{
+                        path: path,
+                        number: ZkNumber::Alpha(name)
+                    };
+                }
+            }
+        } else {
+            ZkCard{
+                path: path,
+                number: ZkNumber::Invalid
+            }
+        }
+    }
+}
+
+
+
 
 impl std::cmp::PartialOrd for ZkCard {
     fn partial_cmp(&self, other: &ZkCard) -> Option<Ordering> {
@@ -28,8 +68,11 @@ impl std::cmp::PartialOrd for ZkCard {
                 match other.number {
                     ZkNumber::Num(ref v_rhs) => {
                         return Some(v.cmp(&v_rhs));
-                    }, 
+                    },
                     ZkNumber::Alpha(ref s) => {
+                        return Some(Ordering::Less);
+                    },
+                    ZkNumber::Invalid => {
                         return Some(Ordering::Less);
                     }
                 };
@@ -41,16 +84,33 @@ impl std::cmp::PartialOrd for ZkCard {
                     },
                     ZkNumber::Alpha(ref s_rhs) => {
                         return Some(s.cmp(&s_rhs));
+                    },
+                    ZkNumber::Invalid => {
+                        return Some(Ordering::Less);
+                    }
+                };
+            },
+            ZkNumber::Invalid => {
+                match other.number {
+                    ZkNumber::Num(ref v_rhs) => {
+                        return Some(Ordering::Greater);
+                    },
+                    ZkNumber::Alpha(ref s_rhs) => {
+                        return Some(Ordering::Greater);
+                    },
+                    ZkNumber::Invalid => {
+                        return Some(Ordering::Equal);
                     }
                 };
             }
+
         };
     }
 }
 
 impl std::cmp::PartialEq for ZkCard {
     fn eq(&self, other: &ZkCard) -> bool {
-        self.path == other.path && 
+        self.path == other.path &&
             self.number == other.number
     }
 }
@@ -206,7 +266,7 @@ fn list_files(pat: &Regex) -> Result<(), ZkError> {
                 match get_first_header(&path) {
                     Ok(header) => {
                         print!("\t{}\n", header);
-                    }, 
+                    },
                     Err(_) => {
                         print!("header not found\n");
                     }
@@ -266,11 +326,31 @@ fn get_first_header(path: &PathBuf) -> Result<String, ZkError> {
                     if let Some(h) = matches.next() {
                         return Ok(String::from(&h["label"]));
                     }
-                } 
+                }
             }
         }
         return Err(ZkError::NoteHeader);
     } else {
         Err(ZkError::Access(path.to_path_buf()))
     }
+}
+
+#[test]
+fn ordering() {
+    let c0 = ZkCard::from(PathBuf::from("./1.md"));
+    let c1 = ZkCard::from(PathBuf::from("./1.1.1.md"));
+    let c2 = ZkCard::from(PathBuf::from("./filename.md"));
+    let c3 = ZkCard::from(PathBuf::from("./filename_long.md"));
+    let c4 = ZkCard::from(PathBuf::from("./1.10.2.1.md"));
+    let c5 = ZkCard::from(PathBuf::from("./1.1.1.4.md"));
+    let c6 = ZkCard::from(PathBuf::from("./1.2.1.md"));
+    assert!(c0 < c1);
+    assert!(c1 < c2);
+    assert!(c1 < c3);
+    assert!(c1 < c4);
+    assert!(c1 < c5);
+    assert!(c2 < c3);
+    assert!(c5 < c4);
+    assert!(c5 < c6);
+    assert!(c6 < c4);
 }
