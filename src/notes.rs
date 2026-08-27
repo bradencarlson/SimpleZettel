@@ -105,6 +105,13 @@ impl ZkCard {
             }
         }
     }
+    pub fn get_number_length(&self) -> usize {
+        match self.number {
+            ZkNumber::Num(ref v) => 2*v.len() - 1,
+            ZkNumber::Alpha(ref s) => s.len(),
+            ZkNumber::Invalid => 0
+        }
+    }
 }
 
 impl std::fmt::Display for ZkCard {
@@ -334,6 +341,10 @@ fn list_files(pat: &Regex) -> Result<(), ZkError> {
         }
     }
     files.sort();
+
+    let max = files.iter()
+        .map(|c| c.get_number_length())
+        .max();
     for file in files.iter() {
         println!("{}", file);
     }
@@ -370,6 +381,18 @@ fn parse_number(num: &str) -> Result<Vec::<usize>, ZkError> {
         };
     }
     Ok(v)
+}
+
+fn format_number(num: &Vec::<usize>, space: usize) -> String {
+    let mut s = String::new();
+    for n in num {
+        s.push_str(n.to_string().as_str());
+        s.push_str(".");
+    }
+    while s.len() < space {
+        s.push_str(" ");
+    }
+    s
 }
 
 fn insert_number(path: &PathBuf, num: &Vec::<usize>) -> Result<(), ZkError> {
