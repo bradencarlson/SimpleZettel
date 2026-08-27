@@ -1,20 +1,59 @@
+use std::cmp::{Ordering,Eq};
 use std::fs;
-use std::path::PathBuf;
 use std::fs::File;
+use std::io::{BufRead,BufReader};
+use std::path::PathBuf;
 use std::process::Command;
-use std::io::BufReader;
-use std::io::BufRead;
 use clap::ArgMatches;
 use regex::Regex;
 
 use crate::error::ZkError;
 use crate::utils;
 
+#[derive(PartialEq)]
 pub enum ZkNumber {
     Num(Vec::<usize>),
     Alpha(String)
 }
 
+pub struct ZkCard {
+    path: PathBuf, 
+    number: ZkNumber
+}
+
+impl std::cmp::PartialOrd for ZkCard {
+    fn partial_cmp(&self, other: &ZkCard) -> Option<Ordering> {
+        match self.number {
+            ZkNumber::Num(ref v) => {
+                match other.number {
+                    ZkNumber::Num(ref v_rhs) => {
+                        return Some(v.cmp(&v_rhs));
+                    }, 
+                    ZkNumber::Alpha(ref s) => {
+                        return Some(Ordering::Less);
+                    }
+                };
+            },
+            ZkNumber::Alpha(ref s) => {
+                match other.number {
+                    ZkNumber::Num(ref v_rhs) => {
+                        return Some(Ordering::Greater);
+                    },
+                    ZkNumber::Alpha(ref s_rhs) => {
+                        return Some(s.cmp(&s_rhs));
+                    }
+                };
+            }
+        };
+    }
+}
+
+impl std::cmp::PartialEq for ZkCard {
+    fn eq(&self, other: &ZkCard) -> bool {
+        self.path == other.path && 
+            self.number == other.number
+    }
+}
 
 
 pub fn add_note(matches: &ArgMatches) -> Result<(), ZkError> {
