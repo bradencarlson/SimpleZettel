@@ -22,7 +22,7 @@ pub struct ZkCard {
     path: PathBuf,
     number: ZkNumber,
     header: String
-        
+
 }
 
 impl ZkCard {
@@ -110,6 +110,30 @@ impl ZkCard {
             ZkNumber::Num(ref v) => 2*v.len() - 1,
             ZkNumber::Alpha(ref s) => s.len(),
             ZkNumber::Invalid => 0
+        }
+    }
+    pub fn format_number(&self, space: usize) -> String {
+        let mut s = String::new();
+        match self.number {
+            ZkNumber::Num(ref v) => {
+                for n in v {
+                    s.push_str(n.to_string().as_str());
+                    s.push_str(".");
+                }
+                s.pop();
+                while s.len() < space {
+                    s.push(' ');
+                }
+                s
+            },
+            ZkNumber::Alpha(ref s1) => {
+                s.push_str(&s1);
+                while s.len() < space {
+                    s.push(' ');
+                }
+                s
+            },
+            ZkNumber::Invalid => s
         }
     }
 }
@@ -342,11 +366,15 @@ fn list_files(pat: &Regex) -> Result<(), ZkError> {
     }
     files.sort();
 
-    let max = files.iter()
+    let max = match files.iter()
         .map(|c| c.get_number_length())
-        .max();
+        .max() {
+            Some(m) => m+4,
+            None => 20
+    };
+    let blue = anstyle::Style::new().fg_color(Some(anstyle::AnsiColor::Blue.into())).bold();
     for file in files.iter() {
-        println!("{}", file);
+        println!("{blue}{}{blue:#}{}", file.format_number(max), file.header);
     }
     Ok(())
 }
@@ -383,17 +411,6 @@ fn parse_number(num: &str) -> Result<Vec::<usize>, ZkError> {
     Ok(v)
 }
 
-fn format_number(num: &Vec::<usize>, space: usize) -> String {
-    let mut s = String::new();
-    for n in num {
-        s.push_str(n.to_string().as_str());
-        s.push_str(".");
-    }
-    while s.len() < space {
-        s.push_str(" ");
-    }
-    s
-}
 
 fn insert_number(path: &PathBuf, num: &Vec::<usize>) -> Result<(), ZkError> {
     Ok(())
