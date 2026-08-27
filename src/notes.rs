@@ -143,7 +143,7 @@ fn list_files(pat: &Regex) -> Result<(), ZkError> {
                 Err(_) => {continue;}
             };
             let path = e.path();
-            let filename = match path.file_prefix() {
+            let filename = match path.file_stem() {
                 Some(f) => {
                     match f.to_str() {
                         Some(s) => s,
