@@ -25,6 +25,8 @@
 
 An 'x' here in the second box simply means that the command/option has been built into `clap`, an
 'x' in the first box indicates that the feature has been implemented.
+If there is only a single box, then an 'x' indicates that this has been
+implemented.
 List of subcommands desired:
 - [x], [x] add: for adding a new note
 - [x], [x] edit: for editing an existing note
@@ -35,8 +37,10 @@ List of subcommands desired:
     - this could have subcommands just like real `ls`
         - [x], [x] patterns can be passed for matching filenames
         - [ ], [ ] `-t` for listing tags
-        - [ ] files which are numbered (1.1.1.md) are listed in their numerical
+        - [x] files which are numbered (1.1.1.md) are listed in their numerical
           order.
+        - [ ] the user can specify the list a different box (via a flag or some
+          other notation)
     - subcommand for showing based on numbering in front matter.
 - search: searches for a string among files in box
 - [x], [x] box: for managing boxes
