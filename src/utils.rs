@@ -2,8 +2,6 @@ use std::env;
 use std::fs;
 use std::path::PathBuf;
 
-use anstream::println;
-
 use crate::error::ZkError;
 
 pub fn print_blue(msg: &str) {

@@ -1,4 +1,4 @@
-use std::cmp::{Ordering,Eq};
+use std::cmp::Ordering;
 use std::fs;
 use std::fs::File;
 use std::io::{BufRead,BufReader};
@@ -173,7 +173,7 @@ impl std::cmp::Ord for ZkCard {
                     ZkNumber::Num(ref v_rhs) => {
                         return v.cmp(&v_rhs);
                     },
-                    ZkNumber::Alpha(ref s) => {
+                    ZkNumber::Alpha(_) => {
                         return Ordering::Less;
                     },
                     ZkNumber::Invalid => {
@@ -183,7 +183,7 @@ impl std::cmp::Ord for ZkCard {
             },
             ZkNumber::Alpha(ref s) => {
                 match other.number {
-                    ZkNumber::Num(ref v_rhs) => {
+                    ZkNumber::Num(_) => {
                         return Ordering::Greater;
                     },
                     ZkNumber::Alpha(ref s_rhs) => {
@@ -196,10 +196,10 @@ impl std::cmp::Ord for ZkCard {
             },
             ZkNumber::Invalid => {
                 match other.number {
-                    ZkNumber::Num(ref v_rhs) => {
+                    ZkNumber::Num(_) => {
                         return Ordering::Greater;
                     },
-                    ZkNumber::Alpha(ref s_rhs) => {
+                    ZkNumber::Alpha(_) => {
                         return Ordering::Greater;
                     },
                     ZkNumber::Invalid => {
@@ -233,7 +233,7 @@ pub fn add_note(matches: &ArgMatches) -> Result<(), ZkError> {
         }
     }
     if let Some(num) = matches.get_one::<String>("number") {
-        let v = parse_number(&num)?;
+        parse_number(&num)?;
         let file = utils::note_path_from_name(num)?;
         match fs::exists(&file) {
             Ok(true) => {
@@ -420,7 +420,7 @@ fn insert_number(path: &PathBuf, num: &Vec::<usize>) -> Result<(), ZkError> {
 fn get_first_header(path: &PathBuf) -> Result<String, ZkError> {
     utils::verify_note_path(&path)?;
     if let Ok(f) = File::open(path) {
-        let mut reader = BufReader::new(f);
+        let reader = BufReader::new(f);
         let header = Regex::new("^[[:space:]]*#[[:space:]]*(?<label>([a-zA-Z]+[ ]?)+)").unwrap();
         let mut iter = reader.lines();
         while let Some(line_result) = iter.next() {
