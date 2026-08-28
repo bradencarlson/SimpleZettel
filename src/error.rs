@@ -27,6 +27,7 @@ pub enum ZkError {
     TrackFail,
     IndexFail,
     GitInit,
+    GitAdd,
     Current,
     Other(String),
 }
@@ -56,6 +57,7 @@ impl fmt::Display for ZkError {
             ZkError::TrackFail => write!(f, "failed to track box"),
             ZkError::IndexFail => write!(f, "failed to create index file"),
             ZkError::GitInit => write!(f, "failed to innitialize git repo for box"),
+            ZkError::GitAdd => write!(f, "failed to add files to git repo for box"),
             ZkError::Current => write!(f, "failed to update current box"),
             ZkError::Other(msg) => write!(f, "{}", msg),
         }

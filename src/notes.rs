@@ -387,6 +387,7 @@ fn edit_file(path: &PathBuf) -> Result<(), ZkError> {
         .status() {
             Ok(status) => {
                 if status.success() {
+                    git_add()?;
                     Ok(())
                 } else {
                     Err(ZkError::Other(String::from("something went wrong while opening vim for the user")))
@@ -436,6 +437,27 @@ fn get_first_header(path: &PathBuf) -> Result<String, ZkError> {
     } else {
         Err(ZkError::Access(path.to_path_buf()))
     }
+}
+
+fn git_add() -> Result<(), ZkError> {
+    let current = utils::get_current_box()?;
+    match Command::new("git")
+        .current_dir(&current)
+        .arg("add")
+        .arg(".")
+        .status() {
+            Ok(status) => {
+                if status.success() {
+                    Ok(())
+                } else {
+                    Err(ZkError::GitAdd)
+                }
+            },
+            Err(e) => {
+                Err(ZkError::Other(e.to_string()))
+            }
+    }
+
 }
 
 #[test]
