@@ -11,9 +11,10 @@ pub fn print_blue(msg: &str) {
 }
 
 pub fn prompt_user(msg: &str) -> Result<String, ZkError> {
-    print!("{} ", msg);
+    println!("{}", msg);
     let mut buff = String::new();
     if let Ok(resp) = io::stdin().read_line(&mut buff) {
+        buff.pop();
         Ok(buff)
     } else {
         Err(ZkError::Other(String::from("failed to get response from user")))

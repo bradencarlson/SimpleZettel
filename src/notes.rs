@@ -388,6 +388,7 @@ fn edit_file(path: &PathBuf) -> Result<(), ZkError> {
             Ok(status) => {
                 if status.success() {
                     git_add()?;
+                    git_commit()?;
                     Ok(())
                 } else {
                     Err(ZkError::Other(String::from("something went wrong while opening vim for the user")))
@@ -465,7 +466,6 @@ fn git_commit() -> Result<bool, ZkError> {
     let Y = String::from("Y");
     let y = String::from("y");
     if resp != Y && resp != y {
-        println!("you said no!");
         return Ok(false);
     }
     let current = utils::get_current_box()?;
