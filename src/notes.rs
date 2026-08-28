@@ -460,6 +460,32 @@ fn git_add() -> Result<(), ZkError> {
 
 }
 
+fn git_commit() -> Result<bool, ZkError> {
+    let resp = utils::prompt_user("Would you like to commit changes to git? [Y/n]")?;
+    let Y = String::from("Y");
+    let y = String::from("y");
+    if resp != Y && resp != y {
+        println!("you said no!");
+        return Ok(false);
+    }
+    let current = utils::get_current_box()?;
+    match Command::new("git")
+        .current_dir(&current)
+        .arg("commit")
+        .status() {
+            Ok(status) => {
+                if status.success() {
+                    Ok(true)
+                } else {
+                    Err(ZkError::GitCommit)
+                }
+            },
+            Err(e) => {
+                Err(ZkError::Other(e.to_string()))
+            }
+    }
+}
+
 #[test]
 fn ordering() {
     let c0 = ZkCard::from(PathBuf::from("./1.md"));

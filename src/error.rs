@@ -28,6 +28,7 @@ pub enum ZkError {
     IndexFail,
     GitInit,
     GitAdd,
+    GitCommit,
     Current,
     Other(String),
 }
@@ -56,8 +57,9 @@ impl fmt::Display for ZkError {
             ZkError::Access(path) => write!(f, "unable to access {}", path.display()),
             ZkError::TrackFail => write!(f, "failed to track box"),
             ZkError::IndexFail => write!(f, "failed to create index file"),
-            ZkError::GitInit => write!(f, "failed to innitialize git repo for box"),
-            ZkError::GitAdd => write!(f, "failed to add files to git repo for box"),
+            ZkError::GitInit => write!(f, "failed to innitialize box's git repo"),
+            ZkError::GitAdd => write!(f, "failed to add files to box's git repo"),
+            ZkError::GitCommit => write!(f, "failed to commit files to box's git repo"),
             ZkError::Current => write!(f, "failed to update current box"),
             ZkError::Other(msg) => write!(f, "{}", msg),
         }
