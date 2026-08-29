@@ -17,9 +17,6 @@ pub fn handle_subcommand(matches: &ArgMatches) -> Result<(), ZkError> {
         Some(("rm", ssub_m)) => {
             remove_tracking(ssub_m)?;
         },
-        Some(("use", ssub_m)) => {
-            use_box(ssub_m)?;
-        },
         Some(("track", ssub_m)) => {
             track_box(ssub_m)?;
         },
@@ -96,7 +93,7 @@ fn list_boxes() -> Result<(), ZkError> {
 
 }
 
-fn use_box(matches: &ArgMatches) -> Result<(), ZkError> {
+pub fn use_box(matches: &ArgMatches) -> Result<(), ZkError> {
     if let Some(name) = matches.get_one::<String>("name") {
         let path = utils::path_from_name(&name)?;
         if is_tracked(&path)? == false {

@@ -31,15 +31,6 @@ pub fn parse_args() -> ArgMatches {
                     )
                 )
                 .subcommand(
-                    Command::new("use")
-                    .about("set a box as currently in use")
-                    .arg(
-                        Arg::new("name")
-                        .required(true)
-                        .help("the name of the box to use")
-                    )
-                )
-                .subcommand(
                     Command::new("track")
                     .about("track a previously removed box")
                     .arg(
@@ -48,6 +39,16 @@ pub fn parse_args() -> ArgMatches {
                         .help("name of the box to track")
                     )
                 )
+        )
+        .subcommand(
+            Command::new("use")
+            .about("set a box as currently in use")
+            .arg(
+                Arg::new("name")
+                .required(true)
+                .action(ArgAction::Set)
+                .help("the name of the box to use")
+            )
         )
         .subcommand(
             Command::new("add")

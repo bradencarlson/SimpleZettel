@@ -27,6 +27,14 @@ fn main() {
                 },
             }
         },
+        Some(("use", sub_m)) => {
+            match boxes::use_box(sub_m) {
+                Ok(_) => {},
+                Err(e) => {
+                    error::warning(&e.to_string());
+                }
+            }
+        },
         Some(("edit", sub_m)) => {
             match notes::edit_note(sub_m) {
                 Ok(_) => {},
