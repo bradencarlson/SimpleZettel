@@ -50,6 +50,13 @@ List of subcommands desired:
     - [x], [x] remove: for removing a box (only removes tracking, not files)
     - [x], [x] track: for tracking a box previously removed
     - [x], [x] use: select a box to use
+- [ ], [ ] follow: for traversing the files. This should require a name which is
+  the starting point, then shows that note, and provides some sort of menu
+  (which is a list of all notes that the current note references) for the user
+  to select. The menu should probably include the notes children  
+  so the user can go down a sequence like 1.1 -> 1.1.1 -> 1.1.5 -> 1.1.5.2
+  Perhaps this should drop the user into some sort of 'shell', where they can
+  specify a new note name to go to, or list notes. Yeah, this is a big item.
 
 ### Low level commands
 
