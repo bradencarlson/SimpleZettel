@@ -8,16 +8,20 @@
 
 (user edits file, no need to handle anything here)
 
-- [ ] Depending on the exit code (this might have to be based on hashes instead),
+- [x] Depending on the exit code (this might have to be based on hashes instead),
   print out what has happened:
     - new file saved
     - file updated
     - error of some kind?
+- [ ] Should store a hash of the note to edit (when this command is passed),
+  then computes a new hash for the file after the use has finished editing. This
+  way, the git prompt is shown only when the user actually changes the file in
+  some way.
 - [ ] handle any backlinks?
 - [ ] convert any 'numbered' links to 'named' links (for compatibility with
   other systems)?
-- [ ] Prompt user if they would like to add a commit message
-- [ ] Commit changes to box `git` tracking.
+- [x] Prompt user if they would like to add a commit message
+- [x] Commit changes to box `git` tracking.
 
 ## Subcommands and Args
 
