@@ -25,6 +25,12 @@ pub struct ZkCard {
     references: Vec::<PathBuf>,
 }
 
+#[derive(Debug)]
+pub struct ZkRef {
+    path: PathBuf,
+    label: String,
+}
+
 impl ZkCard {
     pub fn from(path: PathBuf) -> Self {
         if let Ok(true) = fs::exists(&path) {
@@ -457,20 +463,24 @@ fn get_first_header(path: &PathBuf) -> Result<String, ZkError> {
     }
 }
 
-fn get_references(path: &PathBuf) -> Result<Vec::<PathBuf>, ZkError> {
-    let mut refs = Vec::<PathBuf>::new();
-    utils::verify_note_path(&path)?;
+fn get_references(path: &PathBuf) -> Result<Vec::<ZkRef>, ZkError> {
+    let mut refs = Vec::<ZkRef>::new();
+    // TODO: Perhaps this method should just assume that someone else has checked this?
+    //utils::verify_note_path(&path)?;
     if let Ok(f) = File::open(path) {
         let reader = BufReader::new(f);
         let mut iter = reader.lines();
-        let reference = Regex::new(r"\[\[(?<filename>[^\]]+)\]\]").unwrap();
+        let reference = Regex::new(r"\[(?<linkname>[^\]]+)\]\((?<link>[^\)]+)\)").unwrap();
         while let Some(line_result) = iter.next() {
             if let Ok(line) = line_result {
                 if reference.is_match(&line) {
                     let mut matches = reference.captures_iter(&line);
                     while let Some(f_name) = matches.next() {
-                        let p = utils::note_path_from_name(&f_name["filename"])?;
-                        refs.push(p);
+                        let zkp = ZkRef {
+                            path: utils::note_path_from_name(&f_name["link"])?,
+                            label: String::from(&f_name["linkname"]),
+                        };
+                        refs.push(zkp);
                     }
                 }
             }

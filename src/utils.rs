@@ -33,7 +33,7 @@ impl HashPair {
                 match self.two {
                     Some(ref t) => {
                         o == t
-                    }, 
+                    },
                     None => false
                 }
             },
