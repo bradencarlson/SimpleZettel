@@ -21,8 +21,8 @@ pub enum ZkNumber {
 pub struct ZkCard {
     path: PathBuf,
     number: ZkNumber,
-    header: String
-
+    header: String,
+    references: Vec::<PathBuf>,
 }
 
 impl ZkCard {
@@ -39,7 +39,8 @@ impl ZkCard {
                         return ZkCard{
                             path: path,
                             number: ZkNumber::Invalid,
-                            header: header
+                            header: header,
+                            references: Vec::<PathBuf>::new(),
                         };
                     }
                 };
@@ -49,14 +50,16 @@ impl ZkCard {
                         return ZkCard{
                             path: path,
                             number: ZkNumber::Num(v),
-                            header: header
+                            header: header,
+                            references: Vec::<PathBuf>::new(),
                         };
                     },
                     Err(_) => {
                         return ZkCard{
                             path: path,
                             number: ZkNumber::Alpha(name),
-                            header: header
+                            header: header,
+                            references: Vec::<PathBuf>::new(),
                         };
                     }
                 }
@@ -64,7 +67,8 @@ impl ZkCard {
                 ZkCard{
                     path: path,
                     number: ZkNumber::Invalid,
-                    header: header
+                    header: header,
+                    references: Vec::<PathBuf>::new(),
                 }
             }
         } else {
@@ -75,7 +79,8 @@ impl ZkCard {
                         return ZkCard{
                             path: path,
                             number: ZkNumber::Invalid,
-                            header: String::from("")
+                            header: String::from(""),
+                            references: Vec::<PathBuf>::new(),
                         };
                     }
                 };
@@ -85,14 +90,16 @@ impl ZkCard {
                         return ZkCard{
                             path: path,
                             number: ZkNumber::Num(v),
-                            header: String::from("")
+                            header: String::from(""),
+                            references: Vec::<PathBuf>::new(),
                         };
                     },
                     Err(_) => {
                         return ZkCard{
                             path: path,
                             number: ZkNumber::Alpha(name),
-                            header: String::from("")
+                            header: String::from(""),
+                            references: Vec::<PathBuf>::new(),
                         };
                     }
                 }
@@ -100,7 +107,8 @@ impl ZkCard {
                 ZkCard{
                     path: path,
                     number: ZkNumber::Invalid,
-                    header: String::from("")
+                    header: String::from(""),
+                    references: Vec::<PathBuf>::new(),
                 }
             }
         }
@@ -266,6 +274,9 @@ pub fn show_note(matches: &ArgMatches) -> Result<(), ZkError> {
         };
         if let Ok(content) = fs::read_to_string(&note) {
             print!("{}", content);
+            if let Ok(v) = get_references(&note) {
+                println!("{:?}", v);
+            }
             Ok(())
         } else {
             Err(ZkError::NoteRead(note))
@@ -444,6 +455,30 @@ fn get_first_header(path: &PathBuf) -> Result<String, ZkError> {
     } else {
         Err(ZkError::Access(path.to_path_buf()))
     }
+}
+
+fn get_references(path: &PathBuf) -> Result<Vec::<PathBuf>, ZkError> {
+    let mut refs = Vec::<PathBuf>::new();
+    utils::verify_note_path(&path)?;
+    if let Ok(f) = File::open(path) {
+        let reader = BufReader::new(f);
+        let mut iter = reader.lines();
+        let reference = Regex::new(r"\[\[(?<filename>[^\]]+)\]\]").unwrap();
+        while let Some(line_result) = iter.next() {
+            if let Ok(line) = line_result {
+                if reference.is_match(&line) {
+                    let mut matches = reference.captures_iter(&line);
+                    while let Some(f_name) = matches.next() {
+                        let p = utils::note_path_from_name(&f_name["filename"])?;
+                        refs.push(p);
+                    }
+                }
+            }
+        }
+    } else {
+        return Err(ZkError::Access(path.to_path_buf()))
+    }
+    Ok(refs)
 }
 
 fn git_add() -> Result<(), ZkError> {
