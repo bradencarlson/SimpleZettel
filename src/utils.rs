@@ -1,9 +1,73 @@
 use std::env;
 use std::fs;
 use std::io;
+use std::hash::{DefaultHasher, Hash, Hasher};
+use std::assert_matches;
 use std::path::PathBuf;
 
 use crate::error::ZkError;
+
+pub struct HashPair {
+    one: Option<u64>,
+    two: Option<u64>,
+}
+
+impl HashPair {
+    pub fn new() -> Self {
+        HashPair {
+            one: None,
+            two: None
+        }
+    }
+
+    pub fn get_first(&self) -> &Option<u64> {
+        &self.one
+    }
+    pub fn get_second(&self) -> &Option<u64> {
+        &self.two
+    }
+
+    pub fn equal(&self) -> bool {
+        match self.one {
+            Some(ref o) => {
+                match self.two {
+                    Some(ref t) => {
+                        o == t
+                    }, 
+                    None => false
+                }
+            },
+            None => false
+        }
+    }
+
+    pub fn push<T: Hash>(&mut self, t: &T) {
+        let mut s = DefaultHasher::new();
+        match self.one {
+            Some(h) => {
+                self.two = Some(h);
+                t.hash(&mut s);
+                self.one = Some(s.finish());
+            },
+            None => {
+                t.hash(&mut s);
+                self.one = Some(s.finish());
+            }
+        }
+    }
+
+    pub fn len(&self) -> usize {
+        match self.two {
+            Some(_h) => 2,
+            None => {
+                match self.one {
+                    Some(_v) => 1,
+                    None => 0
+                }
+            }
+        }
+    }
+}
 
 pub fn print_blue(msg: &str) {
     let blue = anstyle::Style::new().fg_color(Some(anstyle::AnsiColor::Blue.into())).bold();
@@ -118,4 +182,18 @@ fn deep_path() {
         invalid_path.push(".zk/test/one");
         assert_eq!(verify_path(&invalid_path), Err(ZkError::InvalidPath));
     }
+}
+
+#[test]
+fn hashpair() {
+    let mut hp = HashPair::new();
+    let x = 506;
+    hp.push(&x);
+    assert_matches!(hp.get_first(), &Some(_));
+    assert_eq!(hp.len(), 1);
+    let y = 102;
+    hp.push(&y);
+    assert_eq!(hp.len(), 2);
+    assert_matches!(hp.get_second(), &Some(_));
+
 }

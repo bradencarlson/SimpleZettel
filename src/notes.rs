@@ -382,11 +382,17 @@ fn list_files(pat: &Regex) -> Result<(), ZkError> {
 
 fn edit_file(path: &PathBuf) -> Result<(), ZkError> {
     utils::verify_note_path(path)?;
+    let mut hashes = utils::HashPair::new();
+    hashes.push(&path);
     match Command::new("vim")
-        .arg(path)
+        .arg(&path)
         .status() {
             Ok(status) => {
                 if status.success() {
+                    hashes.push(&path);
+                    if hashes.equal() {
+                        return Ok(())
+                    }
                     git_add()?;
                     git_commit()?;
                     Ok(())
