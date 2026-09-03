@@ -26,8 +26,14 @@ pub struct ZkCard {
 }
 
 #[derive(Debug)]
+pub enum ZkPath {
+    Path(PathBuf),
+    Invalid
+}
+
+#[derive(Debug)]
 pub struct ZkRef {
-    path: PathBuf,
+    path: ZkPath,
     label: String,
 }
 
@@ -476,8 +482,12 @@ fn get_references(path: &PathBuf) -> Result<Vec::<ZkRef>, ZkError> {
                 if reference.is_match(&line) {
                     let mut matches = reference.captures_iter(&line);
                     while let Some(f_name) = matches.next() {
+                        let p: ZkPath = match utils::note_path_from_name(&f_name["link"]) {
+                            Ok(pth) => ZkPath::Path(pth),
+                            Err(_) => ZkPath::Invalid
+                        };
                         let zkp = ZkRef {
-                            path: utils::note_path_from_name(&f_name["link"])?,
+                            path: p,
                             label: String::from(&f_name["linkname"]),
                         };
                         refs.push(zkp);
