@@ -3,10 +3,11 @@ use std::fs;
 use std::io;
 use std::hash::{DefaultHasher, Hash, Hasher};
 use std::assert_matches;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use crate::error::ZkError;
 
+#[derive(Debug)]
 pub struct HashPair {
     one: Option<u64>,
     two: Option<u64>,
@@ -54,6 +55,14 @@ impl HashPair {
                 self.one = Some(s.finish());
             }
         }
+    }
+
+    pub fn push_path(&mut self, path: &Path) -> Result<(), ZkError> {
+        match fs::read_to_string(path) {
+            Ok(s) => self.push(&s),
+            Err(_) => { return Err(ZkError::NoteRead(path.to_path_buf()))}
+        };
+        Ok(())
     }
 
     pub fn len(&self) -> usize {
