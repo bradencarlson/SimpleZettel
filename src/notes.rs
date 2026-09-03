@@ -22,7 +22,7 @@ pub struct ZkCard {
     path: PathBuf,
     number: ZkNumber,
     header: String,
-    references: Vec::<PathBuf>,
+    references: Vec::<ZkRef>,
 }
 
 #[derive(Debug)]
@@ -286,6 +286,7 @@ pub fn show_note(matches: &ArgMatches) -> Result<(), ZkError> {
         };
         if let Ok(content) = fs::read_to_string(&note) {
             print!("{}", content);
+            // TODO: This was added for debuging purposes
             if let Ok(v) = get_references(&note) {
                 println!("{:?}", v);
             }
