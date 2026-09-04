@@ -5,6 +5,7 @@ use clap::ArgMatches;
 
 use crate::utils;
 use crate::error::ZkError;
+use crate::error;
 
 pub fn handle_subcommand(matches: &ArgMatches) -> Result<(), ZkError> {
     match matches.subcommand() {
@@ -57,7 +58,10 @@ fn list_boxes() -> Result<(), ZkError> {
     let zk_dir = utils::get_zk_dir()?;
     let current = match utils::get_current_box() {
         Ok(p) => p,
-        Err(ZkError::NoCurrentBox) => PathBuf::new(),
+        Err(ZkError::NoCurrentBox) => {
+            error::warning(&ZkError::NoCurrentBox.to_string());
+            PathBuf::new()
+        },
         Err(e) => { return Err(e) }
     };
     match fs::read_dir(&zk_dir) {
