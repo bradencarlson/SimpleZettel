@@ -429,7 +429,7 @@ fn get_first_header(path: &PathBuf) -> Result<String, ZkError> {
     utils::verify_note_path(&path)?;
     if let Ok(f) = File::open(path) {
         let reader = BufReader::new(f);
-        let header = Regex::new("^[[:space:]]*#[[:space:]]*(?<label>([a-zA-Z]+[ ]?)+)").unwrap();
+        let header = Regex::new("^[[:space:]]*#[[:space:]]*(?<label>.*)").unwrap();
         let mut iter = reader.lines();
         while let Some(line_result) = iter.next() {
             if let Ok(line) = line_result {
