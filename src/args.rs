@@ -9,6 +9,12 @@ pub fn parse_args() -> ArgMatches {
                 .subcommand(
                     Command::new("ls")
                     .about("list boxes")
+                    .arg(
+                        Arg::new("all")
+                        .short('a')
+                        .long("all")
+                        .action(ArgAction::SetTrue)
+                    )
                 )
                 .subcommand(
                     Command::new("add")

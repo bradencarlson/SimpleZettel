@@ -49,7 +49,7 @@ List of subcommands desired:
 - [x], [x] box: for managing boxes
     - [x], [x] ls: for listing boxes (maybe this should be the default behavior if no
       subcommand is found
-        - [ ], [ ] add subcommand `-a` for listing all boxes, not just tracked ones
+        - [x], [x] add subcommand `-a` for listing all boxes, not just tracked ones
     - [x], [x] add: for adding a box
     - [x], [x] remove: for removing a box (only removes tracking, not files)
     - [x], [x] track: for tracking a box previously removed

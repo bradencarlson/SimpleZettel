@@ -9,8 +9,10 @@ use crate::error;
 
 pub fn handle_subcommand(matches: &ArgMatches) -> Result<(), ZkError> {
     match matches.subcommand() {
-        Some(("ls", _ssub_m)) => {
-            list_boxes()?;
+        Some(("ls", ssub_m)) => {
+            let all = ssub_m.get_flag("all");
+            println!("{:?}", all);
+            list_boxes(all)?;
         },
         Some(("add", ssub_m)) => {
             create_box(ssub_m)?;
@@ -22,7 +24,7 @@ pub fn handle_subcommand(matches: &ArgMatches) -> Result<(), ZkError> {
             track_box(ssub_m)?;
         },
         _ => {
-            list_boxes()?;
+            list_boxes(false)?;
         }
     }
     Ok(())
@@ -54,7 +56,7 @@ fn create_box(matches: &ArgMatches) -> Result<(), ZkError> {
     }
 }
 
-fn list_boxes() -> Result<(), ZkError> {
+fn list_boxes(all: bool) -> Result<(), ZkError> {
     let zk_dir = utils::get_zk_dir()?;
     let current = match utils::get_current_box() {
         Ok(p) => p,
@@ -77,7 +79,7 @@ fn list_boxes() -> Result<(), ZkError> {
                         if path == current {
                             pre = "->";
                         }
-                        if is_tracked(&path)? == false {
+                        if is_tracked(&path)? == false && !all {
                             continue;
                         }
                         if let Some(name) = path.file_name() {
@@ -114,7 +116,7 @@ pub fn use_box(matches: &ArgMatches) -> Result<(), ZkError> {
                 current.push(".current");
                 match fs::write(current, name) {
                     Ok(_) => {
-                        list_boxes()?;
+                        list_boxes(false)?;
                         Ok(())
                     },
                     Err(_e) => Err(ZkError::Current)
