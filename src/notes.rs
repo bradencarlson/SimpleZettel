@@ -52,7 +52,7 @@ impl ZkCard {
                             path: path,
                             number: ZkNumber::Invalid,
                             header: header,
-                            references: Vec::<PathBuf>::new(),
+                            references: Vec::<ZkRef>::new(),
                         };
                     }
                 };
@@ -63,7 +63,7 @@ impl ZkCard {
                             path: path,
                             number: ZkNumber::Num(v),
                             header: header,
-                            references: Vec::<PathBuf>::new(),
+                            references: Vec::<ZkRef>::new(),
                         };
                     },
                     Err(_) => {
@@ -71,7 +71,7 @@ impl ZkCard {
                             path: path,
                             number: ZkNumber::Alpha(name),
                             header: header,
-                            references: Vec::<PathBuf>::new(),
+                            references: Vec::<ZkRef>::new(),
                         };
                     }
                 }
@@ -80,7 +80,7 @@ impl ZkCard {
                     path: path,
                     number: ZkNumber::Invalid,
                     header: header,
-                    references: Vec::<PathBuf>::new(),
+                    references: Vec::<ZkRef>::new(),
                 }
             }
         } else {
@@ -92,7 +92,7 @@ impl ZkCard {
                             path: path,
                             number: ZkNumber::Invalid,
                             header: String::from(""),
-                            references: Vec::<PathBuf>::new(),
+                            references: Vec::<ZkRef>::new(),
                         };
                     }
                 };
@@ -103,7 +103,7 @@ impl ZkCard {
                             path: path,
                             number: ZkNumber::Num(v),
                             header: String::from(""),
-                            references: Vec::<PathBuf>::new(),
+                            references: Vec::<ZkRef>::new(),
                         };
                     },
                     Err(_) => {
@@ -111,7 +111,7 @@ impl ZkCard {
                             path: path,
                             number: ZkNumber::Alpha(name),
                             header: String::from(""),
-                            references: Vec::<PathBuf>::new(),
+                            references: Vec::<ZkRef>::new(),
                         };
                     }
                 }
@@ -120,7 +120,7 @@ impl ZkCard {
                     path: path,
                     number: ZkNumber::Invalid,
                     header: String::from(""),
-                    references: Vec::<PathBuf>::new(),
+                    references: Vec::<ZkRef>::new(),
                 }
             }
         }
