@@ -39,12 +39,13 @@ List of subcommands desired:
     - this could have subcommands just like real `ls`
         - [x], [x] patterns can be passed for matching filenames
         - [ ], [ ] `-t` for listing tags
+        - [ ], [ ] `-d <num>` for specifying a maximum depth to stop at when
+          listing numbered files.
         - [x] files which are numbered (1.1.1.md) are listed in their numerical
           order.
         - [ ] the user can specify the list a different box (via a flag or some
           other notation)
-    - subcommand for showing based on numbering in front matter.
-- search: searches for a string among files in box
+- [ ], [ ] search: searches for a string among files in box
 - [x], [x] box: for managing boxes
     - [x], [x] ls: for listing boxes (maybe this should be the default behavior if no
       subcommand is found
