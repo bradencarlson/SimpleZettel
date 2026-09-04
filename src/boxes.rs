@@ -55,7 +55,11 @@ fn create_box(matches: &ArgMatches) -> Result<(), ZkError> {
 
 fn list_boxes() -> Result<(), ZkError> {
     let zk_dir = utils::get_zk_dir()?;
-    let current = utils::get_current_box()?;
+    let current = match utils::get_current_box() {
+        Ok(p) => p,
+        Err(ZkError::NoCurrentBox) => PathBuf::new(),
+        Err(e) => { return Err(e) }
+    };
     match fs::read_dir(&zk_dir) {
         Ok(iter) => {
             for entry in iter {

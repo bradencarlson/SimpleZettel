@@ -34,7 +34,7 @@ impl HashPair {
                 match self.two {
                     Some(ref t) => {
                         o == t
-                    }, 
+                    },
                     None => false
                 }
             },
@@ -162,11 +162,11 @@ pub fn get_current_box() -> Result<PathBuf, ZkError> {
                     Ok(current)
                 },
                 Err(e) => {
-                    Err(ZkError::Other(String::from(e.to_string())))
+                    Err(ZkError::Other(String::from("I couldn't read the ~/.zk/.current file. I might need you to delete it for me.")))
                 }
             }
         },
-        Err(e) => Err(ZkError::Other(String::from(e.to_string())))
+        Err(e) => Err(ZkError::NoCurrentBox)
     }
 }
 
