@@ -43,7 +43,7 @@ List of subcommands desired:
           listing numbered files.
         - [x] files which are numbered (1.1.1.md) are listed in their numerical
           order.
-        - [ ] the user can specify the list a different box (via a flag or some
+        - [ ], [ ] the user can specify the list a different box (via a flag or some
           other notation)
 - [ ], [ ] search: searches for a string among files in box
 - [x], [x] box: for managing boxes

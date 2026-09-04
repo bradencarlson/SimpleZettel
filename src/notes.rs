@@ -390,7 +390,6 @@ fn edit_file(path: &PathBuf) -> Result<(), ZkError> {
             Ok(status) => {
                 if status.success() {
                     hashes.push_path(&path)?;
-                    println!("{:?}", hashes);
                     if hashes.equal() {
                         return Ok(())
                     }

@@ -11,7 +11,6 @@ pub fn handle_subcommand(matches: &ArgMatches) -> Result<(), ZkError> {
     match matches.subcommand() {
         Some(("ls", ssub_m)) => {
             let all = ssub_m.get_flag("all");
-            println!("{:?}", all);
             list_boxes(all)?;
         },
         Some(("add", ssub_m)) => {
