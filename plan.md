@@ -62,6 +62,7 @@ List of subcommands desired:
   Perhaps this should drop the user into some sort of 'shell', where they can
   specify a new note name to go to, or list notes. Yeah, this is a big item.
 - [x], [x] config: check config syntax, or print out that no config exists. 
+    - [ ], [x] edit: specifies the command to use when editing a note.
 
 ### Low level commands
 
