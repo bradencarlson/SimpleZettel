@@ -9,7 +9,12 @@ fn main() {
 
     let matches = args::parse_args();
 
-    config::get_config();
+    match config::get_config() {
+        Ok(_) => {}, 
+        Err(e) => {
+            error::warning(&e.to_string());
+        }
+    };
 
     match matches.subcommand() {
         Some(("box", sub_m)) => {

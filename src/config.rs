@@ -72,8 +72,10 @@ pub fn get_config() -> Result<ZkConfig, ZkError> {
 
 fn parse_table(tab: Table) -> Result<ZkConfig, ZkError> {
     let mut config = ZkConfig::new();
-    if let Some(v) = tab["show"].as_str() {
-        config.commands.show = ZkCmd::cmd(v.to_string());
+    if let Some(cmd_tab) = tab.get("commands") {
+        if let Some(c) = cmd_tab.get("show") {
+            config.commands.show = ZkCmd::cmd(c.to_string());
+        }
     }
     println!("{:?}", config);
     Ok(config)
