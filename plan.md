@@ -120,16 +120,11 @@ this is what `nb` does (a huge inspiration and a great project!)
 
 ### Listing of files
 
-This could be done based to front matter, as explained in the previous section.
-
-I could also simply use whatever argument the user passes as a regex to select
-which files to show.  This makes it the user's job to use some numbering system
-as the names of the notes.  For example, if they run `zk add 1.1.2.1`, they
-could later run something like `zk ls 1.1.*` and that note would show up.
-
-I think I like the idea of using front matter, since I believe that I would want
-to use this for links and references anyway, but I worry about the time it
-might take to process all the files in a box.
+This is done by filename. Specifically, each file name (minus the extension) is
+assumed to be of type ZkNumber, which is either a number (i.e. 1.12.3.2), a
+string (i.e. note-one), or is invalid (string cannot be parsed). Notes are then
+listed acording to the ZkNumber ordering defined in the program (numbers first,
+in order, then strings, in alphabetical order, then any invalids).
 
 ## Things that are *not* implemented
 
