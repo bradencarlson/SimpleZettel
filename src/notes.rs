@@ -9,6 +9,7 @@ use regex::Regex;
 
 use crate::error::ZkError;
 use crate::utils;
+use crate::config::{ZkConfig,ZkCmd};
 
 #[derive(PartialEq,Debug)]
 pub enum ZkNumber {
@@ -21,8 +22,20 @@ pub enum ZkNumber {
 pub struct ZkCard {
     path: PathBuf,
     number: ZkNumber,
-    header: String
+    header: String,
+    references: Vec::<ZkRef>,
+}
 
+#[derive(Debug)]
+pub enum ZkPath {
+    Path(PathBuf),
+    Invalid
+}
+
+#[derive(Debug)]
+pub struct ZkRef {
+    path: ZkPath,
+    label: String,
 }
 
 impl ZkCard {
@@ -39,7 +52,8 @@ impl ZkCard {
                         return ZkCard{
                             path: path,
                             number: ZkNumber::Invalid,
-                            header: header
+                            header: header,
+                            references: Vec::<ZkRef>::new(),
                         };
                     }
                 };
@@ -49,14 +63,16 @@ impl ZkCard {
                         return ZkCard{
                             path: path,
                             number: ZkNumber::Num(v),
-                            header: header
+                            header: header,
+                            references: Vec::<ZkRef>::new(),
                         };
                     },
                     Err(_) => {
                         return ZkCard{
                             path: path,
                             number: ZkNumber::Alpha(name),
-                            header: header
+                            header: header,
+                            references: Vec::<ZkRef>::new(),
                         };
                     }
                 }
@@ -64,7 +80,8 @@ impl ZkCard {
                 ZkCard{
                     path: path,
                     number: ZkNumber::Invalid,
-                    header: header
+                    header: header,
+                    references: Vec::<ZkRef>::new(),
                 }
             }
         } else {
@@ -75,7 +92,8 @@ impl ZkCard {
                         return ZkCard{
                             path: path,
                             number: ZkNumber::Invalid,
-                            header: String::from("")
+                            header: String::from(""),
+                            references: Vec::<ZkRef>::new(),
                         };
                     }
                 };
@@ -85,14 +103,16 @@ impl ZkCard {
                         return ZkCard{
                             path: path,
                             number: ZkNumber::Num(v),
-                            header: String::from("")
+                            header: String::from(""),
+                            references: Vec::<ZkRef>::new(),
                         };
                     },
                     Err(_) => {
                         return ZkCard{
                             path: path,
                             number: ZkNumber::Alpha(name),
-                            header: String::from("")
+                            header: String::from(""),
+                            references: Vec::<ZkRef>::new(),
                         };
                     }
                 }
@@ -100,7 +120,8 @@ impl ZkCard {
                 ZkCard{
                     path: path,
                     number: ZkNumber::Invalid,
-                    header: String::from("")
+                    header: String::from(""),
+                    references: Vec::<ZkRef>::new(),
                 }
             }
         }
@@ -254,7 +275,7 @@ pub fn add_note(matches: &ArgMatches) -> Result<(), ZkError> {
     Err(ZkError::NoteAddArgs)
 }
 
-pub fn show_note(matches: &ArgMatches) -> Result<(), ZkError> {
+pub fn show_note(matches: &ArgMatches, config: &ZkConfig) -> Result<(), ZkError> {
     if let Some(name) = matches.get_one::<String>("name") {
         let note = utils::note_path_from_name(name)?;
         match fs::exists(&note) {
@@ -264,12 +285,22 @@ pub fn show_note(matches: &ArgMatches) -> Result<(), ZkError> {
             }
             _ => {}
         };
-        if let Ok(content) = fs::read_to_string(&note) {
-            print!("{}", content);
-            Ok(())
-        } else {
-            Err(ZkError::NoteRead(note))
-        }
+        match config.commands.show {
+            ZkCmd::cmd(ref cmd) => {
+                Command::new(cmd)
+                    .arg(&note)
+                    .status();
+            },
+            ZkCmd::Invalid => {
+                if let Ok(content) = fs::read_to_string(&note) {
+                    print!("{}", content);
+                    return Ok(());
+                } else {
+                    return Err(ZkError::NoteRead(note));
+                }
+            }
+        };
+        Ok(())
     } else {
         Err(ZkError::NoName)
     }
@@ -453,6 +484,38 @@ fn get_first_header(path: &PathBuf) -> Result<String, ZkError> {
     } else {
         Err(ZkError::Access(path.to_path_buf()))
     }
+}
+
+fn get_references(path: &PathBuf) -> Result<Vec::<ZkRef>, ZkError> {
+    let mut refs = Vec::<ZkRef>::new();
+    // TODO: Perhaps this method should just assume that someone else has checked this?
+    //utils::verify_note_path(&path)?;
+    if let Ok(f) = File::open(path) {
+        let reader = BufReader::new(f);
+        let mut iter = reader.lines();
+        let reference = Regex::new(r"\[(?<linkname>[^\]]+)\]\((?<link>[^\)]+)\)").unwrap();
+        while let Some(line_result) = iter.next() {
+            if let Ok(line) = line_result {
+                if reference.is_match(&line) {
+                    let mut matches = reference.captures_iter(&line);
+                    while let Some(f_name) = matches.next() {
+                        let p: ZkPath = match utils::note_path_from_name(&f_name["link"]) {
+                            Ok(pth) => ZkPath::Path(pth),
+                            Err(_) => ZkPath::Invalid
+                        };
+                        let zkp = ZkRef {
+                            path: p,
+                            label: String::from(&f_name["linkname"]),
+                        };
+                        refs.push(zkp);
+                    }
+                }
+            }
+        }
+    } else {
+        return Err(ZkError::Access(path.to_path_buf()))
+    }
+    Ok(refs)
 }
 
 fn git_add() -> Result<(), ZkError> {

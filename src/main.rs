@@ -3,12 +3,27 @@ mod boxes;
 mod notes;
 mod utils;
 mod error;
+mod config;
+
+use crate::error::ZkError;
+use crate::config::ZkConfig;
 
 use clap::{Command,ArgMatches};
 
 fn main() {
 
     let matches = args::parse_args();
+
+    let config = match config::get_config() {
+        Ok(c) => c, 
+        Err(ZkError::ConfigNotExists) => {
+            ZkConfig::new()
+        },
+        Err(e) => {
+            error::warning(&e.to_string());
+            ZkConfig::new()
+        }
+    };
 
     match matches.subcommand() {
         Some(("box", sub_m)) => {
@@ -54,7 +69,7 @@ fn main() {
             }
         },
         Some(("show", sub_m)) => {
-            match notes::show_note(sub_m) {
+            match notes::show_note(sub_m, &config) {
                 Ok(_) => {},
                 Err(e) => {
                     error::warning(&e.to_string());
