@@ -87,7 +87,6 @@ fn parse_table(tab: Table) -> Result<ZkConfig, ZkError> {
             config.commands.edit = ZkCmd::cmd(v.to_string());
         }
     }
-    println!("{:?}", config);
     Ok(config)
 }
 
