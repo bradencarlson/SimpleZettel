@@ -51,6 +51,10 @@ pub struct ZkRef {
 impl ZkCard {
     pub fn from(path: PathBuf) -> Self {
         if let Ok(true) = fs::exists(&path) {
+            let filetype = match ft::get_filetype(&path) {
+                Ok(t) => t,
+                Err(_) => FileType::Markdown
+            };
             let header = match get_first_header(&path) {
                 Ok(s) => s,
                 Err(_) => String::from("no valid header found")
@@ -63,7 +67,7 @@ impl ZkCard {
                             path: path,
                             number: ZkNumber::Invalid,
                             header: header,
-                            kind: ZkType { filetype: FileType::Markdown },
+                            kind: ZkType { filetype: filetype },
                             references: Vec::<ZkRef>::new(),
                         };
                     }
@@ -75,7 +79,7 @@ impl ZkCard {
                             path: path,
                             number: ZkNumber::Num(v),
                             header: header,
-                            kind: ZkType { filetype: FileType::Markdown },
+                            kind: ZkType { filetype: filetype },
                             references: Vec::<ZkRef>::new(),
                         };
                     },
@@ -84,7 +88,7 @@ impl ZkCard {
                             path: path,
                             number: ZkNumber::Alpha(name),
                             header: header,
-                            kind: ZkType { filetype: FileType::Markdown },
+                            kind: ZkType { filetype: filetype },
                             references: Vec::<ZkRef>::new(),
                         };
                     }
@@ -94,7 +98,7 @@ impl ZkCard {
                     path: path,
                     number: ZkNumber::Invalid,
                     header: header,
-                    kind: ZkType { filetype: FileType::Markdown },
+                    kind: ZkType { filetype: filetype },
                     references: Vec::<ZkRef>::new(),
                 }
             }
