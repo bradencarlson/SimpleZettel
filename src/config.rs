@@ -1,4 +1,5 @@
 use std::fs;
+use std::assert_matches;
 use toml::Table;
 
 use crate::utils;
@@ -14,7 +15,7 @@ pub struct ZkCommands {
     show: ZkCmd,
 }
 
-#[derive(Debug)]
+#[derive(Debug,PartialEq)]
 pub enum ZkCmd {
     cmd(String),
     Invalid,
@@ -74,9 +75,35 @@ fn parse_table(tab: Table) -> Result<ZkConfig, ZkError> {
     let mut config = ZkConfig::new();
     if let Some(cmd_tab) = tab.get("commands") {
         if let Some(c) = cmd_tab.get("show") {
-            config.commands.show = ZkCmd::cmd(c.to_string());
+            let v = c.to_string();
+            let v = clean_value(&v);
+            config.commands.show = ZkCmd::cmd(v.to_string());
         }
     }
     println!("{:?}", config);
     Ok(config)
+}
+
+fn clean_value(v: &str) -> &str {
+    let v1 = match v.strip_prefix('"') {
+        Some(st) => st,
+        None => &v
+    };
+    let v2 = match v1.strip_suffix('"') {
+        Some(st) => st,
+        None => &v
+    };
+    v2
+}
+
+#[test]
+fn config() {
+    let c1 = "
+[commands]
+show = 'glow'
+";
+    let tab1 = c1.parse::<Table>().unwrap();
+    let conf1 = parse_table(tab1).unwrap();
+    assert_eq!(conf1.commands.show, ZkCmd::cmd(String::from("glow")));
+
 }
