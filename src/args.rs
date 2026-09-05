@@ -14,6 +14,7 @@ pub fn parse_args() -> ArgMatches {
                         .short('a')
                         .long("all")
                         .action(ArgAction::SetTrue)
+                        .help("List all boxes, even those which are not tracked")
                     )
                 )
                 .subcommand(
@@ -111,6 +112,10 @@ pub fn parse_args() -> ArgMatches {
                 .action(ArgAction::Set)
                 .help("pattern to use to match filenames")
             )
+        )
+        .subcommand(
+            Command::new("config")
+            .about("Check config file for errors")
         )
         .get_matches()
 }
