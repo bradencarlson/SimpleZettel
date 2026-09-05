@@ -319,20 +319,29 @@ pub fn edit_note(matches: &ArgMatches) -> Result<(), ZkError> {
     }
 }
 
-pub fn list_notes(matches: &ArgMatches) -> Result<(), ZkError> {
-    if let Some(pat) = matches.get_one::<String>("pattern") {
-        let r = match Regex::new(pat) {
-            Ok(p) => p,
-            Err(e) => {
-                return Err(ZkError::Other(e.to_string()));
+pub fn list_notes(m: Option<&ArgMatches>) -> Result<(), ZkError> {
+    match m {
+        Some(matches) => {
+            if let Some(pat) = matches.get_one::<String>("pattern") {
+                let r = match Regex::new(pat) {
+                    Ok(p) => p,
+                    Err(e) => {
+                        return Err(ZkError::Other(e.to_string()));
+                    }
+                };
+                list_files(&r)?;
+                Ok(())
+            } else {
+                let r = Regex::new("").unwrap();
+                list_files(&r)?;
+                Ok(())
             }
-        };
-        list_files(&r)?;
-        Ok(())
-    } else {
-        let r = Regex::new("").unwrap();
-        list_files(&r)?;
-        Ok(())
+        },
+        None => {
+            let r = Regex::new("").unwrap();
+            list_files(&r)?;
+            Ok(())
+        }
     }
 }
 

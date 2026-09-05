@@ -4,6 +4,8 @@ mod notes;
 mod utils;
 mod error;
 
+use clap::{Command,ArgMatches};
+
 fn main() {
 
     let matches = args::parse_args();
@@ -60,7 +62,7 @@ fn main() {
             }
         },
         Some(("ls", sub_m)) => {
-            match notes::list_notes(sub_m) {
+            match notes::list_notes(Some(sub_m)) {
                 Ok(_) => {},
                 Err(e) => {
                     error::warning(&e.to_string());
@@ -68,7 +70,12 @@ fn main() {
             }
         },
         _ => {
-            println!("No subcommand matched. Run with -h for help.");
+            match notes::list_notes(None) {
+                Ok(_) => {}, 
+                Err(e) => {
+                    error::warning(&e.to_string());
+                }
+            }
         }
     };
 
