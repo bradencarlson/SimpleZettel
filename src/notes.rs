@@ -23,7 +23,18 @@ pub struct ZkCard {
     path: PathBuf,
     number: ZkNumber,
     header: String,
+    kind: ZkType,
     references: Vec::<ZkRef>,
+}
+
+#[derive(Debug)]
+pub struct ZkType {
+    filetype: FileType
+}
+
+#[derive(Debug)]
+pub enum FileType {
+    Markdown,
 }
 
 #[derive(Debug)]
@@ -53,6 +64,7 @@ impl ZkCard {
                             path: path,
                             number: ZkNumber::Invalid,
                             header: header,
+                            kind: ZkType { filetype: FileType::Markdown },
                             references: Vec::<ZkRef>::new(),
                         };
                     }
@@ -64,6 +76,7 @@ impl ZkCard {
                             path: path,
                             number: ZkNumber::Num(v),
                             header: header,
+                            kind: ZkType { filetype: FileType::Markdown },
                             references: Vec::<ZkRef>::new(),
                         };
                     },
@@ -72,6 +85,7 @@ impl ZkCard {
                             path: path,
                             number: ZkNumber::Alpha(name),
                             header: header,
+                            kind: ZkType { filetype: FileType::Markdown },
                             references: Vec::<ZkRef>::new(),
                         };
                     }
@@ -81,6 +95,7 @@ impl ZkCard {
                     path: path,
                     number: ZkNumber::Invalid,
                     header: header,
+                    kind: ZkType { filetype: FileType::Markdown },
                     references: Vec::<ZkRef>::new(),
                 }
             }
@@ -93,6 +108,7 @@ impl ZkCard {
                             path: path,
                             number: ZkNumber::Invalid,
                             header: String::from(""),
+                            kind: ZkType { filetype: FileType::Markdown },
                             references: Vec::<ZkRef>::new(),
                         };
                     }
@@ -104,6 +120,7 @@ impl ZkCard {
                             path: path,
                             number: ZkNumber::Num(v),
                             header: String::from(""),
+                            kind: ZkType { filetype: FileType::Markdown },
                             references: Vec::<ZkRef>::new(),
                         };
                     },
@@ -112,6 +129,7 @@ impl ZkCard {
                             path: path,
                             number: ZkNumber::Alpha(name),
                             header: String::from(""),
+                            kind: ZkType { filetype: FileType::Markdown },
                             references: Vec::<ZkRef>::new(),
                         };
                     }
@@ -121,6 +139,7 @@ impl ZkCard {
                     path: path,
                     number: ZkNumber::Invalid,
                     header: String::from(""),
+                    kind: ZkType { filetype: FileType::Markdown },
                     references: Vec::<ZkRef>::new(),
                 }
             }
