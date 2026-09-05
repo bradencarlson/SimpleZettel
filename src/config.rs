@@ -7,12 +7,13 @@ use crate::error::ZkError;
 
 #[derive(Debug)]
 pub struct ZkConfig {
-    commands: ZkCommands,
+    pub commands: ZkCommands,
 }
 
 #[derive(Debug)]
 pub struct ZkCommands {
-    show: ZkCmd,
+    pub show: ZkCmd,
+    pub edit: ZkCmd,
 }
 
 #[derive(Debug,PartialEq)]
@@ -32,7 +33,8 @@ impl ZkConfig {
 impl ZkCommands {
     pub fn new() -> Self {
         ZkCommands {
-            show: ZkCmd::new()
+            show: ZkCmd::new(),
+            edit: ZkCmd::new()
         }
     }
 }
@@ -62,7 +64,7 @@ pub fn get_config() -> Result<ZkConfig, ZkError> {
                 return Ok(parse_table(tab)?);
             },
             Err(e) => {
-                return Err(ZkError::ConfigError(s.to_string()));
+                return Err(ZkError::ConfigError);
             }
         };
 
@@ -78,6 +80,11 @@ fn parse_table(tab: Table) -> Result<ZkConfig, ZkError> {
             let v = c.to_string();
             let v = clean_value(&v);
             config.commands.show = ZkCmd::cmd(v.to_string());
+        }
+        if let Some(c) = cmd_tab.get("edit") {
+            let v = c.to_string();
+            let v = clean_value(&v);
+            config.commands.edit = ZkCmd::cmd(v.to_string());
         }
     }
     println!("{:?}", config);
@@ -105,5 +112,16 @@ show = 'glow'
     let tab1 = c1.parse::<Table>().unwrap();
     let conf1 = parse_table(tab1).unwrap();
     assert_eq!(conf1.commands.show, ZkCmd::cmd(String::from("glow")));
+
+    let c2 = "
+[commands]
+show = 'glow'
+edit = 'vim'
+";
+    let tab2 = c2.parse::<Table>().unwrap();
+    let conf2 = parse_table(tab2).unwrap();
+    assert_eq!(conf2.commands.show, ZkCmd::cmd(String::from("glow")));
+    assert_eq!(conf2.commands.edit, ZkCmd::cmd(String::from("vim")));
+
 
 }

@@ -5,14 +5,21 @@ mod utils;
 mod error;
 mod config;
 
+use crate::error::ZkError;
+use crate::config::ZkConfig;
+
 fn main() {
 
     let matches = args::parse_args();
 
-    match config::get_config() {
-        Ok(_) => {}, 
+    let config = match config::get_config() {
+        Ok(c) => c, 
+        Err(ZkError::ConfigNotExists) => {
+            ZkConfig::new()
+        },
         Err(e) => {
             error::warning(&e.to_string());
+            ZkConfig::new()
         }
     };
 
@@ -60,7 +67,7 @@ fn main() {
             }
         },
         Some(("show", sub_m)) => {
-            match notes::show_note(sub_m) {
+            match notes::show_note(sub_m, &config) {
                 Ok(_) => {},
                 Err(e) => {
                     error::warning(&e.to_string());

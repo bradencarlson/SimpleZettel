@@ -9,6 +9,7 @@ use regex::Regex;
 
 use crate::error::ZkError;
 use crate::utils;
+use crate::config::{ZkConfig,ZkCmd};
 
 #[derive(PartialEq,Debug)]
 pub enum ZkNumber {
@@ -274,7 +275,7 @@ pub fn add_note(matches: &ArgMatches) -> Result<(), ZkError> {
     Err(ZkError::NoteAddArgs)
 }
 
-pub fn show_note(matches: &ArgMatches) -> Result<(), ZkError> {
+pub fn show_note(matches: &ArgMatches, config: &ZkConfig) -> Result<(), ZkError> {
     if let Some(name) = matches.get_one::<String>("name") {
         let note = utils::note_path_from_name(name)?;
         match fs::exists(&note) {
@@ -284,16 +285,22 @@ pub fn show_note(matches: &ArgMatches) -> Result<(), ZkError> {
             }
             _ => {}
         };
-        if let Ok(content) = fs::read_to_string(&note) {
-            print!("{}", content);
-            // TODO: This was added for debuging purposes
-            if let Ok(v) = get_references(&note) {
-                println!("{:?}", v);
+        match config.commands.show {
+            ZkCmd::cmd(ref cmd) => {
+                Command::new(cmd)
+                    .arg(&note)
+                    .status();
+            },
+            ZkCmd::Invalid => {
+                if let Ok(content) = fs::read_to_string(&note) {
+                    print!("{}", content);
+                    return Ok(());
+                } else {
+                    return Err(ZkError::NoteRead(note));
+                }
             }
-            Ok(())
-        } else {
-            Err(ZkError::NoteRead(note))
-        }
+        };
+        Ok(())
     } else {
         Err(ZkError::NoName)
     }
