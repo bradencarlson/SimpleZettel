@@ -11,6 +11,9 @@ use crate::error::ZkError;
 use crate::utils;
 use crate::config::{ZkConfig,ZkCmd};
 
+mod ft;
+use ft::FileType;
+
 #[derive(PartialEq,Debug)]
 pub enum ZkNumber {
     Num(Vec::<usize>),
@@ -32,10 +35,6 @@ pub struct ZkType {
     filetype: FileType
 }
 
-#[derive(Debug)]
-pub enum FileType {
-    Markdown,
-}
 
 #[derive(Debug)]
 pub enum ZkPath {

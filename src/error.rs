@@ -1,4 +1,5 @@
 use std::fmt;
+use std::io;
 use std::path::PathBuf;
 
 use anstream::println;
@@ -75,6 +76,12 @@ impl fmt::Display for ZkError {
 }
 
 impl std::error::Error for ZkError {}
+
+impl From<io::Error> for ZkError {
+    fn from(value: io::Error) -> Self {
+        ZkError::Other(value.to_string())
+    }
+}
 
 pub fn critical(msg: &str) {
     let red = anstyle::Style::new().fg_color(Some(anstyle::AnsiColor::Red.into())).bold();
