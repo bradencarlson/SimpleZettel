@@ -3,10 +3,13 @@ mod boxes;
 mod notes;
 mod utils;
 mod error;
+mod config;
 
 fn main() {
 
     let matches = args::parse_args();
+
+    config::get_config();
 
     match matches.subcommand() {
         Some(("box", sub_m)) => {
