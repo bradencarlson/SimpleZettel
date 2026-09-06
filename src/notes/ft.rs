@@ -3,6 +3,8 @@ use std::fs::File;
 use std::io::Read;
 
 use crate::error::ZkError;
+use crate::notes::ZkCard;
+use crate::config::ZkConfig;
 
 #[derive(Debug)]
 pub enum FileType {
@@ -30,4 +32,8 @@ pub fn get_filetype(path: &Path) -> Result<FileType, ZkError> {
         return Err(ZkError::NoteRead(path.to_path_buf()));
     }
     Ok(FileType::Markdown)
+}
+
+pub fn show_note(card: &ZkCard, config: &ZkConfig) -> Result<(), ZkError> {
+    Ok(())
 }

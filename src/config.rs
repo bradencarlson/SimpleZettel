@@ -5,43 +5,27 @@ use toml::Table;
 use crate::utils;
 use crate::error::ZkError;
 
-#[derive(Debug)]
+#[derive(Debug,Default)]
 pub struct ZkConfig {
-    pub commands: ZkCommands,
+    pub show: ZkCommands,
 }
 
-#[derive(Debug)]
+#[derive(Debug,Default)]
 pub struct ZkCommands {
-    pub show: ZkCmd,
-    pub edit: ZkCmd,
+    pub md: ZkCmd,
+    pub pdf: ZkCmd,
 }
 
-#[derive(Debug,PartialEq)]
+#[derive(Debug,PartialEq,Default)]
 pub enum ZkCmd {
     cmd(String),
+    #[default]
     Invalid,
 }
 
 impl ZkConfig {
     pub fn new() -> Self {
-        ZkConfig {
-            commands: ZkCommands::new()
-        }
-    }
-}
-
-impl ZkCommands {
-    pub fn new() -> Self {
-        ZkCommands {
-            show: ZkCmd::new(),
-            edit: ZkCmd::new()
-        }
-    }
-}
-
-impl ZkCmd {
-    pub fn new() -> Self {
-        ZkCmd::Invalid
+        Default::default()
     }
 }
 
@@ -75,16 +59,16 @@ pub fn get_config() -> Result<ZkConfig, ZkError> {
 
 fn parse_table(tab: Table) -> Result<ZkConfig, ZkError> {
     let mut config = ZkConfig::new();
-    if let Some(cmd_tab) = tab.get("commands") {
-        if let Some(c) = cmd_tab.get("show") {
+    if let Some(cmd_tab) = tab.get("show") {
+        if let Some(c) = cmd_tab.get("md") {
             let v = c.to_string();
             let v = clean_value(&v);
-            config.commands.show = ZkCmd::cmd(v.to_string());
+            config.show.md = ZkCmd::cmd(v.to_string());
         }
-        if let Some(c) = cmd_tab.get("edit") {
+        if let Some(c) = cmd_tab.get("pdf") {
             let v = c.to_string();
             let v = clean_value(&v);
-            config.commands.edit = ZkCmd::cmd(v.to_string());
+            config.show.pdf = ZkCmd::cmd(v.to_string());
         }
     }
     Ok(config)
@@ -105,22 +89,22 @@ fn clean_value(v: &str) -> &str {
 #[test]
 fn config() {
     let c1 = "
-[commands]
-show = 'glow'
+[show]
+md = 'glow'
 ";
     let tab1 = c1.parse::<Table>().unwrap();
     let conf1 = parse_table(tab1).unwrap();
-    assert_eq!(conf1.commands.show, ZkCmd::cmd(String::from("glow")));
+    assert_eq!(conf1.show.md, ZkCmd::cmd(String::from("glow")));
 
     let c2 = "
-[commands]
-show = 'glow'
-edit = 'vim'
+[show]
+md = 'glow'
+pdf = 'sioyek'
 ";
     let tab2 = c2.parse::<Table>().unwrap();
     let conf2 = parse_table(tab2).unwrap();
-    assert_eq!(conf2.commands.show, ZkCmd::cmd(String::from("glow")));
-    assert_eq!(conf2.commands.edit, ZkCmd::cmd(String::from("vim")));
+    assert_eq!(conf2.show.md, ZkCmd::cmd(String::from("glow")));
+    assert_eq!(conf2.show.pdf, ZkCmd::cmd(String::from("sioyek")));
 
 
 }

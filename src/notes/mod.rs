@@ -304,7 +304,7 @@ pub fn show_note(matches: &ArgMatches, config: &ZkConfig) -> Result<(), ZkError>
         // appropriate command.
         println!("Filetype detection enabled, but not used yet.");
         
-        match config.commands.show {
+        match config.show.md {
             ZkCmd::cmd(ref cmd) => {
                 Command::new(cmd)
                     .arg(&note.path)
