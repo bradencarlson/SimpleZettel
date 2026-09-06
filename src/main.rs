@@ -15,7 +15,7 @@ fn main() {
     let matches = args::parse_args();
 
     let config = match config::get_config() {
-        Ok(c) => c, 
+        Ok(c) => c,
         Err(ZkError::ConfigNotExists) => {
             ZkConfig::new()
         },
@@ -84,9 +84,28 @@ fn main() {
                 }
             }
         },
+        Some(("config", _sub_m)) => {
+            let check = match config::get_config() {
+                Ok(c) => {
+                    error::info("config check passed");
+                },
+                Err(ZkError::ConfigNotExists) => {
+                    error::info("no config file found");
+                },
+                Err(ZkError::ConfigRead) => {
+                    error::warning("config file exists but cannot be read");
+                },
+                Err(ZkError::ConfigError) => {
+                    error::warning("there are errors in the config file");
+                },
+                Err(e) => {
+                    error::warning(&e.to_string());
+                }
+            };
+        },
         _ => {
             match notes::list_notes(None) {
-                Ok(_) => {}, 
+                Ok(_) => {},
                 Err(e) => {
                     error::warning(&e.to_string());
                 }

@@ -61,8 +61,9 @@ List of subcommands desired:
   so the user can go down a sequence like 1.1 -> 1.1.1 -> 1.1.5 -> 1.1.5.2
   Perhaps this should drop the user into some sort of 'shell', where they can
   specify a new note name to go to, or list notes. Yeah, this is a big item.
-- [ ], [ ] config: check config syntax, or print out that no config exists. 
 - [ ], [ ] import: copy a file into the box directory.
+- [x], [x] config: check config syntax, or print out that no config exists. 
+    - [ ], [x] edit: specifies the command to use when editing a note.
 
 ### Low level commands
 
