@@ -11,7 +11,7 @@ use crate::error::ZkError;
 use crate::utils;
 use crate::config::{ZkConfig,ZkCmd};
 
-mod ft;
+pub mod ft;
 use ft::FileType;
 
 #[derive(PartialEq,Debug)]
@@ -26,15 +26,9 @@ pub struct ZkCard {
     path: PathBuf,
     number: ZkNumber,
     header: String,
-    kind: ZkType,
+    filetype: FileType,
     references: Vec::<ZkRef>,
 }
-
-#[derive(Debug)]
-pub struct ZkType {
-    filetype: FileType
-}
-
 
 #[derive(Debug)]
 pub enum ZkPath {
@@ -69,7 +63,7 @@ impl From<PathBuf> for ZkCard {
                             path: path,
                             number: ZkNumber::Invalid,
                             header: header,
-                            kind: ZkType { filetype: filetype },
+                            filetype: filetype,
                             references: Vec::<ZkRef>::new(),
                         };
                     }
@@ -81,7 +75,7 @@ impl From<PathBuf> for ZkCard {
                             path: path,
                             number: ZkNumber::Num(v),
                             header: header,
-                            kind: ZkType { filetype: filetype },
+                            filetype: filetype,
                             references: Vec::<ZkRef>::new(),
                         };
                     },
@@ -90,7 +84,7 @@ impl From<PathBuf> for ZkCard {
                             path: path,
                             number: ZkNumber::Alpha(name),
                             header: header,
-                            kind: ZkType { filetype: filetype },
+                            filetype: filetype,
                             references: Vec::<ZkRef>::new(),
                         };
                     }
@@ -100,7 +94,7 @@ impl From<PathBuf> for ZkCard {
                     path: path,
                     number: ZkNumber::Invalid,
                     header: header,
-                    kind: ZkType { filetype: filetype },
+                    filetype: FileType::Markdown,
                     references: Vec::<ZkRef>::new(),
                 }
             }
@@ -113,7 +107,7 @@ impl From<PathBuf> for ZkCard {
                             path: path,
                             number: ZkNumber::Invalid,
                             header: String::from(""),
-                            kind: ZkType { filetype: FileType::Markdown },
+                            filetype: FileType::Markdown,
                             references: Vec::<ZkRef>::new(),
                         };
                     }
@@ -125,7 +119,7 @@ impl From<PathBuf> for ZkCard {
                             path: path,
                             number: ZkNumber::Num(v),
                             header: String::from(""),
-                            kind: ZkType { filetype: FileType::Markdown },
+                            filetype: FileType::Markdown,
                             references: Vec::<ZkRef>::new(),
                         };
                     },
@@ -134,7 +128,7 @@ impl From<PathBuf> for ZkCard {
                             path: path,
                             number: ZkNumber::Alpha(name),
                             header: String::from(""),
-                            kind: ZkType { filetype: FileType::Markdown },
+                            filetype: FileType::Markdown,
                             references: Vec::<ZkRef>::new(),
                         };
                     }
@@ -144,7 +138,7 @@ impl From<PathBuf> for ZkCard {
                     path: path,
                     number: ZkNumber::Invalid,
                     header: String::from(""),
-                    kind: ZkType { filetype: FileType::Markdown },
+                    filetype: FileType::Markdown,
                     references: Vec::<ZkRef>::new(),
                 }
             }
@@ -263,7 +257,7 @@ impl std::cmp::Ord for ZkCard {
 
 pub fn add_note(matches: &ArgMatches) -> Result<(), ZkError> {
     if let Some(name) = matches.get_one::<String>("name") {
-        let file = utils::note_path_from_name(name)?;
+        let file = utils::note_path_from_name(name, None)?;
         match fs::exists(&file) {
             Ok(true) => {
                 return Err(ZkError::NoteExists);
@@ -282,7 +276,7 @@ pub fn add_note(matches: &ArgMatches) -> Result<(), ZkError> {
     }
     if let Some(num) = matches.get_one::<String>("number") {
         parse_number(&num)?;
-        let file = utils::note_path_from_name(num)?;
+        let file = utils::note_path_from_name(num, None)?;
         match fs::exists(&file) {
             Ok(true) => {
                 return Err(ZkError::NoteExists);
@@ -304,7 +298,7 @@ pub fn add_note(matches: &ArgMatches) -> Result<(), ZkError> {
 
 pub fn show_note(matches: &ArgMatches, config: &ZkConfig) -> Result<(), ZkError> {
     if let Some(name) = matches.get_one::<String>("name") {
-        let note = utils::note_path_from_name(name)?;
+        let note = utils::note_path_from_name(name, None)?;
         utils::note_exists(&note)?;
         match config.commands.show {
             ZkCmd::cmd(ref cmd) => {
@@ -329,7 +323,7 @@ pub fn show_note(matches: &ArgMatches, config: &ZkConfig) -> Result<(), ZkError>
 
 pub fn rm_note(matches: &ArgMatches) -> Result<(), ZkError> {
     if let Some(name) = matches.get_one::<String>("name") {
-        let note = utils::note_path_from_name(name)?;
+        let note = utils::note_path_from_name(name, None)?;
         if utils::note_exists(&note)? {
             match fs::remove_file(&note) {
                 Ok(()) => {
@@ -350,7 +344,7 @@ pub fn rm_note(matches: &ArgMatches) -> Result<(), ZkError> {
 
 pub fn edit_note(matches: &ArgMatches) -> Result<(), ZkError> {
     if let Some(name) = matches.get_one::<String>("name") {
-        let note = utils::note_path_from_name(name)?;
+        let note = utils::note_path_from_name(name, None)?;
         if utils::note_exists(&note)? {
             edit_file(&note)?;
         };
@@ -424,7 +418,7 @@ fn list_files(pat: &Regex) -> Result<(), ZkError> {
     };
     let blue = anstyle::Style::new().fg_color(Some(anstyle::AnsiColor::Blue.into())).bold();
     for file in files.iter() {
-        println!("{blue}{}{blue:#}{}", file.format_number(max), file.header);
+        println!("{:?} {blue}{}{blue:#}{}", file.filetype, file.format_number(max), file.header);
     }
     Ok(())
 }
@@ -509,7 +503,7 @@ fn get_references(path: &PathBuf) -> Result<Vec::<ZkRef>, ZkError> {
                 if reference.is_match(&line) {
                     let mut matches = reference.captures_iter(&line);
                     while let Some(f_name) = matches.next() {
-                        let p: ZkPath = match utils::note_path_from_name(&f_name["link"]) {
+                        let p: ZkPath = match utils::note_path_from_name(&f_name["link"], None) {
                             Ok(pth) => ZkPath::Path(pth),
                             Err(_) => ZkPath::Invalid
                         };

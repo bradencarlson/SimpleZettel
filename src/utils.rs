@@ -6,6 +6,7 @@ use std::assert_matches;
 use std::path::{Path, PathBuf};
 
 use crate::error::ZkError;
+use crate::notes::ft::FileType;
 
 #[derive(Debug)]
 pub struct HashPair {
@@ -103,15 +104,19 @@ pub fn path_from_name(name: &str) -> Result<PathBuf, ZkError> {
     }
 }
 
-pub fn note_path_from_name(name: &str) -> Result<PathBuf, ZkError> {
+pub fn note_path_from_name(name: &str, filetype: Option<FileType>) -> Result<PathBuf, ZkError> {
+    let extension: String = match filetype {
+        Some(ft) => ft.get_ext(),
+        None => String::from("md")
+    };
     let mut file = get_current_box()?;
     file.push(name);
     if let Some(ext) = file.extension() {
-        if ext == "md" {
+        if *ext == *extension {
             return Ok(file);
         }
     }
-    file.add_extension("md");
+    file.add_extension(extension);
     Ok(file)
 }
 
