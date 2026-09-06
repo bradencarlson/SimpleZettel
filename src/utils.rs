@@ -1,12 +1,14 @@
 use std::env;
 use std::fs;
 use std::io;
+use std::fs::{DirEntry};
 use std::hash::{DefaultHasher, Hash, Hasher};
 use std::assert_matches;
 use std::path::{Path, PathBuf};
 
 use crate::error::ZkError;
 use crate::notes::ft::FileType;
+use crate::notes::ZkCard;
 
 #[derive(Debug)]
 pub struct HashPair {
@@ -118,6 +120,56 @@ pub fn note_path_from_name(name: &str, filetype: Option<FileType>) -> Result<Pat
     }
     file.add_extension(extension);
     Ok(file)
+}
+
+pub fn zkcard_from_name(name: &str) -> Result<ZkCard, ZkError> {
+    let path = get_current_box()?;
+    if let Ok(iter) = fs::read_dir(&path) {
+        for entry in iter {
+            let fname = get_filename(&entry)?;
+            let p = get_filepath(&entry)?;
+            if fname.starts_with(name) {
+                return Ok(ZkCard::from(p.to_path_buf()));
+            }
+        }
+    } else {
+        return Err(ZkError::Other(String::from("could not open current box")));
+    }
+    Err(ZkError::NoteNotExists)
+}
+
+fn get_filename(entry: &io::Result<DirEntry>) -> Result<String, ZkError> {
+    match entry {
+        Ok(ent) => {
+            let path = ent.path();
+            if let Some(name) = path.file_name() {
+                match name.to_str() {
+                    Some(n) => {
+                        Ok(n.to_string())
+                    }, 
+                    None => {
+                        Err(ZkError::Other(String::from("failed to get note name")))
+                    }
+                }
+            } else {
+                Err(ZkError::Other(String::from("failed to get note name")))
+            }
+        },
+        Err(_) => {
+            Err(ZkError::Other(String::from("something went wrong wile reading box directory")))
+        }
+    }
+}
+
+fn get_filepath(entry: &io::Result<DirEntry>) -> Result<PathBuf, ZkError> {
+    match entry {
+        Ok(ent) => {
+            Ok(ent.path())
+        },
+        Err(_) => {
+            Err(ZkError::Other(String::from("something went wrong wile reading box directory")))
+        }
+    }
 }
 
 pub fn get_zk_dir() -> Result<PathBuf, ZkError> {
