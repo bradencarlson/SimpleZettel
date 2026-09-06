@@ -62,6 +62,7 @@ List of subcommands desired:
   Perhaps this should drop the user into some sort of 'shell', where they can
   specify a new note name to go to, or list notes. Yeah, this is a big item.
 - [ ], [ ] config: check config syntax, or print out that no config exists. 
+- [ ], [ ] import: copy a file into the box directory.
 
 ### Low level commands
 
