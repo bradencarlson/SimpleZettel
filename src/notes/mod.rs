@@ -45,8 +45,8 @@ pub struct ZkRef {
 impl From<PathBuf> for ZkCard {
     fn from(path: PathBuf) -> Self {
         if let Ok(true) = fs::exists(&path) {
-            //let mut filetype = FileType::Markdown;
-            //#[cfg(feature = "filetypes")]
+            let mut filetype = FileType::Markdown;
+            #[cfg(feature = "filetypes")]
             let filetype = match ft::get_filetype(&path) {
                 Ok(t) => t,
                 Err(_) => FileType::Markdown
