@@ -48,9 +48,11 @@ pub struct ZkRef {
     label: String,
 }
 
-impl ZkCard {
-    pub fn from(path: PathBuf) -> Self {
+impl From<PathBuf> for ZkCard {
+    fn from(path: PathBuf) -> Self {
         if let Ok(true) = fs::exists(&path) {
+            //let mut filetype = FileType::Markdown;
+            //#[cfg(feature = "filetypes")]
             let filetype = match ft::get_filetype(&path) {
                 Ok(t) => t,
                 Err(_) => FileType::Markdown
@@ -148,6 +150,9 @@ impl ZkCard {
             }
         }
     }
+}
+
+impl ZkCard {
     pub fn get_number_length(&self) -> usize {
         match self.number {
             ZkNumber::Num(ref v) => 2*v.len() - 1,
@@ -300,13 +305,7 @@ pub fn add_note(matches: &ArgMatches) -> Result<(), ZkError> {
 pub fn show_note(matches: &ArgMatches, config: &ZkConfig) -> Result<(), ZkError> {
     if let Some(name) = matches.get_one::<String>("name") {
         let note = utils::note_path_from_name(name)?;
-        match fs::exists(&note) {
-            Ok(true) => {},
-            Ok(false) => {
-                return Err(ZkError::NoteNotExists);
-            }
-            _ => {}
-        };
+        utils::note_exists(&note)?;
         match config.commands.show {
             ZkCmd::cmd(ref cmd) => {
                 Command::new(cmd)
@@ -331,21 +330,18 @@ pub fn show_note(matches: &ArgMatches, config: &ZkConfig) -> Result<(), ZkError>
 pub fn rm_note(matches: &ArgMatches) -> Result<(), ZkError> {
     if let Some(name) = matches.get_one::<String>("name") {
         let note = utils::note_path_from_name(name)?;
-        match fs::exists(&note) {
-            Ok(true) => {
-                match fs::remove_file(&note) {
-                    Ok(()) => {
-                        println!("succesfully removed note");
-                        Ok(())
-                    },
-                    Err(_e) => {
-                        Err(ZkError::Other(String::from("could not remove note")))
-                    }
+        if utils::note_exists(&note)? {
+            match fs::remove_file(&note) {
+                Ok(()) => {
+                    println!("succesfully removed note");
+                    Ok(())
+                },
+                Err(_e) => {
+                    Err(ZkError::Other(String::from("could not remove note")))
                 }
-            },
-            _ => {
-                Err(ZkError::NoteNotExists)
             }
+        } else {
+            return Err(ZkError::NoteNotExists);
         }
     } else {
         Err(ZkError::NoName)
@@ -355,18 +351,10 @@ pub fn rm_note(matches: &ArgMatches) -> Result<(), ZkError> {
 pub fn edit_note(matches: &ArgMatches) -> Result<(), ZkError> {
     if let Some(name) = matches.get_one::<String>("name") {
         let note = utils::note_path_from_name(name)?;
-        match fs::exists(&note) {
-            Ok(true) => {
-                edit_file(&note)?;
-                return Ok(())
-            },
-            Ok(false) => {
-                return Err(ZkError::NoteNotExists)
-            },
-            Err(_) => {
-                return Err(ZkError::Other(String::from("Could not check existence of note")))
-            }
-        }
+        if utils::note_exists(&note)? {
+            edit_file(&note)?;
+        };
+        Ok(())
     } else {
         Err(ZkError::NoName)
     }

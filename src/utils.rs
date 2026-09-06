@@ -175,6 +175,15 @@ pub fn get_current_box() -> Result<PathBuf, ZkError> {
     }
 }
 
+pub fn note_exists(note: &Path) -> Result<bool, ZkError> {
+    match fs::exists(&note)? {
+        true => {Ok(true)},
+        false => {
+            return Err(ZkError::NoteNotExists);
+        }
+    }
+}
+
 #[test]
 fn valid_path() {
     if let Some(mut path) = env::home_dir() {
