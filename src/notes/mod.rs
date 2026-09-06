@@ -347,19 +347,15 @@ pub fn show_note(matches: &ArgMatches, config: &ZkConfig) -> Result<(), ZkError>
 
 pub fn rm_note(matches: &ArgMatches) -> Result<(), ZkError> {
     if let Some(name) = matches.get_one::<String>("name") {
-        let note = utils::note_path_from_name(name, None)?;
-        if utils::note_exists(&note)? {
-            match fs::remove_file(&note) {
-                Ok(()) => {
-                    println!("succesfully removed note");
-                    Ok(())
-                },
-                Err(_e) => {
-                    Err(ZkError::Other(String::from("could not remove note")))
-                }
+        let note = utils::zkcard_from_name(name)?;
+        match fs::remove_file(&note.path) {
+            Ok(()) => {
+                println!("succesfully removed note");
+                Ok(())
+            },
+            Err(_e) => {
+                Err(ZkError::Other(String::from("could not remove note")))
             }
-        } else {
-            return Err(ZkError::NoteNotExists);
         }
     } else {
         Err(ZkError::NoName)
