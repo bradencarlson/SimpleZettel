@@ -178,6 +178,14 @@ impl ZkCard {
             ZkNumber::Invalid => s
         }
     }
+    pub fn filetype_prefix(&self) -> String {
+        #[cfg(feature = "filetypes")]
+        return match self.filetype {
+            FileType::Markdown => "    ".to_string(),
+            FileType::PDF => "(d) ".to_string(),
+        };
+        String::new()
+    }
 }
 
 impl std::fmt::Display for ZkCard {
@@ -434,7 +442,7 @@ fn list_files(pat: &Regex) -> Result<(), ZkError> {
     };
     let blue = anstyle::Style::new().fg_color(Some(anstyle::AnsiColor::Blue.into())).bold();
     for file in files.iter() {
-        println!("{:?} {blue}{}{blue:#}{}", file.filetype, file.format_number(max), file.header);
+        println!("{}{blue}{}{blue:#}{}", file.filetype_prefix(), file.format_number(max), file.header);
     }
     Ok(())
 }
