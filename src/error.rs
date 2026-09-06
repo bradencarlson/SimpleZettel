@@ -34,6 +34,7 @@ pub enum ZkError {
     NoteNotExists,
     NoteNumber,
     NoteRead(PathBuf),
+    NoteShow(PathBuf),
     Other(String),
     TrackFail,
 }
@@ -69,6 +70,7 @@ impl fmt::Display for ZkError {
             ZkError::NoteNotExists => write!(f, "note does not exist"),
             ZkError::NoteNumber => write!(f, "invalid note number"),
             ZkError::NoteRead(path) => write!(f, "failed to read note: {}", path.display()),
+            ZkError::NoteShow(path) => write!(f, "failed to show note: {}", path.display()),
             ZkError::Other(msg) => write!(f, "{}", msg),
             ZkError::TrackFail => write!(f, "failed to track box"),
         }

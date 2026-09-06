@@ -1,10 +1,13 @@
 use std::path::Path;
 use std::fs::File;
+use std::fs;
 use std::io::Read;
+use std::process::Command;
 
 use crate::error::ZkError;
 use crate::notes::ZkCard;
 use crate::config::ZkConfig;
+use crate::config::ZkCmd;
 
 #[derive(Debug)]
 pub enum FileType {
@@ -35,5 +38,38 @@ pub fn get_filetype(path: &Path) -> Result<FileType, ZkError> {
 }
 
 pub fn show_note(card: &ZkCard, config: &ZkConfig) -> Result<(), ZkError> {
-    Ok(())
+    match card.filetype {
+        FileType::Markdown => {
+            match config.show.md {
+                ZkCmd::cmd(ref cmd) => {
+                    Command::new(cmd)
+                        .arg(&card.path)
+                        .status();
+                    return Ok(());
+                }, 
+                ZkCmd::Invalid => {
+                    if let Ok(s) = fs::read_to_string(&card.path) {
+                        println!("{}", s);
+                        return Ok(());
+                    } else {
+                        return Err(ZkError::NoteRead(card.path.clone()));
+                    }
+                }
+            };
+        },
+        FileType::PDF => {
+            match config.show.pdf {
+                ZkCmd::cmd(ref cmd) => {
+                    Command::new(cmd)
+                        .arg(&card.path)
+                        .status();
+                    return Ok(());
+                },
+                ZkCmd::Invalid => {
+                    println!("No default command for showing pdf documents.");
+                    return Ok(());
+                }
+            }
+        }
+    }
 }

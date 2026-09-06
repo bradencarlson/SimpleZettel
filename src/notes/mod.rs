@@ -300,15 +300,27 @@ pub fn show_note(matches: &ArgMatches, config: &ZkConfig) -> Result<(), ZkError>
     if let Some(name) = matches.get_one::<String>("name") {
         let note = utils::zkcard_from_name(name)?;
         #[cfg(feature = "filetypes")]
-        // TODO: add ft::show_note method which takes in a zkcard, and a ZkConfig and performs the
-        // appropriate command.
-        println!("Filetype detection enabled, but not used yet.");
+        match ft::show_note(&note, config) {
+            Ok(()) => {return Ok(());},
+            Err(e) => {return Err(e);}
+        };
         
         match config.show.md {
             ZkCmd::cmd(ref cmd) => {
-                Command::new(cmd)
+                match Command::new(cmd)
                     .arg(&note.path)
-                    .status();
+                    .status() {
+                        Ok(status) => {
+                            if status.success() {
+                                return Ok(());
+                            } else {
+                                return Err(ZkError::NoteShow(note.path));
+                            }
+                        },
+                        Err(e) => {
+                            return Err(e.into());
+                        }
+                }
             },
             ZkCmd::Invalid => {
                 if let Ok(content) = fs::read_to_string(&note.path) {
