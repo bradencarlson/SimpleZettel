@@ -103,6 +103,9 @@ fn main() {
                 }
             };
         },
+        Some(("import", _sub_m)) => {
+            println!("import command detected.");
+        }
         _ => {
             match notes::list_notes(None) {
                 Ok(_) => {},

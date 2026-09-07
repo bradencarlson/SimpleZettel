@@ -117,5 +117,14 @@ pub fn parse_args() -> ArgMatches {
             Command::new("config")
             .about("Check config file for errors")
         )
+        .subcommand(
+            Command::new("import")
+            .about("Copy a file to the current box")
+            .arg(
+                Arg::new("path")
+                .required(true)
+                .help("path of the file to import")
+            )
+        )
         .get_matches()
 }
