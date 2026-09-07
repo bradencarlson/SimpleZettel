@@ -103,8 +103,15 @@ fn main() {
                 }
             };
         },
-        Some(("import", _sub_m)) => {
-            println!("import command detected.");
+        Some(("import", sub_m)) => {
+            match notes::import_file(&sub_m) {
+                Ok(_) => {
+                    println!("file successfully imported to current box");
+                },
+                Err(e) => {
+                    error::warning(&e.to_string());
+                }
+            };
         }
         _ => {
             match notes::list_notes(None) {

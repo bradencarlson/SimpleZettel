@@ -374,6 +374,39 @@ pub fn edit_note(matches: &ArgMatches) -> Result<(), ZkError> {
     }
 }
 
+pub fn import_file(m: &ArgMatches) -> Result<(), ZkError> {
+    if let Some(p) = m.get_one::<String>("path") {
+        let path = PathBuf::from(p);
+        match fs::exists(&path) {
+            Ok(true) => {},
+            Ok(false) => {
+                return Err(ZkError::Other(String::from("import path does not exist")));
+            },
+            Err(_) => {
+                return Err(ZkError::Access(path));
+            }
+        };
+        let mut new_file = utils::get_current_box()?;
+        if let Some(fname) = path.file_name() {
+            new_file.push(fname);
+            match fs::copy(path, new_file) {
+                Ok(_) => {
+                    return Ok(());
+                },
+                Err(_) => {
+                    return Err(ZkError::ImportFail);
+                }
+            }
+        } else {
+            return Err(ZkError::Other(String::from("unable to get filename of import path")));
+        }
+
+    } else {
+        return Err(ZkError::ImportArgs);
+    }
+    Ok(())
+}
+
 pub fn list_notes(m: Option<&ArgMatches>) -> Result<(), ZkError> {
     match m {
         Some(matches) => {
