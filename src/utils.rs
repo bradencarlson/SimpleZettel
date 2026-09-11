@@ -128,7 +128,7 @@ pub fn zkcard_from_name(name: &str) -> Result<ZkCard, ZkError> {
         for entry in iter {
             let fname = get_filename(&entry)?;
             let p = get_filepath(&entry)?;
-            if fname.starts_with(name) {
+            if fname == name {
                 return Ok(ZkCard::from(p.to_path_buf()));
             }
         }
@@ -142,7 +142,7 @@ fn get_filename(entry: &io::Result<DirEntry>) -> Result<String, ZkError> {
     match entry {
         Ok(ent) => {
             let path = ent.path();
-            if let Some(name) = path.file_name() {
+            if let Some(name) = path.file_stem() {
                 match name.to_str() {
                     Some(n) => {
                         Ok(n.to_string())
