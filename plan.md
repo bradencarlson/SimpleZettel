@@ -63,7 +63,8 @@ List of subcommands desired:
   specify a new note name to go to, or list notes. Yeah, this is a big item.
 - [x], [x] import: copy a file into the box directory.
 - [x], [x] config: check config syntax, or print out that no config exists. 
-    - [ ], [x] edit: specifies the command to use when editing a note.
+    - [ ], [ ] edit: specifies the command to use when editing a note.
+- [ ], [ ] mv: rename a note
 
 ### Low level commands
 
