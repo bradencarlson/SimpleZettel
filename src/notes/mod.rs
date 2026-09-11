@@ -410,6 +410,7 @@ pub fn import_file(m: &ArgMatches) -> Result<(), ZkError> {
 pub fn list_notes(m: Option<&ArgMatches>) -> Result<(), ZkError> {
     match m {
         Some(matches) => {
+            let b = matches.get_one::<String>("box");
             if let Some(pat) = matches.get_one::<String>("pattern") {
                 let r = match Regex::new(pat) {
                     Ok(p) => p,
@@ -417,27 +418,30 @@ pub fn list_notes(m: Option<&ArgMatches>) -> Result<(), ZkError> {
                         return Err(ZkError::Other(e.to_string()));
                     }
                 };
-                list_files(&r)?;
+                list_files(&r, b)?;
                 Ok(())
             } else {
                 let r = Regex::new("").unwrap();
-                list_files(&r)?;
+                list_files(&r, b)?;
                 Ok(())
             }
         },
         None => {
             let r = Regex::new("").unwrap();
-            list_files(&r)?;
+            list_files(&r, None)?;
             Ok(())
         }
     }
 }
 
-fn list_files(pat: &Regex) -> Result<(), ZkError> {
-    let current = utils::get_current_box()?;
+fn list_files(pat: &Regex, b: Option<&String>) -> Result<(), ZkError> {
+    let bx = match b {
+        Some(name) => utils::get_box_from_name(name)?,
+        None => utils::get_current_box()?
+    };
     let hidden = Regex::new(r"^\.").unwrap();
     let mut files = Vec::<ZkCard>::new();
-    if let Ok(iter) = fs::read_dir(current) {
+    if let Ok(iter) = fs::read_dir(bx) {
         for entry in iter {
             let e = match entry {
                 Ok(e) => {e},

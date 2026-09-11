@@ -232,6 +232,15 @@ pub fn get_current_box() -> Result<PathBuf, ZkError> {
     }
 }
 
+pub fn get_box_from_name(name: &String) -> Result<PathBuf, ZkError> {
+    let mut p = get_zk_dir()?;
+    p.push(name);
+    match p.is_dir() {
+        true => Ok(p),
+        false => Err(ZkError::BoxExists)
+    }
+}
+
 pub fn note_exists(note: &Path) -> Result<bool, ZkError> {
     match fs::exists(&note)? {
         true => {Ok(true)},

@@ -112,6 +112,14 @@ pub fn parse_args() -> ArgMatches {
                 .action(ArgAction::Set)
                 .help("pattern to use to match filenames")
             )
+            .arg(
+                Arg::new("box")
+                .required(false)
+                .short('b')
+                .long("box")
+                .action(ArgAction::Set)
+                .help("Specify which box to list")
+            )
         )
         .subcommand(
             Command::new("config")
