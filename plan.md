@@ -34,7 +34,8 @@ List of subcommands desired:
 - [x], [x] edit: for editing an existing note
 - [x], [x] rm: for removing an existing note
 - [x], [x] show: for showing an existing note
-    - this currently uses just a print statement
+    - user should be able to specify a note in a different box for all of the
+      above commands
 - [x], [x] ls: for listing all files in a box
     - this could have subcommands just like real `ls`
         - [x], [x] patterns can be passed for matching filenames
@@ -43,7 +44,7 @@ List of subcommands desired:
           listing numbered files.
         - [x] files which are numbered (1.1.1.md) are listed in their numerical
           order.
-        - [ ], [ ] the user can specify the list a different box (via a flag or some
+        - [x], [x] the user can specify the list a different box (via a flag or some
           other notation)
 - [ ], [ ] search: searches for a string among files in box
 - [x], [x] box: for managing boxes
@@ -87,13 +88,6 @@ is absent, `zk` should report that it is in a "headless" state.
 The `.track` file in a box directory simply denotes that that box is tracked by
 `zk`. Removing a box simply means deleting this file.
 
-The `cache` directory in each box contains information that could speed up
-processing in the future. This could be information such as which files have
-which number, which files link to others, etc.
-
-The `.index` file is simply a copy of what `nb` does, keeps track of the files
-created in order, for numbering them.
-
 You will see that each box has a `.git` directory, the command `zk box add ...`
 should not only create the box, but initialize git tracking there as well.
 
@@ -105,29 +99,60 @@ should not only create the box, but initialize git tracking there as well.
 |-- boxn
 |   |-- .git
 |   |-- .track
-|   |-- files
-|   |   |-- file1
-|   |   |-- file2
-|   |   |-- ...
-|   |   |-- filen
-|   |-- cache
-|   |   |-- info
+|   |-- file1
+|   |-- file2
+|   |-- ...
+|   |-- filen
 
 ### Numbering of files
 
-Files could simply have a `number` field in their front matter, but that won't
-do if I would like to add other file types.
-
-I could also keep track of numbering in a dotfile in the box directory as well,
-this is what `nb` does (a huge inspiration and a great project!)
+This is left up to the user. Currently, valid 'numbers' for filenames are
+filenames matching
+```
+^(\d\.)*\d$
+```
+For example '1', '1.2.12.3', or '10.9', or any valid sequence of characters
+which are able to be read into a String in rust (namely, UTF-8 characters). When
+listing files in a box, `zk` will treat these differently. Since `zk` was
+designed to manage a Zettelkasten, filenames matching the regular expression
+above are assumed to come before any alphanumeric filenames. See the next
+section for an example.
 
 ### Listing of files
 
 This is done by filename. Specifically, each file name (minus the extension) is
 assumed to be of type ZkNumber, which is either a number (i.e. 1.12.3.2), a
-string (i.e. note-one), or is invalid (string cannot be parsed). Notes are then
+string (i.e. note-one, or any other valid sequence of UTF-8 characters), 
+or is invalid (string cannot be parsed). Notes are then
 listed acording to the ZkNumber ordering defined in the program (numbers first,
-in order, then strings, in alphabetical order, then any invalids).
+in order, then strings, in alphabetical order, then any invalids). For example,
+if the box directory contains the following list of files (notice that these are
+in the order that `ls | sort` puts them in):
+```
+1.1.md
+1.2.md
+1.3.1.md
+1.3.2.md
+1.3.md
+2.1.1.md
+2.1.md
+example.md
+file-one.md
+```
+Then `zk` will list these in the following order:
+```
+1.1.md
+1.2.md
+1.3.md
+1.3.1.md
+1.3.2.md
+2.1.md
+2.1.1.md
+example.md
+file-one.md
+```
+So all files that are named as a 'number' come first, in the correct order, with
+other files listed alphabetically below.
 
 ## Things that are *not* implemented
 
