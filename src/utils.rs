@@ -87,7 +87,7 @@ pub fn print_blue(msg: &str) {
 }
 
 pub fn print_black(msg: &str) {
-    let black = anstyle::Style::new().fg_color(Some(anstyle::AnsiColor::BrightBlack.into())).bold();
+    let black = anstyle::Style::new().fg_color(Some(anstyle::AnsiColor::BrightBlack.into()));
     print!("{black}{}{black:#}", msg);
 }
 
