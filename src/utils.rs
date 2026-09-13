@@ -86,6 +86,11 @@ pub fn print_blue(msg: &str) {
     print!("{blue}{}{blue:#}", msg);
 }
 
+pub fn print_black(msg: &str) {
+    let black = anstyle::Style::new().fg_color(Some(anstyle::AnsiColor::BrightBlack.into())).bold();
+    print!("{black}{}{black:#}", msg);
+}
+
 pub fn prompt_user(msg: &str) -> Result<String, ZkError> {
     println!("{}", msg);
     let mut buff = String::new();

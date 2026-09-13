@@ -494,8 +494,11 @@ fn edit_file(path: &PathBuf) -> Result<(), ZkError> {
                     if hashes.equal() {
                         return Ok(())
                     }
-                    git_add()?;
-                    git_commit()?;
+                    #[cfg(feature = "git")]
+                    { 
+                        git_add()?;
+                        git_commit()?;
+                    }
                     Ok(())
                 } else {
                     Err(ZkError::Other(String::from("something went wrong while opening vim for the user")))
@@ -579,6 +582,7 @@ fn get_references(path: &PathBuf) -> Result<Vec::<ZkRef>, ZkError> {
     Ok(refs)
 }
 
+#[cfg(feature = "git")]
 fn git_add() -> Result<(), ZkError> {
     let current = utils::get_current_box()?;
     match Command::new("git")
@@ -600,6 +604,7 @@ fn git_add() -> Result<(), ZkError> {
 
 }
 
+#[cfg(feature = "git")]
 fn git_commit() -> Result<bool, ZkError> {
     let resp = utils::prompt_user("Would you like to commit changes to git? [Y/n]")?;
     let Y = String::from("Y");

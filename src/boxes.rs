@@ -71,6 +71,7 @@ fn list_boxes(all: bool) -> Result<(), ZkError> {
                 let mut pre = "  ";
                 match entry {
                     Ok(e) => {
+                        let mut dark = false;
                         let path = e.path();
                         if !path.is_dir() {
                             continue;
@@ -78,13 +79,22 @@ fn list_boxes(all: bool) -> Result<(), ZkError> {
                         if path == current {
                             pre = "->";
                         }
-                        if is_tracked(&path)? == false && !all {
-                            continue;
+                        if is_tracked(&path)? == false {
+                            if !all {
+                                continue;
+                            } 
+                            dark = true;
+
                         }
                         if let Some(name) = path.file_name() {
                             if let Some(dir_name) = name.to_str() {
                                 utils::print_blue(pre);
-                                println!("{}", dir_name);
+                                if dark {
+                                    utils::print_black(dir_name);
+                                    println!("");
+                                } else {
+                                    println!("{}", dir_name);
+                                }
                             }
                         }
                     },
