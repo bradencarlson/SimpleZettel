@@ -111,12 +111,15 @@ pub fn path_from_name(name: &str) -> Result<PathBuf, ZkError> {
     }
 }
 
-pub fn note_path_from_name(name: &str, filetype: Option<FileType>) -> Result<PathBuf, ZkError> {
+pub fn note_path_from_name(name: &str, filetype: Option<FileType>, b: Option<&String>) -> Result<PathBuf, ZkError> {
     let extension: String = match filetype {
         Some(ft) => ft.get_ext(),
         None => String::from("md")
     };
-    let mut file = get_current_box()?;
+    let mut file = match b {
+        Some(bname) => get_box_from_name(bname)?,
+        None => get_current_box()?,
+    };
     file.push(name);
     if let Some(ext) = file.extension() {
         if *ext == *extension {
@@ -127,8 +130,11 @@ pub fn note_path_from_name(name: &str, filetype: Option<FileType>) -> Result<Pat
     Ok(file)
 }
 
-pub fn zkcard_from_name(name: &str) -> Result<ZkCard, ZkError> {
-    let path = get_current_box()?;
+pub fn zkcard_from_name(name: &str, b: Option<&String>) -> Result<ZkCard, ZkError> {
+    let path = match b {
+        Some(bname) => get_box_from_name(bname)?,
+        None => get_current_box()?,
+    };
     if let Ok(iter) = fs::read_dir(&path) {
         for entry in iter {
             let fname = get_filename(&entry)?;
@@ -242,7 +248,7 @@ pub fn get_box_from_name(name: &String) -> Result<PathBuf, ZkError> {
     p.push(name);
     match p.is_dir() {
         true => Ok(p),
-        false => Err(ZkError::BoxExists)
+        false => Err(ZkError::BoxInvalid)
     }
 }
 

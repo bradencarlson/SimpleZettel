@@ -265,7 +265,7 @@ impl std::cmp::Ord for ZkCard {
 
 pub fn add_note(matches: &ArgMatches, b: Option<&String>) -> Result<(), ZkError> {
     if let Some(name) = matches.get_one::<String>("name") {
-        let file = utils::note_path_from_name(name, None)?;
+        let file = utils::note_path_from_name(name, None, b)?;
         match fs::exists(&file) {
             Ok(true) => {
                 return Err(ZkError::NoteExists);
@@ -284,7 +284,7 @@ pub fn add_note(matches: &ArgMatches, b: Option<&String>) -> Result<(), ZkError>
     }
     if let Some(num) = matches.get_one::<String>("number") {
         parse_number(&num)?;
-        let file = utils::note_path_from_name(num, None)?;
+        let file = utils::note_path_from_name(num, None, b)?;
         match fs::exists(&file) {
             Ok(true) => {
                 return Err(ZkError::NoteExists);
@@ -304,9 +304,9 @@ pub fn add_note(matches: &ArgMatches, b: Option<&String>) -> Result<(), ZkError>
     Err(ZkError::NoteAddArgs)
 }
 
-pub fn show_note(matches: &ArgMatches, config: &ZkConfig) -> Result<(), ZkError> {
+pub fn show_note(matches: &ArgMatches, config: &ZkConfig, b: Option<&String>) -> Result<(), ZkError> {
     if let Some(name) = matches.get_one::<String>("name") {
-        let note = utils::zkcard_from_name(name)?;
+        let note = utils::zkcard_from_name(name, b)?;
         #[cfg(feature = "filetypes")]
         match ft::show_note(&note, config) {
             Ok(()) => {return Ok(());},
@@ -345,9 +345,9 @@ pub fn show_note(matches: &ArgMatches, config: &ZkConfig) -> Result<(), ZkError>
     }
 }
 
-pub fn rm_note(matches: &ArgMatches) -> Result<(), ZkError> {
+pub fn rm_note(matches: &ArgMatches, b: Option<&String>) -> Result<(), ZkError> {
     if let Some(name) = matches.get_one::<String>("name") {
-        let note = utils::zkcard_from_name(name)?;
+        let note = utils::zkcard_from_name(name, b)?;
         match fs::remove_file(&note.path) {
             Ok(()) => {
                 println!("succesfully removed note");
@@ -362,9 +362,9 @@ pub fn rm_note(matches: &ArgMatches) -> Result<(), ZkError> {
     }
 }
 
-pub fn edit_note(matches: &ArgMatches) -> Result<(), ZkError> {
+pub fn edit_note(matches: &ArgMatches, b: Option<&String>) -> Result<(), ZkError> {
     if let Some(name) = matches.get_one::<String>("name") {
-        let note = utils::note_path_from_name(name, None)?;
+        let note = utils::note_path_from_name(name, None, b)?;
         if utils::note_exists(&note)? {
             edit_file(&note)?;
         };
@@ -562,7 +562,7 @@ fn get_references(path: &PathBuf) -> Result<Vec::<ZkRef>, ZkError> {
                 if reference.is_match(&line) {
                     let mut matches = reference.captures_iter(&line);
                     while let Some(f_name) = matches.next() {
-                        let p: ZkPath = match utils::note_path_from_name(&f_name["link"], None) {
+                        let p: ZkPath = match utils::note_path_from_name(&f_name["link"], None, None) {
                             Ok(pth) => ZkPath::Path(pth),
                             Err(_) => ZkPath::Invalid
                         };

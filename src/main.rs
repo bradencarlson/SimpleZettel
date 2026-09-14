@@ -55,7 +55,7 @@ fn main() {
             }
         },
         Some(("edit", sub_m)) => {
-            match notes::edit_note(sub_m) {
+            match notes::edit_note(sub_m, bname) {
                 Ok(_) => {},
                 Err(e) => {
                     error::warning(&e.to_string());
@@ -63,7 +63,7 @@ fn main() {
             }
         },
         Some(("rm", sub_m)) => {
-            match notes::rm_note(sub_m) {
+            match notes::rm_note(sub_m, bname) {
                 Ok(_) => {},
                 Err(e) => {
                     error::warning(&e.to_string());
@@ -71,7 +71,7 @@ fn main() {
             }
         },
         Some(("show", sub_m)) => {
-            match notes::show_note(sub_m, &config) {
+            match notes::show_note(sub_m, &config, bname) {
                 Ok(_) => {},
                 Err(e) => {
                     error::warning(&e.to_string());
