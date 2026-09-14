@@ -64,7 +64,15 @@ List of subcommands desired:
   specify a new note name to go to, or list notes. Yeah, this is a big item.
 - [x], [x] import: copy a file into the box directory.
 - [x], [x] config: check config syntax, or print out that no config exists. 
-    - [ ], [ ] edit: specifies the command to use when editing a note.
+    - [ ], [x] show: show table for defining which commands to use when calling
+      the `show` command.
+        - [x], [x] md: command for markdown files
+        - [x], [x] pdf: command for pdf files
+    - [ ], [ ] general: table for general settings.
+        - [ ], [ ] highlight: color used for arrow in boxes and filenames
+    - [ ], [ ] filetype-prefix:
+        - [ ], [ ] md: prefix to use for markdown files
+        - [ ], [ ] pdf: prefix to use for pdf files
 - [ ], [ ] mv: rename a note
 
 ### Low level commands
