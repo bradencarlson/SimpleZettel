@@ -263,7 +263,7 @@ impl std::cmp::Ord for ZkCard {
 }
 
 
-pub fn add_note(matches: &ArgMatches) -> Result<(), ZkError> {
+pub fn add_note(matches: &ArgMatches, b: Option<&String>) -> Result<(), ZkError> {
     if let Some(name) = matches.get_one::<String>("name") {
         let file = utils::note_path_from_name(name, None)?;
         match fs::exists(&file) {
@@ -407,10 +407,9 @@ pub fn import_file(m: &ArgMatches) -> Result<(), ZkError> {
     Ok(())
 }
 
-pub fn list_notes(m: Option<&ArgMatches>) -> Result<(), ZkError> {
+pub fn list_notes(m: Option<&ArgMatches>, b: Option<&String>) -> Result<(), ZkError> {
     match m {
         Some(matches) => {
-            let b = matches.get_one::<String>("box");
             if let Some(pat) = matches.get_one::<String>("pattern") {
                 let r = match Regex::new(pat) {
                     Ok(p) => p,
@@ -428,7 +427,7 @@ pub fn list_notes(m: Option<&ArgMatches>) -> Result<(), ZkError> {
         },
         None => {
             let r = Regex::new("").unwrap();
-            list_files(&r, None)?;
+            list_files(&r, b)?;
             Ok(())
         }
     }

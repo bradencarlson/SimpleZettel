@@ -25,6 +25,8 @@ fn main() {
         }
     };
 
+    let bname = matches.get_one::<String>("box");
+
     match matches.subcommand() {
         Some(("box", sub_m)) => {
             match boxes::handle_subcommand(sub_m) {
@@ -35,7 +37,7 @@ fn main() {
             };
         },
         Some(("add", sub_m)) => {
-            match notes::add_note(sub_m) {
+            match notes::add_note(sub_m, bname) {
                 Ok(_) => {
                     println!("Note added successfully.");
                 },
@@ -77,7 +79,7 @@ fn main() {
             }
         },
         Some(("ls", sub_m)) => {
-            match notes::list_notes(Some(sub_m)) {
+            match notes::list_notes(Some(sub_m), bname) {
                 Ok(_) => {},
                 Err(e) => {
                     error::warning(&e.to_string());
@@ -114,7 +116,7 @@ fn main() {
             };
         }
         _ => {
-            match notes::list_notes(None) {
+            match notes::list_notes(None, bname) {
                 Ok(_) => {},
                 Err(e) => {
                     error::warning(&e.to_string());

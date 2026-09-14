@@ -3,6 +3,14 @@ use clap::{Command, ArgAction, Arg, ArgMatches};
 pub fn parse_args() -> ArgMatches {
     Command::new("zk")
         .version("0.1.0")
+        .arg(
+            Arg::new("box")
+            .required(false)
+            .short('b')
+            .long("box")
+            .action(ArgAction::Set)
+            .help("specify a box other than the current one")
+        )
         .subcommand(
             Command::new("box")
                 .about("command for managing boxes")
@@ -111,14 +119,6 @@ pub fn parse_args() -> ArgMatches {
                 .required(false)
                 .action(ArgAction::Set)
                 .help("pattern to use to match filenames")
-            )
-            .arg(
-                Arg::new("box")
-                .required(false)
-                .short('b')
-                .long("box")
-                .action(ArgAction::Set)
-                .help("Specify which box to list")
             )
         )
         .subcommand(
