@@ -7,11 +7,16 @@ use crate::error::ZkError;
 
 #[derive(Debug,Default)]
 pub struct ZkConfig {
-    pub show: ZkCommands,
+    pub show: ZkShowCommands,
+    pub general: ZkGenCommands,
 }
 
 #[derive(Debug,Default)]
-pub struct ZkCommands {
+pub struct ZkGenCommands {
+    pub highlight: ZkCmd
+}
+#[derive(Debug,Default)]
+pub struct ZkShowCommands {
     pub md: ZkCmd,
     pub pdf: ZkCmd,
 }
@@ -71,6 +76,14 @@ fn parse_table(tab: Table) -> Result<ZkConfig, ZkError> {
             config.show.pdf = ZkCmd::cmd(v.to_string());
         }
     }
+    if let Some(cmd_tab) = tab.get("general") {
+        if let Some(c) = cmd_tab.get("highlight") {
+            let v = c.to_string();
+            let v = clean_value(&v);
+            config.general.highlight = ZkCmd::cmd(v.to_string());
+        }
+    }
+
     Ok(config)
 }
 

@@ -8,8 +8,6 @@ mod config;
 use crate::error::ZkError;
 use crate::config::ZkConfig;
 
-use clap::{Command,ArgMatches};
-
 fn main() {
 
     let matches = args::parse_args();
