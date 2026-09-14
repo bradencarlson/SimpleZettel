@@ -231,8 +231,11 @@ pub fn get_current_box() -> Result<PathBuf, ZkError> {
         Ok(content) => {
             let current = path_from_name(&content.trim())?;
             match current.try_exists() {
-                Ok(_) => {
+                Ok(true) => {
                     Ok(current)
+                },
+                Ok(false) => {
+                    Err(ZkError::NoCurrentBox)
                 },
                 Err(e) => {
                     Err(ZkError::Other(String::from("I couldn't read the ~/.zk/.current file. I might need you to delete it for me.")))
