@@ -46,9 +46,9 @@ List of subcommands desired:
           order.
         - [x], [x] the user can specify the list a different box (via a flag or some
           other notation)
-        - [ ], [ ] -1 alias for passing the pattern ^1 to ls. like this: `zk -1`? 
+        - [x], [x] -1 alias for passing the pattern ^1 to ls. like this: `zk -1`? 
           this would probably be easier: `zk -n 2`
-- [ ], [ ] search: searches for a string among files in box
+- [ ], [x] search: searches for a string among files in box
 - [x], [x] box: for managing boxes
     - [x], [x] ls: for listing boxes (maybe this should be the default behavior if no
       subcommand is found

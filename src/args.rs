@@ -144,5 +144,14 @@ pub fn parse_args() -> ArgMatches {
                 .help("path of the file to import")
             )
         )
+        .subcommand(
+            Command::new("search")
+            .about("Search for a string amoung notes")
+            .arg(
+                Arg::new("needle")
+                .required(true)
+                .help("string to search for")
+            )
+        )
         .get_matches()
 }
