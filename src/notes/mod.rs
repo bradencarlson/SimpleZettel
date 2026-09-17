@@ -407,7 +407,7 @@ pub fn import_file(m: &ArgMatches) -> Result<(), ZkError> {
     Ok(())
 }
 
-pub fn search_notes(needle: &String, b: Option<&String>) -> Result<(), ZkError> {
+pub fn search_notes(needle: &Regex, b: Option<&String>) -> Result<(), ZkError> {
     let files = get_notes(None, b)?;
     for file in files.iter() {
         search_note(file, needle);
@@ -584,7 +584,7 @@ fn get_first_header(path: &PathBuf) -> Result<String, ZkError> {
     }
 }
 
-fn search_note(card: &ZkCard, needle: &String) -> Option<Vec::<String>> {
+fn search_note(card: &ZkCard, needle: &Regex) -> Option<Vec::<String>> {
     let f = match File::open(&card.path) {
         Ok(file) => file,
         Err(_) => return None
@@ -592,7 +592,7 @@ fn search_note(card: &ZkCard, needle: &String) -> Option<Vec::<String>> {
     let mut reader = BufReader::new(f);
     let mut lines = reader.lines();
     while let Some(Ok(line)) = lines.next() {
-        if line.contains(needle) {
+        if needle.is_match(line.as_str()) {
             println!("{:?}", line);
         }
     }

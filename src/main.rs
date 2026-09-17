@@ -5,6 +5,8 @@ mod utils;
 mod error;
 mod config;
 
+use regex::Regex;
+
 use crate::error::ZkError;
 use crate::config::ZkConfig;
 
@@ -115,11 +117,15 @@ fn main() {
         },
         Some(("search", sub_m)) => {
             if let Some(needle) = sub_m.get_one::<String>("needle") {
-                match notes::search_notes(needle, bname) {
-                    Ok(_) => {},
-                    Err(e) => {
-                        error::warning(&e.to_string());
+                if let Ok(r) = Regex::new(needle) {
+                    match notes::search_notes(&r, bname) {
+                        Ok(_) => {},
+                        Err(e) => {
+                            error::warning(&e.to_string());
+                        }
                     }
+                } else {
+                    error::warning("failed to parse pattern");
                 }
             }
         },
