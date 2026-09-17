@@ -112,7 +112,17 @@ fn main() {
                     error::warning(&e.to_string());
                 }
             };
-        }
+        },
+        Some(("search", sub_m)) => {
+            if let Some(needle) = sub_m.get_one::<String>("needle") {
+                match notes::search_notes(needle, bname) {
+                    Ok(_) => {},
+                    Err(e) => {
+                        error::warning(&e.to_string());
+                    }
+                }
+            }
+        },
         _ => {
             match notes::list_notes(None, bname) {
                 Ok(_) => {},

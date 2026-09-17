@@ -407,6 +407,14 @@ pub fn import_file(m: &ArgMatches) -> Result<(), ZkError> {
     Ok(())
 }
 
+pub fn search_notes(needle: &String, b: Option<&String>) -> Result<(), ZkError> {
+    let files = get_notes(None, b)?;
+    for file in files.iter() {
+        search_note(file, needle);
+    }
+    Ok(())
+}
+
 pub fn list_notes(m: Option<&ArgMatches>, b: Option<&String>) -> Result<(), ZkError> {
     match m {
         Some(matches) => {
@@ -415,15 +423,13 @@ pub fn list_notes(m: Option<&ArgMatches>, b: Option<&String>) -> Result<(), ZkEr
                     let mut pat = String::from("^");
                     pat.push_str(n.as_str());
                     let r = Regex::new(&pat).unwrap();
-                    list_files(&r, b)?;
+                    list_files(Some(&r), b)?;
                     Ok(())
                 } else {
-                    let r = Regex::new("").unwrap();
-                    list_files(&r, b)?;
+                    list_files(None, b)?;
                     Ok(())
                 }
             } else if let Ok(pat) = matches.try_get_one::<String>("pattern") {
-                println!("Pattern found");
                 let pattern = match pat {
                     Some(p) => p,
                     None => ""
@@ -434,26 +440,48 @@ pub fn list_notes(m: Option<&ArgMatches>, b: Option<&String>) -> Result<(), ZkEr
                         return Err(ZkError::Other(e.to_string()));
                     }
                 };
-                list_files(&r, b)?;
+                list_files(Some(&r), b)?;
                 Ok(())
             } else {
-                println!("default behavior");
-                let r = Regex::new("").unwrap();
-                list_files(&r, b)?;
+                list_files(None, b)?;
                 Ok(())
             }
         },
         None => {
-            let r = Regex::new("").unwrap();
-            list_files(&r, b)?;
+            list_files(None, b)?;
             Ok(())
         }
     }
 }
 
-fn list_files(pat: &Regex, b: Option<&String>) -> Result<(), ZkError> {
+fn list_files(p: Option<&Regex>, b: Option<&String>) -> Result<(), ZkError> {
     let bx = match b {
         Some(name) => utils::get_box_from_name(name)?,
+        None => utils::get_current_box()?
+    };
+
+    let files = get_notes(p, b)?;
+
+    let max = match files.iter()
+        .map(|c| c.get_number_length())
+        .max() {
+            Some(m) => m+4,
+            None => 20
+    };
+    let blue = anstyle::Style::new().fg_color(Some(anstyle::AnsiColor::Blue.into())).bold();
+    for file in files.iter() {
+        println!("{}{blue}{}{blue:#}{}", file.filetype_prefix(), file.format_number(max), file.header);
+    }
+    Ok(())
+}
+
+fn get_notes(p: Option<&Regex>, b: Option<&String>) -> Result<Vec::<ZkCard>, ZkError> {
+    let pat = match p {
+        Some(pattern) => pattern, 
+        None => &Regex::new("").unwrap()
+    };
+    let bx = match b {
+        Some(bname) => utils::get_box_from_name(bname)?,
         None => utils::get_current_box()?
     };
     let hidden = Regex::new(r"^\.").unwrap();
@@ -483,18 +511,7 @@ fn list_files(pat: &Regex, b: Option<&String>) -> Result<(), ZkError> {
         }
     }
     files.sort();
-
-    let max = match files.iter()
-        .map(|c| c.get_number_length())
-        .max() {
-            Some(m) => m+4,
-            None => 20
-    };
-    let blue = anstyle::Style::new().fg_color(Some(anstyle::AnsiColor::Blue.into())).bold();
-    for file in files.iter() {
-        println!("{}{blue}{}{blue:#}{}", file.filetype_prefix(), file.format_number(max), file.header);
-    }
-    Ok(())
+    Ok(files)
 }
 
 
@@ -565,6 +582,21 @@ fn get_first_header(path: &PathBuf) -> Result<String, ZkError> {
     } else {
         Err(ZkError::Access(path.to_path_buf()))
     }
+}
+
+fn search_note(card: &ZkCard, needle: &String) -> Option<Vec::<String>> {
+    let f = match File::open(&card.path) {
+        Ok(file) => file,
+        Err(_) => return None
+    };
+    let mut reader = BufReader::new(f);
+    let mut lines = reader.lines();
+    while let Some(Ok(line)) = lines.next() {
+        if line.contains(needle) {
+            println!("{:?}", line);
+        }
+    }
+    Some(Vec::<String>::new())
 }
 
 fn get_references(path: &PathBuf) -> Result<Vec::<ZkRef>, ZkError> {
