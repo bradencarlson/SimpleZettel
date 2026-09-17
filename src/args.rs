@@ -11,6 +11,15 @@ pub fn parse_args() -> ArgMatches {
             .action(ArgAction::Set)
             .help("specify a box other than the current one")
         )
+        .arg(
+            Arg::new("number")
+            .required(false)
+            .short('n')
+            .long("number")
+            .value_parser(clap::value_parser!(i32))
+            .help("When using the default subcommand of listing files, specifies that only files whose number starts with the provided value should be listed.")
+            .action(ArgAction::Set)
+        )
         .subcommand(
             Command::new("box")
                 .about("command for managing boxes")

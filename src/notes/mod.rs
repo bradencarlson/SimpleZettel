@@ -410,8 +410,12 @@ pub fn import_file(m: &ArgMatches) -> Result<(), ZkError> {
 pub fn list_notes(m: Option<&ArgMatches>, b: Option<&String>) -> Result<(), ZkError> {
     match m {
         Some(matches) => {
-            if let Some(pat) = matches.get_one::<String>("pattern") {
-                let r = match Regex::new(pat) {
+            if let Ok(pat) = matches.try_get_one::<String>("pattern") {
+                let pattern = match pat {
+                    Some(p) => p,
+                    None => ""
+                };
+                let r = match Regex::new(pattern) {
                     Ok(p) => p,
                     Err(e) => {
                         return Err(ZkError::Other(e.to_string()));
@@ -419,6 +423,18 @@ pub fn list_notes(m: Option<&ArgMatches>, b: Option<&String>) -> Result<(), ZkEr
                 };
                 list_files(&r, b)?;
                 Ok(())
+            } else if let Ok(num) = matches.try_get_one::<i32>("number") {
+                if let Some(n) = num {
+                    let mut pat = String::from("^");
+                    pat.push_str(n.to_string().as_str());
+                    let r = Regex::new(&pat).unwrap();
+                    list_files(&r, b)?;
+                    Ok(())
+                } else {
+                    let r = Regex::new("").unwrap();
+                    list_files(&r, b)?;
+                    Ok(())
+                }
             } else {
                 let r = Regex::new("").unwrap();
                 list_files(&r, b)?;
