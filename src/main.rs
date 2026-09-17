@@ -114,7 +114,7 @@ fn main() {
             };
         }
         _ => {
-            match notes::list_notes(Some(&matches), bname) {
+            match notes::list_notes(None, bname) {
                 Ok(_) => {},
                 Err(e) => {
                     error::warning(&e.to_string());

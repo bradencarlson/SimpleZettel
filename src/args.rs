@@ -11,15 +11,6 @@ pub fn parse_args() -> ArgMatches {
             .action(ArgAction::Set)
             .help("specify a box other than the current one")
         )
-        .arg(
-            Arg::new("number")
-            .required(false)
-            .short('n')
-            .long("number")
-            .value_parser(clap::value_parser!(i32))
-            .help("When using the default subcommand of listing files, specifies that only files whose number starts with the provided value should be listed.")
-            .action(ArgAction::Set)
-        )
         .subcommand(
             Command::new("box")
                 .about("command for managing boxes")
@@ -128,6 +119,16 @@ pub fn parse_args() -> ArgMatches {
                 .required(false)
                 .action(ArgAction::Set)
                 .help("pattern to use to match filenames")
+            )
+            .arg(
+                Arg::new("number")
+                .required(false)
+                .short('n')
+                .long("number")
+                .conflicts_with("pattern")
+                // TODO: Add parser here to ensure it is a valid ZkNumber?
+                .help("list files whose number starts with the provided value")
+                .action(ArgAction::Set)
             )
         )
         .subcommand(
