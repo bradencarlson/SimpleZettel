@@ -22,6 +22,18 @@ pub enum ZkNumber {
 }
 
 #[derive(Debug)]
+pub struct ZkMatch<'a> {
+    card: &'a ZkCard,
+    matches: Vec::<ZkLine>
+}
+
+#[derive(Debug)]
+pub struct ZkLine {
+    lineno: usize,
+    content: String
+}
+
+#[derive(Debug)]
 pub struct ZkCard {
     path: PathBuf,
     number: ZkNumber,
@@ -40,6 +52,22 @@ pub enum ZkPath {
 pub struct ZkRef {
     path: ZkPath,
     label: String,
+}
+
+impl std::fmt::Display for ZkMatch<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
+        if let Some(filename) = self.card.path.file_name() {
+            let fname = match filename.to_str() {
+                Some(s) => s,
+                None => "invalid filename found"
+            };
+            write!(f, "{}\n", fname);
+            for line in &self.matches {
+                write!(f, "{}: {}\n", line.lineno, line.content);
+            }
+        }
+        Ok(())
+    }
 }
 
 impl From<PathBuf> for ZkCard {
@@ -410,7 +438,16 @@ pub fn import_file(m: &ArgMatches) -> Result<(), ZkError> {
 pub fn search_notes(needle: &Regex, b: Option<&String>) -> Result<(), ZkError> {
     let files = get_notes(None, b)?;
     for file in files.iter() {
-        search_note(file, needle);
+        if let Some(matches) = search_note(file, needle) {
+            let card = ZkMatch { 
+                card: file,
+                matches: matches
+            };
+            let l = &card.matches.len();
+            if *l > 0  {
+                println!("{}", card);
+            }
+        }
     }
     Ok(())
 }
@@ -584,19 +621,25 @@ fn get_first_header(path: &PathBuf) -> Result<String, ZkError> {
     }
 }
 
-fn search_note(card: &ZkCard, needle: &Regex) -> Option<Vec::<String>> {
+fn search_note<'a>(card: &'a ZkCard, needle: &Regex) -> Option<Vec::<ZkLine>> {
     let f = match File::open(&card.path) {
         Ok(file) => file,
         Err(_) => return None
     };
+    let mut matches = Vec::<ZkLine>::new();
     let mut reader = BufReader::new(f);
     let mut lines = reader.lines();
+    let mut line_no = 0;
     while let Some(Ok(line)) = lines.next() {
+        line_no += 1;
         if needle.is_match(line.as_str()) {
-            println!("{:?}", line);
+            matches.push(ZkLine {
+                lineno: line_no,
+                content: line
+            });
         }
     }
-    Some(Vec::<String>::new())
+    Some(matches)
 }
 
 fn get_references(path: &PathBuf) -> Result<Vec::<ZkRef>, ZkError> {
