@@ -455,23 +455,14 @@ pub fn search_notes(needle: &Regex, b: Option<&String>) -> Result<(), ZkError> {
 pub fn list_notes(m: Option<&ArgMatches>, b: Option<&String>) -> Result<(), ZkError> {
     match m {
         Some(matches) => {
-            if let Ok(num) = matches.try_get_one::<String>("number") {
-                if let Some(n) = num {
-                    let mut pat = String::from("^");
-                    pat.push_str(n.as_str());
-                    let r = Regex::new(&pat).unwrap();
-                    list_files(Some(&r), b)?;
-                    Ok(())
-                } else {
-                    list_files(None, b)?;
-                    Ok(())
-                }
-            } else if let Ok(pat) = matches.try_get_one::<String>("pattern") {
-                let pattern = match pat {
-                    Some(p) => p,
-                    None => ""
-                };
-                let r = match Regex::new(pattern) {
+            if let Ok(Some(num)) = matches.try_get_one::<String>("number") {
+                let mut pat = String::from("^");
+                pat.push_str(num.as_str());
+                let r = Regex::new(&pat).unwrap();
+                list_files(Some(&r), b)?;
+                Ok(())
+            } else if let Ok(Some(pat)) = matches.try_get_one::<String>("pattern") {
+                let r = match Regex::new(pat) {
                     Ok(p) => p,
                     Err(e) => {
                         return Err(ZkError::Other(e.to_string()));
