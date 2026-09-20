@@ -1,0 +1,50 @@
+@import url("style/lists.css");
+:root {
+  bg: #271314;
+}
+
+p {
+  padding: 0;
+  margin: 0;
+}
+
+html {
+  background-color: var(--bg);
+}
+
+.main {
+  padding-left: 10%;
+  padding-right: 10%;
+  color: white;
+  font-size: 15pt;
+}
+
+.header {
+  font-size: 24pt;
+}
+
+.subcommand {
+  color: gold;
+  list-style-type: none;
+}
+
+.subcommand-dsc {
+  padding-left: 15pt;
+  margin-top: 5pt;
+  margin-bottom: 5pt;
+  list-style-type: none;
+}
+
+.option {
+  color: blue;
+}
+
+.block {
+  text-align: center;
+  background-color: #474354;
+  border-radius: 3pt;
+  margin-left: 10%;
+  margin-right: 10%;
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
