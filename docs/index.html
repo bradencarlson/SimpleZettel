@@ -86,16 +86,83 @@
       out above.
     </p>
 
+    <h2>Options</h2>
+
     <h2>Subcommands</h2>
+    <p>For all commands which operate on notes, the default behavior is to operate
+    on notes from the currently selected box. You can change this with the 
+    <code class="inline">-b</code> option as descriped above.</p>
     <div class="subcommand">box</div>
-    <p class="subcommand-dsc">Perform operations on boxes.</p>
-    <ul class="level2">
-    <div class="subcommand">ls</div>
-    </ul>
+      <div class="subcmd-container">
+        <p class="subcmd-dsc">Perform operations on boxes. This subcommand
+        itself has several subcommands:</p>
+        <div class="level2">
+          <div class="subcommand">ls</div>
+          <p class="subcmd-dsc">
+            List all boxes. This is the default subcommand, so
+            <code class="inline">zk box</code> and <code class="inline">zk box ls</code>
+            produce the same output. However, passing the 
+            <code class="inline">-a</code> flag to this command lists <i>all</i>
+            boxes, even boxes which are not tracked (removed).
+          </p>
+          <div class="subcommand">add</div>
+          <p class="subcmd-dsc">
+            Add a new box.
+          </p>
+          <div class="subcommand">rm</div>
+          <p class="subcmd-dsc">
+            Remove a box. This does <i>not</i> remove any
+            files (other than a <code class="inline">.track</code> file, which
+            simply tells zk that the box is tracked). It is up to you to decide if
+            you want to actually delete your notes.
+          </p>
+          <div class="subcommand">track</div>
+          <p class="subcmd-dsc">
+            Tracks a previously deleted box.
+          </p>
+        </div>
+      </div>
+    <div class="subcommand">use</div>
+      <div class="subcmd-container">
+        <p class="subcmd-dsc">
+          Selects the given box as the current box.
+        </p>
+      </div>
     <div class="subcommand">add</div>
+      <div class="subcmd-container">
+        <p class="subcmd-dsc">Add markdown notes to a box. Curently 
+        <code class="inline">vim</code> is the only editor supported. This will
+        change in the future.</p>
+      </div>
     <div class="subcommand">ls</div>
+      <div class="subcmd-container">
+        <p class="subcmd-dsc">List notes which belong to the current box.</p>
+      </div>
     <div class="subcommand">show</div>
+      <div class="subcmd-container">
+        <p class="subcmd-dsc">Display a note. If no valid config file is found,
+        only Markdown notes will be displayed, and they will simply be printed
+        out to standard output.</p>
+      </div>
     <div class="subcommand">edit</div>
+      <div class="subcmd-container">
+        <p class="subcmd-dsc">Edit a note.</p>
+      </div>
     <div class="subcommand">rm</div>
+      <div class="subcmd-container">
+        <p class="subcmd-dsc">Remove a note from a box.</p>
+      </div>
+    <div class="subcommand">import</div>
+      <div class="subcmd-container">
+        <p class="subcmd-dsc">Copy a file into the current box. This is not
+        limited to Markdown files, but can be any file. Note that zk currently
+        only supports Markdown and PDF files.</p>
+      </div>
+    <div class="subcommand">config</div>
+      <div class="subcmd-container">
+        <p class="subcmd-dsc">Check the config file for errors. Currently, this
+        only <i>tells</i> the user if there are errors present, not <i>where</i>
+        or <i>what</i> they are. Nice, huh?</p>
+      </div>
   </body>
 </html>

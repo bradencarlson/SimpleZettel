@@ -4,6 +4,9 @@
   --bg: #17131c;
   --inline-code: #22272a;
   --inline-code-border: #326232;
+  --subcmd-bg: var(--bg);
+  --subcmd-color: yellow;
+  --subcmd-border: var(--inline-code-border);
 }
 
 p {
@@ -36,12 +39,23 @@ html {
   padding: 0pt 8pt 0pt 8pt;
 }
 
-.subcommand {
-  color: gold;
-  padding-left: 10pt;
+.subcmd-container {
+  border-left: 3px dotted var(--subcmd-border);
+  border-radius: 3px;
+  margin-left: 8pt;
+  margin-bottom: 8pt;
 }
 
-.subcommand-dsc {
+.subcommand {
+  display: inline;
+  color: var(--subcmd-color);
+  padding: 0pt 8pt 0pt 8pt;
+  background-color: var(--subcmd-bg);
+  border: 2px solid var(--subcmd-border);
+  border-radius: 3pt;
+}
+
+.subcmd-dsc {
   padding-left: 15pt;
   margin-top: 5pt;
   margin-bottom: 5pt;
