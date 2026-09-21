@@ -2,16 +2,20 @@
 @import url("style/containers.css");
 :root {
   --bg: #17131c;
-  --inline-code: #22272a;
-  --inline-code-border: #326232;
+  --inline-bg: #22272a;
+  --inline-code-border: #326282;
   --subcmd-bg: var(--bg);
-  --subcmd-color: yellow;
+  --subcmd-color: #fefeff;
   --subcmd-border: var(--inline-code-border);
+  --font-size: 15pt;
 }
 
 p {
   padding: 0;
   margin: 0;
+  line-height: 1.6;
+  font-size: 15pt;
+
 }
 
 html {
@@ -31,17 +35,17 @@ html {
 }
 
 .inline {
-  background-color: var(--inline-code);
+  background-color: var(--inline-bg);
   border-radius: 3pt;
   border-width: 2pt;
   border-style: solid;
   border-color: var(--inline-code-border);
   padding: 0pt 8pt 0pt 8pt;
+  font-size: var(--font-size);
 }
 
 .subcmd-container {
   border-left: 3px dotted var(--subcmd-border);
-  border-radius: 3px;
   margin-left: 8pt;
   margin-bottom: 8pt;
 }

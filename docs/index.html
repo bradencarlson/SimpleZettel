@@ -32,7 +32,7 @@
         </ol>
         <li>Numeric notes come before alphanumeric notes, which come before
           notes with invalid names. Numeric notes are ordered according to the
-          digits that appear before each period. For example: 
+          digits that appear before each period. For example:
           <code class="inline">1.1 &lt; 1.2 &lt;
             1.2.1 &lt; 1.3 &lt; 2.1 &lt; 2.1.1 &lt; 2.2</code>
         <li>Alphanumeric notes are sorted in alphabetical order.</li>
@@ -74,13 +74,13 @@
       </div>
       So long as the user has chosen good names for their notes, and have
       entered short, useful headers, information will be easy to retrieve from
-      the zettelkasten. 
+      the zettelkasten.
     </p>
     <p>
       As a side note, the numbering scheme above was chosen because it makes the
       most sense to the author of this program. However, the author recognizes
       that this might not be best for everyone, and plans on one day allowing
-      the user to specify a custom separator (inplace of the '.' used above) 
+      the user to specify a custom separator (inplace of the '.' used above)
       in their config file, and for allowing note names such as 1.1a. For now
       though, note names should fall into one of the two valid categories laid
       out above.
@@ -88,9 +88,26 @@
 
     <h2>Options</h2>
 
+    <div class="subcommand">-b</div>
+    <div class="subcmd-container">
+      <p class="subcmd-dsc">
+        Specifies a box to use. If this option is not passed to zk, it will use
+        the currently selected box. This can be useful to view the contents of a
+        box other than the current one, without having to switch boxes. For
+        example, to display note 1.2 in box notes (while notes is not the
+        current box), run <code class="inline">zk -b notes show 1.2</code>.
+      </p>
+    </div>
+    <div class="subcommand">-h</div>
+    <div class="subcmd-container">
+      <p class="subcmd-dsc">
+        Display all options and subcommands for zk.
+      </p>
+    </div>
+
     <h2>Subcommands</h2>
     <p>For all commands which operate on notes, the default behavior is to operate
-    on notes from the currently selected box. You can change this with the 
+    on notes from the currently selected box. You can change this with the
     <code class="inline">-b</code> option as descriped above.</p>
     <div class="subcommand">box</div>
       <div class="subcmd-container">
@@ -101,36 +118,58 @@
           <p class="subcmd-dsc">
             List all boxes. This is the default subcommand, so
             <code class="inline">zk box</code> and <code class="inline">zk box ls</code>
-            produce the same output. However, passing the 
+            produce the same output. However, passing the
             <code class="inline">-a</code> flag to this command lists <i>all</i>
             boxes, even boxes which are not tracked (removed).
           </p>
           <div class="subcommand">add</div>
           <p class="subcmd-dsc">
-            Add a new box.
+            Add a new box. This creates the boxes directory under the directory
+            <code class="inline">~/.zk</code>, initializes
+            <code class="inline">git</code> for this directory, and places a
+            <code class="inline">.track</code> file inside the box. This
+            subcommand requires the name of the box to add, for example,
+            <code class="inline">zk box add notes</code>.
           </p>
           <div class="subcommand">rm</div>
           <p class="subcmd-dsc">
             Remove a box. This does <i>not</i> remove any
-            files (other than a <code class="inline">.track</code> file, which
+            files (other than the <code class="inline">.track</code> file, which
             simply tells zk that the box is tracked). It is up to you to decide if
             you want to actually delete your notes.
           </p>
           <div class="subcommand">track</div>
           <p class="subcmd-dsc">
-            Tracks a previously deleted box.
+            Tracks a previously deleted box. For example, if the user previously
+            removed the <code class="inline">test</code> box (or has copied this
+            directory of markdown notes from another location), they can tell zk
+            that it is a box to be tracked by running
+            <code class="inline">zk box track test</code>.
+          </p>
+          <div class="subcommand">help</div>
+          <p class="subcmd-dsc">
+            Display the help for this subcommand.
           </p>
         </div>
       </div>
     <div class="subcommand">use</div>
       <div class="subcmd-container">
         <p class="subcmd-dsc">
-          Selects the given box as the current box.
+          Selects the given box as the current box. This will also print out a
+          list of all tracked boxes, with an indicator pointing to the current
+          box.
         </p>
       </div>
     <div class="subcommand">add</div>
       <div class="subcmd-container">
-        <p class="subcmd-dsc">Add markdown notes to a box. Curently 
+        <p class="subcmd-dsc">Add markdown notes to a box. You must specify the
+        note name when calling this subcommand, for example,
+        <code class="inline">zk add 1.23.2</code>. Zk will then drop the user
+        into <code class="inline">vim</code> to edit the note.  Once the user
+        exits the editor, zk will ask the user if they would like to commit the
+        change to <code class="inline">git</code>. If the user specifies that
+        they would, they are once again dropped into an editor to specify the
+        commit message. Currently
         <code class="inline">vim</code> is the only editor supported. This will
         change in the future.</p>
       </div>
@@ -146,23 +185,38 @@
       </div>
     <div class="subcommand">edit</div>
       <div class="subcmd-container">
-        <p class="subcmd-dsc">Edit a note.</p>
+        <p class="subcmd-dsc">
+          Edit a note. Just like the <code class="inline">zk add</code> command,
+          the user is dropped into <code class="inline">vim</code> to edit the
+          notes contents. If the file is changed in any way, the user is
+          prompted to commit the changes to <code class="inline">git</code>.
+        </p>
       </div>
     <div class="subcommand">rm</div>
       <div class="subcmd-container">
-        <p class="subcmd-dsc">Remove a note from a box.</p>
+        <p class="subcmd-dsc">
+          Remove a note from a box. Unlike the <code class="inline">zk box rm</code>
+          command, this command <i>does</i> remove the note file from the
+          filesystem. Use carefully.
+        </p>
       </div>
     <div class="subcommand">import</div>
       <div class="subcmd-container">
         <p class="subcmd-dsc">Copy a file into the current box. This is not
         limited to Markdown files, but can be any file. Note that zk currently
-        only supports Markdown and PDF files.</p>
+        only supports listing Markdown and PDF files.</p>
       </div>
     <div class="subcommand">config</div>
       <div class="subcmd-container">
         <p class="subcmd-dsc">Check the config file for errors. Currently, this
         only <i>tells</i> the user if there are errors present, not <i>where</i>
         or <i>what</i> they are. Nice, huh?</p>
+      </div>
+    <div class="subcommand">help</div>
+      <div class="subcmd-container">
+        <p class="subcmd-dsc">
+          Display all subcommands and options for zk.
+        </p>
       </div>
   </body>
 </html>
