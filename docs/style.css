@@ -1,7 +1,9 @@
 @import url("style/lists.css");
 @import url("style/containers.css");
 :root {
-  bg: #271314;
+  --bg: #17131c;
+  --inline-code: #22272a;
+  --inline-code-border: #326232;
 }
 
 p {
@@ -25,16 +27,24 @@ html {
   font-size: 24pt;
 }
 
+.inline {
+  background-color: var(--inline-code);
+  border-radius: 3pt;
+  border-width: 2pt;
+  border-style: solid;
+  border-color: var(--inline-code-border);
+  padding: 0pt 8pt 0pt 8pt;
+}
+
 .subcommand {
   color: gold;
-  list-style-type: none;
+  padding-left: 10pt;
 }
 
 .subcommand-dsc {
   padding-left: 15pt;
   margin-top: 5pt;
   margin-bottom: 5pt;
-  list-style-type: none;
 }
 
 .option {
@@ -49,4 +59,8 @@ html {
   margin-right: 10%;
   padding-top: 5px;
   padding-bottom: 5px;
+}
+
+.float-left {
+  float: left;
 }

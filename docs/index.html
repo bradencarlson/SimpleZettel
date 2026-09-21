@@ -14,7 +14,6 @@
       import files into boxes to keep track of other
       information such as scholarly articles.
     </p>
-
     <p>
       Zk was designed with the idea that with a little help from the user, notes
       should be easy to find later. It is the user's
@@ -25,7 +24,7 @@
         <li>There are three types of note names:</li>
         <ol>
           <li>Numeric: any note name matching the regular expression
-            ^[0-9]+(\.[0-9]+)*$. For example 1, 1.23.2, or 32.2.11.9.4.</li>
+            <code class="inline">^[0-9]+(\.[0-9]+)*$</code>. For example 1, 1.23.2, or 32.2.11.9.4.</li>
           <li>Alphanumeric: any sequence of valid UTF-8 characters not falling
             into the numeric category.</li>
           <li>Invalid names: a sequence of characters which cannot be
@@ -33,8 +32,9 @@
         </ol>
         <li>Numeric notes come before alphanumeric notes, which come before
           notes with invalid names. Numeric notes are ordered according to the
-          digits that appear before each period. For example: 1.1 &lt; 1.2 &lt;
-          1.2.1 &lt; 1.3 &lt; 2.1 &lt; 2.1.1 &lt; 2.2.
+          digits that appear before each period. For example: 
+          <code class="inline">1.1 &lt; 1.2 &lt;
+            1.2.1 &lt; 1.3 &lt; 2.1 &lt; 2.1.1 &lt; 2.2</code>
         <li>Alphanumeric notes are sorted in alphabetical order.</li>
         <li>Notes with invalid names are displayed in a random order.</li>
       </ul>
@@ -51,33 +51,51 @@
       example, if note 1.1 has the following contents:
     </p>
     <div class="centered-h">
-    <img src="img/option-rust.svg" style="width: 50%;">
+    <img src="img/option-rust.svg" style="width: 85%;">
     </div>
     <p>Zk will list this note as
-    <div class="block">1.1&emsp;&emsp;Options in Rust</div>
+    <code class="inline">1.1&emsp;&emsp;Options in Rust</code>
     </p>
     <p>As a more complete example, here is what the output of zk might look like
     for someone who has been taking notes on the Rust programming language.
     <div class="centered-h">
-    <img src="img/rust-zk.svg" style="width: 65%;">
+    <img src="img/rust-zk.svg" style="width: 85%;">
     </div>
+    </p>
+    <p>
+      Naturally, over time many notes will be accumulated. Zk allows for
+      listing files whose names match a regular expression; together with a
+      little help from the user (naming their notes in a way that makes sense to
+      the user), this is a powerful feature for filtering and finding notes. For
+      example, taking the same Rust zettelkasten from above, the user can easily
+      see all notes with 'depth' 2 by running the following:
+      <div class="centered-h">
+        <img src="img/rust-filter.svg" style="width: 85%;">
+      </div>
+      So long as the user has chosen good names for their notes, and have
+      entered short, useful headers, information will be easy to retrieve from
+      the zettelkasten. 
+    </p>
+    <p>
+      As a side note, the numbering scheme above was chosen because it makes the
+      most sense to the author of this program. However, the author recognizes
+      that this might not be best for everyone, and plans on one day allowing
+      the user to specify a custom separator (inplace of the '.' used above) 
+      in their config file, and for allowing note names such as 1.1a. For now
+      though, note names should fall into one of the two valid categories laid
+      out above.
     </p>
 
     <h2>Subcommands</h2>
-    <p>
-      Zk is typically invoked along with a subcommand.
-    </p>
-    <ul>
-      <li class="subcommand">box</li>
-      <p class="subcommand-dsc">Perform operations on boxes.</p>
-      <ul class="level2">
-        <li class="subcommand">ls</li>
-      </ul>
-      <li class="subcommand">add</li>
-      <li class="subcommand">ls</li>
-      <li class="subcommand">show</li>
-      <li class="subcommand">edit</li>
-      <li class="subcommand">rm</li>
+    <div class="subcommand">box</div>
+    <p class="subcommand-dsc">Perform operations on boxes.</p>
+    <ul class="level2">
+    <div class="subcommand">ls</div>
     </ul>
+    <div class="subcommand">add</div>
+    <div class="subcommand">ls</div>
+    <div class="subcommand">show</div>
+    <div class="subcommand">edit</div>
+    <div class="subcommand">rm</div>
   </body>
 </html>
