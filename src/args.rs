@@ -1,7 +1,7 @@
 use clap::{Command, ArgAction, Arg, ArgMatches};
 
 pub fn parse_args() -> ArgMatches {
-    Command::new("zk")
+    Command::new("szettel")
         .version("0.1.0")
         .arg(
             Arg::new("box")

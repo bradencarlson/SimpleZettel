@@ -103,7 +103,7 @@ pub fn prompt_user(msg: &str) -> Result<String, ZkError> {
 }
 
 pub fn path_from_name(name: &str) -> Result<PathBuf, ZkError> {
-    let mut root = get_zk_dir()?;
+    let mut root = get_szettel_dir()?;
     root.push(name);
     match verify_path(&root) {
         Ok(_) => Ok(root),
@@ -183,9 +183,9 @@ fn get_filepath(entry: &io::Result<DirEntry>) -> Result<PathBuf, ZkError> {
     }
 }
 
-pub fn get_zk_dir() -> Result<PathBuf, ZkError> {
+pub fn get_szettel_dir() -> Result<PathBuf, ZkError> {
     if let Some(mut path) = env::home_dir() {
-        path.push(".zk/");
+        path.push(".szettel/");
         match fs::exists(&path) {
             Ok(true) => Ok(path),
             Ok(false) => {
@@ -203,7 +203,7 @@ pub fn get_zk_dir() -> Result<PathBuf, ZkError> {
 }
 
 pub fn verify_path(path: &PathBuf) -> Result<(), ZkError> {
-    let zk_home = get_zk_dir()?;
+    let zk_home = get_szettel_dir()?;
     if let Some(parent) = path.parent() {
         if parent == zk_home {
             Ok(())
@@ -217,7 +217,7 @@ pub fn verify_path(path: &PathBuf) -> Result<(), ZkError> {
 }
 
 pub fn verify_note_path(path: &PathBuf) -> Result<(), ZkError> {
-    let zk_home = get_zk_dir()?;
+    let zk_home = get_szettel_dir()?;
     match path.starts_with(zk_home) {
         true => Ok(()),
         false => Err(ZkError::InvalidNotePath(path.clone()))
@@ -225,7 +225,7 @@ pub fn verify_note_path(path: &PathBuf) -> Result<(), ZkError> {
 }
 
 pub fn get_current_box() -> Result<PathBuf, ZkError> {
-    let mut current = get_zk_dir()?;
+    let mut current = get_szettel_dir()?;
     current.push(".current");
     match fs::read_to_string(&current) {
         Ok(content) => {
@@ -238,7 +238,7 @@ pub fn get_current_box() -> Result<PathBuf, ZkError> {
                     Err(ZkError::NoCurrentBox)
                 },
                 Err(e) => {
-                    Err(ZkError::Other(String::from("I couldn't read the ~/.zk/.current file. I might need you to delete it for me.")))
+                    Err(ZkError::Other(String::from("I couldn't read the ~/.szettel/.current file. I might need you to delete it for me.")))
                 }
             }
         },
@@ -247,7 +247,7 @@ pub fn get_current_box() -> Result<PathBuf, ZkError> {
 }
 
 pub fn get_box_from_name(name: &String) -> Result<PathBuf, ZkError> {
-    let mut p = get_zk_dir()?;
+    let mut p = get_szettel_dir()?;
     p.push(name);
     match p.is_dir() {
         true => Ok(p),
@@ -267,7 +267,7 @@ pub fn note_exists(note: &Path) -> Result<bool, ZkError> {
 #[test]
 fn valid_path() {
     if let Some(mut path) = env::home_dir() {
-        path.push(".zk/test");
+        path.push(".szettel/test");
         assert_eq!(verify_path(&path), Ok(()));
     }
 
@@ -282,7 +282,7 @@ fn invalid_path() {
 #[test]
 fn deep_path() {
     if let Some(mut invalid_path) = env::home_dir() {
-        invalid_path.push(".zk/test/one");
+        invalid_path.push(".szettel/test/one");
         assert_eq!(verify_path(&invalid_path), Err(ZkError::InvalidPath));
     }
 }

@@ -1,32 +1,33 @@
 <!DOCTYPE html>
 <html>
   <header>
-    <title>Zk cli documentation</title>
+    <title>SimpleZettel Documentation</title>
     <link rel="stylesheet" href="style.css">
   </header>
   <body class="main">
     <h1 class="header">
-      Zk CLI Documentation
+      SimpleZettel Documentation
     </h1>
     <p>
-      Zk is a command line tool for managing a personal knowledge base (a
+      SimpleZettel is a command line tool for managing a personal knowledge base (a
       zettelkasten). You can create boxes, add Markdown notes to boxes, and
       import files into boxes to keep track of other
       information such as scholarly articles. The user is also encouraged to
       consider <a href="https://xwmx.github.io/nb/">nb</a>, which was a huge
-      inspiration for this project, and which the author still uses daily. Zk
+      inspiration for this project, and which the author still uses daily.
+      SimpleZettel
       was created specifically to handle note numbering, which determines the
       order that they should be printed in. The following short video
-      demonstrates the main features of zk:
+      demonstrates the main features:
     </p>
     <div class="centered-h" style="margin: 15pt 0pt 15pt 0pt; height: 425px;">
-    <video controls><source src="img/demo.mkv"></video>
+    <video controls><source src="img/demo.mp4"></video>
     </div>
     <p>
-      Zk was designed with the idea that with a little help from the user, notes
+      SimpleZettel was designed with the idea that with a little help from the user, notes
       should be easy to find later. It is the user's
       responsibility to name their notes and enter an appropriate header which
-      indicates what the note is about. Once a note has been created, Zk will
+      indicates what the note is about. Once a note has been created, this tool will
       assist the user in finding it later by sorting notes according to the following scheme:
       <ul>
         <li>There are three types of note names:</li>
@@ -55,24 +56,25 @@
       1.3.4.1).
     </p>
     <p>
-      Zk will further assist you in finding information in your zettelkasten by
+      SimpleZettel will further assist you in finding information in your zettelkasten by
       printing out the first header of each note alongside its name. For
       example, if note 1.1 has the following contents:
     </p>
     <div class="centered-h">
     <img src="img/option-rust.svg" style="width: 85%;">
     </div>
-    <p>Zk will list this note as
+    <p>SimpleZettel will list this note as
     <code class="inline">1.1&emsp;&emsp;Options in Rust</code>
     </p>
-    <p>As a more complete example, here is what the output of zk might look like
+    <p>As a more complete example, here is what the output of 
+    <code class="inline">szettel</code> might look like
     for someone who has been taking notes on the Rust programming language.
     <div class="centered-h">
     <img src="img/rust-zk.svg" style="width: 85%;">
     </div>
     </p>
     <p>
-      Naturally, over time many notes will be accumulated. Zk allows for
+      Naturally, over time many notes will be accumulated. SimpleZettel allows for
       listing files whose names match a regular expression; together with a
       little help from the user (naming their notes in a way that makes sense to
       the user), this is a powerful feature for filtering and finding notes. For
@@ -98,7 +100,7 @@
     <h2>Installation</h2>
     <p>
       It is recommended to install using Cargo. However, binaries for Linux are
-      provided in the <a href="https://github.com/bradencarlson/zk">releases</a>
+      provided in the <a href="https://github.com/bradencarlson/simplezettel">releases</a>
       page.
     </p>
 
@@ -107,17 +109,18 @@
     <div class="subcommand">-b</div>
     <div class="subcmd-container">
       <p class="subcmd-dsc">
-        Specifies a box to use. If this option is not passed to zk, it will use
+        Specifies a box to use. If this option is not passed to 
+        <code class="inline">szettel</code>, it will use
         the currently selected box. This can be useful to view the contents of a
         box other than the current one, without having to switch boxes. For
         example, to display note 1.2 in box notes (while notes is not the
-        current box), run <code class="inline">zk -b notes show 1.2</code>.
+        current box), run <code class="inline">szettel -b notes show 1.2</code>.
       </p>
     </div>
     <div class="subcommand">-h</div>
     <div class="subcmd-container">
       <p class="subcmd-dsc">
-        Display all options and subcommands for zk.
+        Display all options and subcommands for <code class="inline">szettel</code>.
       </p>
     </div>
 
@@ -133,7 +136,7 @@
           <div class="subcommand">ls</div>
           <p class="subcmd-dsc">
             List all boxes. This is the default subcommand, so
-            <code class="inline">zk box</code> and <code class="inline">zk box ls</code>
+            <code class="inline">szettel box</code> and <code class="inline">szettel box ls</code>
             produce the same output. However, passing the
             <code class="inline">-a</code> flag to this command lists <i>all</i>
             boxes, even boxes which are not tracked (removed).
@@ -141,26 +144,27 @@
           <div class="subcommand">add</div>
           <p class="subcmd-dsc">
             Add a new box. This creates the boxes directory under the directory
-            <code class="inline">~/.zk</code>, initializes
+            <code class="inline">~/.szettel</code>, initializes
             <code class="inline">git</code> for this directory, and places a
             <code class="inline">.track</code> file inside the box. This
             subcommand requires the name of the box to add, for example,
-            <code class="inline">zk box add notes</code>.
+            <code class="inline">szettel box add notes</code>.
           </p>
           <div class="subcommand">rm</div>
           <p class="subcmd-dsc">
             Remove a box. This does <i>not</i> remove any
             files (other than the <code class="inline">.track</code> file, which
-            simply tells zk that the box is tracked). It is up to you to decide if
+            simply tells <code class="inline">szettel</code> that the box is tracked). It is up to you to decide if
             you want to actually delete your notes.
           </p>
           <div class="subcommand">track</div>
           <p class="subcmd-dsc">
             Tracks a previously deleted box. For example, if the user previously
             removed the <code class="inline">test</code> box (or has copied this
-            directory of markdown notes from another location), they can tell zk
+            directory of markdown notes from another location), they can tell
+            SimpleZettel
             that it is a box to be tracked by running
-            <code class="inline">zk box track test</code>.
+            <code class="inline">szettel box track test</code>.
           </p>
           <div class="subcommand">help</div>
           <p class="subcmd-dsc">
@@ -180,9 +184,9 @@
       <div class="subcmd-container">
         <p class="subcmd-dsc">Add markdown notes to a box. You must specify the
         note name when calling this subcommand, for example,
-        <code class="inline">zk add 1.23.2</code>. Zk will then drop the user
+        <code class="inline">szettel add 1.23.2</code>. SimpleZettel will then drop the user
         into <code class="inline">vim</code> to edit the note.  Once the user
-        exits the editor, zk will ask the user if they would like to commit the
+        exits the editor, the user is asked if they would like to commit the
         change to <code class="inline">git</code>. If the user specifies that
         they would, they are once again dropped into an editor to specify the
         commit message. Currently
@@ -202,7 +206,7 @@
     <div class="subcommand">edit</div>
       <div class="subcmd-container">
         <p class="subcmd-dsc">
-          Edit a note. Just like the <code class="inline">zk add</code> command,
+          Edit a note. Just like the <code class="inline">szettel add</code> command,
           the user is dropped into <code class="inline">vim</code> to edit the
           notes contents. If the file is changed in any way, the user is
           prompted to commit the changes to <code class="inline">git</code>.
@@ -211,7 +215,7 @@
     <div class="subcommand">rm</div>
       <div class="subcmd-container">
         <p class="subcmd-dsc">
-          Remove a note from a box. Unlike the <code class="inline">zk box rm</code>
+          Remove a note from a box. Unlike the <code class="inline">szettel box rm</code>
           command, this command <i>does</i> remove the note file from the
           filesystem. Use carefully.
         </p>
@@ -219,7 +223,7 @@
     <div class="subcommand">import</div>
       <div class="subcmd-container">
         <p class="subcmd-dsc">Copy a file into the current box. This is not
-        limited to Markdown files, but can be any file. Note that zk currently
+        limited to Markdown files, but can be any file. Note that SimpleZettel currently
         only supports listing Markdown and PDF files.</p>
       </div>
     <div class="subcommand">config</div>
@@ -231,15 +235,15 @@
     <div class="subcommand">help</div>
       <div class="subcmd-container">
         <p class="subcmd-dsc">
-          Display all subcommands and options for zk.
+          Display all subcommands and options for <code class="inline">szettel</code>.
         </p>
       </div>
  
   <h2>Configuration</h2>
   <p>
-    The configuration of zk is still very limited, but will expanded in the
+    The configuration of <code class="inline">szettel</code> is still very limited, but will expanded in the
     future. The config file should be located at 
-    <code class="inline">~/.zk/config.toml</code>, and should contain a single
+    <code class="inline">~/.szettel/config.toml</code>, and should contain a single
     TOML table: the <code class="inline">show</code> table. The valid keys for
     this table are shown below.
   </p>

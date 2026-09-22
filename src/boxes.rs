@@ -56,7 +56,7 @@ fn create_box(matches: &ArgMatches) -> Result<(), ZkError> {
 }
 
 fn list_boxes(all: bool) -> Result<(), ZkError> {
-    let zk_dir = utils::get_zk_dir()?;
+    let zk_dir = utils::get_szettel_dir()?;
     let current = match utils::get_current_box() {
         Ok(p) => p,
         Err(ZkError::NoCurrentBox) => {
@@ -116,12 +116,11 @@ pub fn use_box(matches: &ArgMatches) -> Result<(), ZkError> {
     if let Some(name) = matches.get_one::<String>("name") {
         let path = utils::path_from_name(&name)?;
         if is_tracked(&path)? == false {
-            println!("This box has been removed. Use `box track` to add it.");
-            return Ok(());
+            return Err(ZkError::BoxNotTracked);
         };
         match fs::exists(&path) {
             Ok(true) => {
-                let mut current = utils::get_zk_dir()?;
+                let mut current = utils::get_szettel_dir()?;
                 current.push(".current");
                 match fs::write(current, name) {
                     Ok(_) => {

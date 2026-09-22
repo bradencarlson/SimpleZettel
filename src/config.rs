@@ -35,7 +35,7 @@ impl ZkConfig {
 }
 
 pub fn get_config() -> Result<ZkConfig, ZkError> {
-    let mut config = utils::get_zk_dir()?;
+    let mut config = utils::get_szettel_dir()?;
     config.push("config.toml");
     match fs::exists(&config) {
         Ok(true) =>  {},
