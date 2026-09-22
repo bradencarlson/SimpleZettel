@@ -5,9 +5,14 @@
   --inline-bg: #22272a;
   --inline-code-border: #326282;
   --subcmd-bg: var(--bg);
-  --subcmd-color: #fefeff;
+  --subcmd-color: gold;
   --subcmd-border: var(--inline-code-border);
   --font-size: 15pt;
+  --link-fg: gold;
+}
+
+a {
+  color: var(--link-fg);
 }
 
 p {
@@ -82,3 +87,4 @@ html {
 .float-left {
   float: left;
 }
+

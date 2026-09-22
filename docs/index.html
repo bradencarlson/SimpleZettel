@@ -40,8 +40,9 @@
       </ul>
     </p>
     <p>
-      With the above ordering in mind, it is recommended to name notes according
-      to a Luhmann style system (i.e. the note whose name is 1.3.4.2 is related
+      With the above ordering in mind, it is recommended to name notes in such a
+      way that notes have a clear hierarchy
+      (i.e. the note whose name is 1.3.4.2 is related
       to note 1.3.4, but does not follow the same line of thought as note
       1.3.4.1).
     </p>
@@ -84,6 +85,13 @@
       in their config file, and for allowing note names such as 1.1a. For now
       though, note names should fall into one of the two valid categories laid
       out above.
+    </p>
+
+    <h2>Installation</h2>
+    <p>
+      It is recommended to install using Cargo. However, binaries for Linux are
+      provided in the <a href="https://github.com/bradencarlson/zk">releases</a>
+      page.
     </p>
 
     <h2>Options</h2>
@@ -218,5 +226,40 @@
           Display all subcommands and options for zk.
         </p>
       </div>
+ 
+  <h2>Configuration</h2>
+  <p>
+    The configuration of zk is still very limited, but will expanded in the
+    future. The config file should be located at 
+    <code class="inline">~/.zk/config.toml</code>, and should contain a single
+    TOML table: the <code class="inline">show</code> table. The valid keys for
+    this table are shown below.
+  </p>
+  <div class="subcommand">show</div>
+  <div class="subcmd-container">
+    <p class="subcmd-dsc">
+      The valid keys for the <code class="inline">show</code> table are as
+      follows.
+    </p>
+    <div class="level2">
+      <div class="subcommand">md</div>
+      <p class="subcmd-dsc">
+        Defines the command to run when displaying a Markdown note. For example,
+        the author prefers the value of this key to be 
+        <code class="inline">glow</code>.  This
+        currently only supports a command with out any arguments. This will be
+        changed in the future.
+      </p>
+      <div class="subcommand">pdf</div>
+      <p class="subcmd-dsc">
+        Defines the command to run when displaying a PDF file. For example,
+        the author prefers the value of this key to be 
+        <code class="inline">sioyek</code>.  This
+        currently only supports a command with out any arguments. This will be
+        changed in the future.
+      </p>
+    </div>
+  </div>
+
   </body>
 </html>
