@@ -23,6 +23,10 @@ p {
 
 }
 
+body {
+  padding-bottom: 25pt;
+}
+
 html {
   background-color: var(--bg);
 }
@@ -84,7 +88,13 @@ html {
   padding-bottom: 5px;
 }
 
-.float-left {
+.float-right {
   float: left;
 }
 
+
+.footer {
+  text-align: center;
+  padding: 10pt 0pt 10pt 0pt;
+  font-size: 12pt;
+}
