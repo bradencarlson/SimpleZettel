@@ -1,4 +1,4 @@
-$ szettel ls
+$ szk ls
 	1.1			Options in Rust
     1.1.1		Returning the Option type
     1.1.2		The Option type as a parameter

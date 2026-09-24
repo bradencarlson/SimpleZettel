@@ -1,20 +1,20 @@
 # start in short box, but don't list it
-szettel box
-szettel use demo
-szettel
-szettel show 1.1
-szettel add 1.3.1
+szk box
+szk use demo
+szk
+szk show 1.1
+szk add 1.3.1
 
 # Error trait requirements
 
 Requires Debug and Display traits
 
-szettel show 1.3.1
-szettel use short
-szettel box rm demo
-szettel box
-szettel box ls -a
-szettel box track demo
-szettel box
-szettel use demo
-szettel
+szk show 1.3.1
+szk use short
+szk box rm demo
+szk box
+szk box ls -a
+szk box track demo
+szk box
+szk use demo
+szk

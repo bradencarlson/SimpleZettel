@@ -67,7 +67,7 @@
     <code class="inline">1.1&emsp;&emsp;Options in Rust</code>
     </p>
     <p>As a more complete example, here is what the output of 
-    <code class="inline">szettel</code> might look like
+    <code class="inline">szk</code> might look like
     for someone who has been taking notes on the Rust programming language.
     <div class="centered-h">
     <img src="img/rust-zk.svg" style="width: 85%;">
@@ -110,17 +110,17 @@
     <div class="subcmd-container">
       <p class="subcmd-dsc">
         Specifies a box to use. If this option is not passed to 
-        <code class="inline">szettel</code>, it will use
+        <code class="inline">szk</code>, it will use
         the currently selected box. This can be useful to view the contents of a
         box other than the current one, without having to switch boxes. For
         example, to display note 1.2 in box notes (while notes is not the
-        current box), run <code class="inline">szettel -b notes show 1.2</code>.
+        current box), run <code class="inline">szk -b notes show 1.2</code>.
       </p>
     </div>
     <div class="subcommand">-h</div>
     <div class="subcmd-container">
       <p class="subcmd-dsc">
-        Display all options and subcommands for <code class="inline">szettel</code>.
+        Display all options and subcommands for <code class="inline">szk</code>.
       </p>
     </div>
 
@@ -136,7 +136,7 @@
           <div class="subcommand">ls</div>
           <p class="subcmd-dsc">
             List all boxes. This is the default subcommand, so
-            <code class="inline">szettel box</code> and <code class="inline">szettel box ls</code>
+            <code class="inline">szk box</code> and <code class="inline">szk box ls</code>
             produce the same output. However, passing the
             <code class="inline">-a</code> flag to this command lists <i>all</i>
             boxes, even boxes which are not tracked (removed).
@@ -148,13 +148,13 @@
             <code class="inline">git</code> for this directory, and places a
             <code class="inline">.track</code> file inside the box. This
             subcommand requires the name of the box to add, for example,
-            <code class="inline">szettel box add notes</code>.
+            <code class="inline">szk box add notes</code>.
           </p>
           <div class="subcommand">rm</div>
           <p class="subcmd-dsc">
             Remove a box. This does <i>not</i> remove any
             files (other than the <code class="inline">.track</code> file, which
-            simply tells <code class="inline">szettel</code> that the box is tracked). It is up to you to decide if
+            simply tells <code class="inline">szk</code> that the box is tracked). It is up to you to decide if
             you want to actually delete your notes.
           </p>
           <div class="subcommand">track</div>
@@ -164,7 +164,7 @@
             directory of markdown notes from another location), they can tell
             SimpleZettel
             that it is a box to be tracked by running
-            <code class="inline">szettel box track test</code>.
+            <code class="inline">szk box track test</code>.
           </p>
           <div class="subcommand">help</div>
           <p class="subcmd-dsc">
@@ -184,7 +184,7 @@
       <div class="subcmd-container">
         <p class="subcmd-dsc">Add markdown notes to a box. You must specify the
         note name when calling this subcommand, for example,
-        <code class="inline">szettel add 1.23.2</code>. SimpleZettel will then drop the user
+        <code class="inline">szk add 1.23.2</code>. SimpleZettel will then drop the user
         into <code class="inline">vim</code> to edit the note.  Once the user
         exits the editor, the user is asked if they would like to commit the
         change to <code class="inline">git</code>. If the user specifies that
@@ -206,7 +206,7 @@
     <div class="subcommand">edit</div>
       <div class="subcmd-container">
         <p class="subcmd-dsc">
-          Edit a note. Just like the <code class="inline">szettel add</code> command,
+          Edit a note. Just like the <code class="inline">szk add</code> command,
           the user is dropped into <code class="inline">vim</code> to edit the
           notes contents. If the file is changed in any way, the user is
           prompted to commit the changes to <code class="inline">git</code>.
@@ -215,7 +215,7 @@
     <div class="subcommand">rm</div>
       <div class="subcmd-container">
         <p class="subcmd-dsc">
-          Remove a note from a box. Unlike the <code class="inline">szettel box rm</code>
+          Remove a note from a box. Unlike the <code class="inline">szk box rm</code>
           command, this command <i>does</i> remove the note file from the
           filesystem. Use carefully.
         </p>
@@ -235,13 +235,13 @@
     <div class="subcommand">help</div>
       <div class="subcmd-container">
         <p class="subcmd-dsc">
-          Display all subcommands and options for <code class="inline">szettel</code>.
+          Display all subcommands and options for <code class="inline">szk</code>.
         </p>
       </div>
  
   <h2>Configuration</h2>
   <p>
-    The configuration of <code class="inline">szettel</code> is still very limited, but will expanded in the
+    The configuration of <code class="inline">szk</code> is still very limited, but will expanded in the
     future. The config file should be located at 
     <code class="inline">~/.szettel/config.toml</code>, and should contain a single
     TOML table: the <code class="inline">show</code> table. The valid keys for
