@@ -1,3 +1,4 @@
+use std::path::PathBuf;
 use std::process::Command;
 use crate::error::ZkError;
 use crate::utils;
@@ -49,3 +50,16 @@ pub fn commit() -> Result<bool, ZkError> {
     }
 }
 
+pub fn init(path: &PathBuf) -> Result<(), ZkError> {
+    utils::verify_path(path)?;
+    match Command::new("git")
+        .arg("init")
+        .arg(path)
+        .output() {
+            Ok(_) => {
+                println!("successfully initialized git for box");
+                Ok(())
+            },
+            Err(_) => Err(ZkError::GitInit)
+    }
+}

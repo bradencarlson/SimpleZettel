@@ -6,6 +6,7 @@ use clap::ArgMatches;
 use crate::utils;
 use crate::error::ZkError;
 use crate::error;
+use crate::vcs;
 
 pub fn handle_subcommand(matches: &ArgMatches) -> Result<(), ZkError> {
     match matches.subcommand() {
@@ -40,7 +41,7 @@ fn create_box(matches: &ArgMatches) -> Result<(), ZkError> {
             Ok(false) => {
                 match fs::create_dir(&path) {
                     Ok(_) => {
-                        git_init(&path)?;
+                        vcs::init(&path)?;
                         track(&path)?;
                         println!("Created box successfully");
                         Ok(())
@@ -149,19 +150,6 @@ fn track_box(matches: &ArgMatches) -> Result<(), ZkError> {
     }
 }
 
-fn git_init(path: &PathBuf) -> Result<(), ZkError> {
-    utils::verify_path(path)?;
-    match Command::new("git")
-        .arg("init")
-        .arg(path)
-        .output() {
-            Ok(_) => {
-                println!("successfully initialized git for box");
-                Ok(())
-            },
-            Err(_) => Err(ZkError::GitInit)
-    }
-}
 
 fn track(path: &PathBuf) -> Result<(), ZkError> {
     utils::verify_path(path)?;
