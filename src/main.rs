@@ -4,6 +4,7 @@ mod notes;
 mod utils;
 mod error;
 mod config;
+mod vcs;
 
 use regex::Regex;
 
@@ -71,7 +72,7 @@ fn main() {
             }
         },
         Some(("show", sub_m)) => {
-            match notes::show_note(sub_m, &config, bname) {
+            match notes::show_note(sub_m, &config.show, bname) {
                 Ok(_) => {},
                 Err(e) => {
                     error::warning(&e.to_string());

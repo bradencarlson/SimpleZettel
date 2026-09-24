@@ -9,7 +9,8 @@ use regex::Regex;
 
 use crate::error::ZkError;
 use crate::utils;
-use crate::config::{ZkConfig,ZkCmd};
+use crate::config::{ZkConfig,ZkCmd,ZkShowCommands};
+use crate::vcs;
 
 pub mod ft;
 use ft::FileType;
@@ -266,16 +267,16 @@ pub fn add_note(matches: &ArgMatches, b: Option<&String>, editor: &ZkCmd) -> Res
     Err(ZkError::NoteAddArgs)
 }
 
-pub fn show_note(matches: &ArgMatches, config: &ZkConfig, b: Option<&String>) -> Result<(), ZkError> {
+pub fn show_note(matches: &ArgMatches, show_cmds: &ZkShowCommands, b: Option<&String>) -> Result<(), ZkError> {
     if let Some(name) = matches.get_one::<String>("name") {
         let note = utils::zkcard_from_name(name, b)?;
         #[cfg(feature = "filetypes")]
-        match ft::show_note(&note, config) {
+        match ft::show_note(&note, show_cmds) {
             Ok(()) => {return Ok(());},
             Err(e) => {return Err(e);}
         };
         
-        match config.show.md {
+        match show_cmds.md {
             ZkCmd::cmd(ref cmd) => {
                 match Command::new(cmd)
                     .arg(&note.path)
@@ -494,11 +495,8 @@ fn edit_file(path: &PathBuf, editor: &ZkCmd) -> Result<(), ZkError> {
                     if hashes.equal() {
                         return Ok(())
                     }
-                    #[cfg(feature = "git")]
-                    { 
-                        git_add()?;
-                        git_commit()?;
-                    }
+                    vcs::add()?;
+                    vcs::commit()?;
                     Ok(())
                 } else {
                     Err(ZkError::Other(String::from("something went wrong while opening vim for the user")))
@@ -601,54 +599,6 @@ fn get_references(path: &PathBuf) -> Result<Vec::<ZkRef>, ZkError> {
         return Err(ZkError::Access(path.to_path_buf()))
     }
     Ok(refs)
-}
-
-#[cfg(feature = "git")]
-fn git_add() -> Result<(), ZkError> {
-    let current = utils::get_current_box()?;
-    match Command::new("git")
-        .current_dir(&current)
-        .arg("add")
-        .arg(".")
-        .status() {
-            Ok(status) => {
-                if status.success() {
-                    Ok(())
-                } else {
-                    Err(ZkError::GitAdd)
-                }
-            },
-            Err(e) => {
-                Err(ZkError::Other(e.to_string()))
-            }
-    }
-
-}
-
-#[cfg(feature = "git")]
-fn git_commit() -> Result<bool, ZkError> {
-    let resp = utils::prompt_user("Would you like to commit changes to git? [Y/n]")?;
-    let Y = String::from("Y");
-    let y = String::from("y");
-    if resp != Y && resp != y {
-        return Ok(false);
-    }
-    let current = utils::get_current_box()?;
-    match Command::new("git")
-        .current_dir(&current)
-        .arg("commit")
-        .status() {
-            Ok(status) => {
-                if status.success() {
-                    Ok(true)
-                } else {
-                    Err(ZkError::GitCommit)
-                }
-            },
-            Err(e) => {
-                Err(ZkError::Other(e.to_string()))
-            }
-    }
 }
 
 #[test]

@@ -6,8 +6,7 @@ use std::process::Command;
 
 use crate::error::ZkError;
 use crate::notes::ZkCard;
-use crate::config::ZkConfig;
-use crate::config::ZkCmd;
+use crate::config::{ZkConfig,ZkCmd,ZkShowCommands};
 
 #[derive(Debug)]
 pub enum FileType {
@@ -41,10 +40,10 @@ pub fn get_filetype(path: &Path) -> Result<FileType, ZkError> {
     }
 }
 
-pub fn show_note(card: &ZkCard, config: &ZkConfig) -> Result<(), ZkError> {
+pub fn show_note(card: &ZkCard, show_cmds: &ZkShowCommands) -> Result<(), ZkError> {
     match card.filetype {
         FileType::Markdown => {
-            match config.show.md {
+            match show_cmds.md {
                 ZkCmd::cmd(ref cmd) => {
                     Command::new(cmd)
                         .arg(&card.path)
@@ -62,7 +61,7 @@ pub fn show_note(card: &ZkCard, config: &ZkConfig) -> Result<(), ZkError> {
             };
         },
         FileType::PDF => {
-            match config.show.pdf {
+            match show_cmds.pdf {
                 ZkCmd::cmd(ref cmd) => {
                     Command::new(cmd)
                         .arg(&card.path)
