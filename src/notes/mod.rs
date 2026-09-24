@@ -77,11 +77,9 @@ impl From<PathBuf> for ZkCard {
             Ok(s) => s,
             Err(e) => String::from("No valid header")
         };
-        let mut filetype = FileType::Markdown;
-        #[cfg(feature = "filetypes")]
         let filetype = match ft::get_filetype(&path) {
-            Ok(t) => t,
-            Err(_) => FileType::Markdown
+            Ok(f) => f,
+            Err(e) => FileType::Markdown
         };
         ZkCard {
             path: path,
