@@ -72,104 +72,23 @@ impl std::fmt::Display for ZkMatch<'_> {
 
 impl From<PathBuf> for ZkCard {
     fn from(path: PathBuf) -> Self {
-        if let Ok(true) = fs::exists(&path) {
-            let mut filetype = FileType::Markdown;
-            #[cfg(feature = "filetypes")]
-            let filetype = match ft::get_filetype(&path) {
-                Ok(t) => t,
-                Err(_) => FileType::Markdown
-            };
-            let header = match get_first_header(&path) {
-                Ok(s) => s,
-                Err(_) => String::from("no valid header found")
-            };
-            if let Some(filename) = path.file_stem() {
-                let f = match filename.to_str() {
-                    Some(s) => s,
-                    None => {
-                        return ZkCard{
-                            path: path,
-                            number: ZkNumber::Invalid,
-                            header: header,
-                            filetype: filetype,
-                            references: Vec::<ZkRef>::new(),
-                        };
-                    }
-                };
-                let name = String::from(f);
-                match parse_number(&f) {
-                    Ok(v) => {
-                        return ZkCard{
-                            path: path,
-                            number: ZkNumber::Num(v),
-                            header: header,
-                            filetype: filetype,
-                            references: Vec::<ZkRef>::new(),
-                        };
-                    },
-                    Err(_) => {
-                        return ZkCard{
-                            path: path,
-                            number: ZkNumber::Alpha(name),
-                            header: header,
-                            filetype: filetype,
-                            references: Vec::<ZkRef>::new(),
-                        };
-                    }
-                }
-            } else {
-                ZkCard{
-                    path: path,
-                    number: ZkNumber::Invalid,
-                    header: header,
-                    filetype: FileType::Markdown,
-                    references: Vec::<ZkRef>::new(),
-                }
-            }
-        } else {
-            if let Some(filename) = path.file_stem() {
-                let f = match filename.to_str() {
-                    Some(s) => s,
-                    None => {
-                        return ZkCard{
-                            path: path,
-                            number: ZkNumber::Invalid,
-                            header: String::from(""),
-                            filetype: FileType::Markdown,
-                            references: Vec::<ZkRef>::new(),
-                        };
-                    }
-                };
-                let name = String::from(f);
-                match parse_number(&f) {
-                    Ok(v) => {
-                        return ZkCard{
-                            path: path,
-                            number: ZkNumber::Num(v),
-                            header: String::from(""),
-                            filetype: FileType::Markdown,
-                            references: Vec::<ZkRef>::new(),
-                        };
-                    },
-                    Err(_) => {
-                        return ZkCard{
-                            path: path,
-                            number: ZkNumber::Alpha(name),
-                            header: String::from(""),
-                            filetype: FileType::Markdown,
-                            references: Vec::<ZkRef>::new(),
-                        };
-                    }
-                }
-            } else {
-                ZkCard{
-                    path: path,
-                    number: ZkNumber::Invalid,
-                    header: String::from(""),
-                    filetype: FileType::Markdown,
-                    references: Vec::<ZkRef>::new(),
-                }
-            }
+        let number = ZkCard::get_number(&path);
+        let header = match get_first_header(&path) {
+            Ok(s) => s,
+            Err(e) => String::from("No valid header")
+        };
+        let mut filetype = FileType::Markdown;
+        #[cfg(feature = "filetypes")]
+        let filetype = match ft::get_filetype(&path) {
+            Ok(t) => t,
+            Err(_) => FileType::Markdown
+        };
+        ZkCard {
+            path: path,
+            number: number,
+            header: header,
+            filetype: filetype,
+            references: Vec::<ZkRef>::new()
         }
     }
 }
@@ -214,6 +133,23 @@ impl ZkCard {
         };
         String::new()
     }
+
+    pub fn get_number(path: &PathBuf) -> ZkNumber {
+        if let Some(f) = path.file_stem() {
+            if let Some(fname) = f.to_str() {
+                if let Ok(v) = parse_number(fname) {
+                    return ZkNumber::Num(v);
+                } else {
+                    return ZkNumber::Alpha(fname.to_string());
+                }
+            } else {
+                return ZkNumber::Invalid;
+            }
+        } else {
+            return ZkNumber::Invalid;
+        }
+    }
+
 }
 
 impl std::fmt::Display for ZkCard {
