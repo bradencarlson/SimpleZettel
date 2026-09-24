@@ -225,7 +225,7 @@ impl std::cmp::Ord for ZkCard {
 }
 
 
-pub fn add_note(matches: &ArgMatches, b: Option<&String>) -> Result<(), ZkError> {
+pub fn add_note(matches: &ArgMatches, b: Option<&String>, editor: &ZkCmd) -> Result<(), ZkError> {
     if let Some(name) = matches.get_one::<String>("name") {
         let file = utils::note_path_from_name(name, None, b)?;
         match fs::exists(&file) {
@@ -236,7 +236,7 @@ pub fn add_note(matches: &ArgMatches, b: Option<&String>) -> Result<(), ZkError>
         };
         match File::create(&file) {
             Ok(_) => {
-                edit_file(&file)?;
+                edit_file(&file, editor)?;
                 return Ok(());
             },
             Err(_) => {
@@ -255,7 +255,7 @@ pub fn add_note(matches: &ArgMatches, b: Option<&String>) -> Result<(), ZkError>
         };
         match File::create(&file) {
             Ok(_) => {
-                edit_file(&file)?;
+                edit_file(&file, editor)?;
                 return Ok(());
             },
             Err(_) => {
@@ -324,11 +324,11 @@ pub fn rm_note(matches: &ArgMatches, b: Option<&String>) -> Result<(), ZkError> 
     }
 }
 
-pub fn edit_note(matches: &ArgMatches, b: Option<&String>) -> Result<(), ZkError> {
+pub fn edit_note(matches: &ArgMatches, b: Option<&String>, editor: &ZkCmd) -> Result<(), ZkError> {
     if let Some(name) = matches.get_one::<String>("name") {
         let note = utils::note_path_from_name(name, None, b)?;
         if utils::note_exists(&note)? {
-            edit_file(&note)?;
+            edit_file(&note, editor)?;
         };
         Ok(())
     } else {
@@ -477,11 +477,15 @@ fn get_notes(p: Option<&Regex>, b: Option<&String>) -> Result<Vec::<ZkCard>, ZkE
 }
 
 
-fn edit_file(path: &PathBuf) -> Result<(), ZkError> {
+fn edit_file(path: &PathBuf, editor: &ZkCmd) -> Result<(), ZkError> {
     utils::verify_note_path(path)?;
     let mut hashes = utils::HashPair::new();
     hashes.push_path(&path)?;
-    match Command::new("vim")
+    let cmd = match editor {
+        ZkCmd::cmd(edit_cmd) => edit_cmd,
+        ZkCmd::Invalid => "vim"
+    };
+    match Command::new(cmd)
         .arg(&path)
         .status() {
             Ok(status) => {

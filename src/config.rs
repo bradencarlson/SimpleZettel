@@ -13,7 +13,8 @@ pub struct ZkConfig {
 
 #[derive(Debug,Default)]
 pub struct ZkGenCommands {
-    pub highlight: ZkCmd
+    pub highlight: ZkCmd,
+    pub editor: ZkCmd
 }
 #[derive(Debug,Default)]
 pub struct ZkShowCommands {
@@ -81,6 +82,11 @@ fn parse_table(tab: Table) -> Result<ZkConfig, ZkError> {
             let v = c.to_string();
             let v = clean_value(&v);
             config.general.highlight = ZkCmd::cmd(v.to_string());
+        }
+        if let Some(c) = cmd_tab.get("editor") {
+            let v = c.to_string();
+            let v = clean_value(&v);
+            config.general.editor = ZkCmd::cmd(v.to_string());
         }
     }
 

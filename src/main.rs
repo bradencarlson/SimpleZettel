@@ -37,7 +37,7 @@ fn main() {
             };
         },
         Some(("add", sub_m)) => {
-            match notes::add_note(sub_m, bname) {
+            match notes::add_note(sub_m, bname, &config.general.editor) {
                 Ok(_) => {
                     println!("Note added successfully.");
                 },
@@ -55,7 +55,7 @@ fn main() {
             }
         },
         Some(("edit", sub_m)) => {
-            match notes::edit_note(sub_m, bname) {
+            match notes::edit_note(sub_m, bname, &config.general.editor) {
                 Ok(_) => {},
                 Err(e) => {
                     error::warning(&e.to_string());
