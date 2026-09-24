@@ -1,4 +1,4 @@
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::fs::File;
 use std::fs;
 use std::io::Read;
@@ -41,24 +41,13 @@ pub fn get_filetype(path: &Path) -> Result<FileType, ZkError> {
 }
 
 pub fn show_note(card: &ZkCard, show_cmds: &ZkShowCommands) -> Result<(), ZkError> {
+    if !cfg!(feature = "filetypes") {
+        print_note(card)?;
+        return Ok(());
+    }
     match card.filetype {
         FileType::Markdown => {
-            match show_cmds.md {
-                ZkCmd::cmd(ref cmd) => {
-                    Command::new(cmd)
-                        .arg(&card.path)
-                        .status();
-                    return Ok(());
-                }, 
-                ZkCmd::Invalid => {
-                    if let Ok(s) = fs::read_to_string(&card.path) {
-                        println!("{}", s);
-                        return Ok(());
-                    } else {
-                        return Err(ZkError::NoteRead(card.path.clone()));
-                    }
-                }
-            };
+            run_cmd(&card, &show_cmds.md)?;
         },
         FileType::PDF => {
             match show_cmds.pdf {
@@ -75,4 +64,27 @@ pub fn show_note(card: &ZkCard, show_cmds: &ZkShowCommands) -> Result<(), ZkErro
             }
         }
     }
+    Ok(())
+}
+
+fn run_cmd(card: &ZkCard, cmd: &ZkCmd) -> Result<(), ZkError> {
+    match cmd {
+        ZkCmd::cmd(cmd) => {
+            Command::new(cmd)
+                .arg(&card.path)
+                .status();
+        }, 
+        ZkCmd::Invalid => {
+            print_note(card)?;
+        }
+    };
+    Ok(())
+}
+fn print_note(card: &ZkCard) -> Result<(), ZkError> {
+    if let Ok(s) = fs::read_to_string(&card.path) {
+        println!("{}", s);
+    } else {
+        return Err(ZkError::NoteRead(card.path.clone()));
+    }
+    Ok(())
 }

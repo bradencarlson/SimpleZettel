@@ -270,38 +270,7 @@ pub fn add_note(matches: &ArgMatches, b: Option<&String>, editor: &ZkCmd) -> Res
 pub fn show_note(matches: &ArgMatches, show_cmds: &ZkShowCommands, b: Option<&String>) -> Result<(), ZkError> {
     if let Some(name) = matches.get_one::<String>("name") {
         let note = utils::zkcard_from_name(name, b)?;
-        #[cfg(feature = "filetypes")]
-        match ft::show_note(&note, show_cmds) {
-            Ok(()) => {return Ok(());},
-            Err(e) => {return Err(e);}
-        };
-        
-        match show_cmds.md {
-            ZkCmd::cmd(ref cmd) => {
-                match Command::new(cmd)
-                    .arg(&note.path)
-                    .status() {
-                        Ok(status) => {
-                            if status.success() {
-                                return Ok(());
-                            } else {
-                                return Err(ZkError::NoteShow(note.path));
-                            }
-                        },
-                        Err(e) => {
-                            return Err(e.into());
-                        }
-                }
-            },
-            ZkCmd::Invalid => {
-                if let Ok(content) = fs::read_to_string(&note.path) {
-                    print!("{}", content);
-                    return Ok(());
-                } else {
-                    return Err(ZkError::NoteRead(note.path));
-                }
-            }
-        };
+        ft::show_note(&note, show_cmds)?;
         Ok(())
     } else {
         Err(ZkError::NoName)
