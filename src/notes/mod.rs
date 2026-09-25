@@ -100,7 +100,17 @@ impl ZkCard {
             ZkNumber::Invalid => 0
         }
     }
-    pub fn format_number(&self, space: usize) -> String {
+    pub fn pretty_print(&self, space: usize, style: Option<anstyle::Style>) {
+        match style {
+            Some(sty) => {
+                println!("{}{sty}{}{sty:#}{}", self.filetype_prefix(), self.format_number(space), self.header);
+            },
+            None => {
+                println!("{}{}{}", self.filetype_prefix(), self.format_number(space), self.header);
+            }
+        };
+    }
+    fn format_number(&self, space: usize) -> String {
         let mut s = String::new();
         match self.number {
             ZkNumber::Num(ref v) => {
@@ -124,7 +134,7 @@ impl ZkCard {
             ZkNumber::Invalid => s
         }
     }
-    pub fn filetype_prefix(&self) -> String {
+    fn filetype_prefix(&self) -> String {
         #[cfg(feature = "filetypes")]
         return match self.filetype {
             FileType::Markdown => "    ".to_string(),
@@ -356,14 +366,14 @@ pub fn search_notes(needle: &Regex, b: Option<&String>) -> Result<(), ZkError> {
     Ok(())
 }
 
-pub fn list_notes(m: Option<&ArgMatches>, b: Option<&String>) -> Result<(), ZkError> {
+pub fn list_notes(m: Option<&ArgMatches>, b: Option<&String>, color: &u8) -> Result<(), ZkError> {
     match m {
         Some(matches) => {
             if let Ok(Some(num)) = matches.try_get_one::<String>("number") {
                 let mut pat = String::from("^");
                 pat.push_str(num.as_str());
                 let r = Regex::new(&pat).unwrap();
-                list_files(Some(&r), b)?;
+                list_files(Some(&r), b, color)?;
                 Ok(())
             } else if let Ok(Some(pat)) = matches.try_get_one::<String>("pattern") {
                 let r = match Regex::new(pat) {
@@ -372,21 +382,21 @@ pub fn list_notes(m: Option<&ArgMatches>, b: Option<&String>) -> Result<(), ZkEr
                         return Err(ZkError::Other(e.to_string()));
                     }
                 };
-                list_files(Some(&r), b)?;
+                list_files(Some(&r), b, color)?;
                 Ok(())
             } else {
-                list_files(None, b)?;
+                list_files(None, b, color)?;
                 Ok(())
             }
         },
         None => {
-            list_files(None, b)?;
+            list_files(None, b, color)?;
             Ok(())
         }
     }
 }
 
-fn list_files(p: Option<&Regex>, b: Option<&String>) -> Result<(), ZkError> {
+fn list_files(p: Option<&Regex>, b: Option<&String>, color: &u8) -> Result<(), ZkError> {
     let bx = match b {
         Some(name) => utils::get_box_from_name(name)?,
         None => utils::get_current_box()?
@@ -400,9 +410,9 @@ fn list_files(p: Option<&Regex>, b: Option<&String>) -> Result<(), ZkError> {
             Some(m) => m+4,
             None => 20
     };
-    let blue = anstyle::Style::new().fg_color(Some(anstyle::AnsiColor::Blue.into())).bold();
+    let style = anstyle::Style::new().fg_color(Some(anstyle::Ansi256Color::from(*color).into())).bold();
     for file in files.iter() {
-        println!("{}{blue}{}{blue:#}{}", file.filetype_prefix(), file.format_number(max), file.header);
+        file.pretty_print(max, Some(style));
     }
     Ok(())
 }
@@ -453,7 +463,7 @@ fn edit_file(path: &PathBuf, editor: &ZkCmd) -> Result<(), ZkError> {
     hashes.push_path(&path)?;
     let cmd = match editor {
         ZkCmd::cmd(edit_cmd) => edit_cmd,
-        ZkCmd::Invalid => "vim"
+        _ => "vim"
     };
     match Command::new(cmd)
         .arg(&path)

@@ -1,4 +1,5 @@
 use std::fs;
+use std::str::FromStr;
 use std::assert_matches;
 use toml::Table;
 
@@ -13,8 +14,8 @@ pub struct ZkConfig {
 
 #[derive(Debug,Default)]
 pub struct ZkGenCommands {
-    pub highlight: ZkCmd,
-    pub editor: ZkCmd
+    pub editor: ZkCmd,
+    pub highlight: u8,
 }
 #[derive(Debug,Default)]
 pub struct ZkShowCommands {
@@ -31,7 +32,9 @@ pub enum ZkCmd {
 
 impl ZkConfig {
     pub fn new() -> Self {
-        Default::default()
+        let mut z: ZkConfig = Default::default();
+        z.general.highlight = 167;
+        z
     }
 }
 
@@ -81,7 +84,13 @@ fn parse_table(tab: Table) -> Result<ZkConfig, ZkError> {
         if let Some(c) = cmd_tab.get("highlight") {
             let v = c.to_string();
             let v = clean_value(&v);
-            config.general.highlight = ZkCmd::cmd(v.to_string());
+            let u = match u8::from_str(v) {
+                Ok(value) => value,
+                Err(_) => {
+                    return Err(ZkError::ConfigHighlight);
+                }
+            };
+            config.general.highlight = u;
         }
         if let Some(c) = cmd_tab.get("editor") {
             let v = c.to_string();
@@ -108,6 +117,9 @@ fn clean_value(v: &str) -> &str {
 #[test]
 fn config() {
     let c1 = "
+[general]
+editor = 'vim'
+
 [show]
 md = 'glow'
 ";
@@ -116,6 +128,9 @@ md = 'glow'
     assert_eq!(conf1.show.md, ZkCmd::cmd(String::from("glow")));
 
     let c2 = "
+[general]
+editor = 'nano'
+
 [show]
 md = 'glow'
 pdf = 'sioyek'
@@ -124,6 +139,7 @@ pdf = 'sioyek'
     let conf2 = parse_table(tab2).unwrap();
     assert_eq!(conf2.show.md, ZkCmd::cmd(String::from("glow")));
     assert_eq!(conf2.show.pdf, ZkCmd::cmd(String::from("sioyek")));
+    assert_eq!(conf2.general.editor, ZkCmd::cmd(String::from("nano")));
 
 
 }

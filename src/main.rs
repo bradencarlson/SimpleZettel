@@ -26,6 +26,8 @@ fn main() {
         }
     };
 
+    let color = config.general.highlight;
+
     let bname = matches.get_one::<String>("box");
 
     match matches.subcommand() {
@@ -80,7 +82,7 @@ fn main() {
             }
         },
         Some(("ls", sub_m)) => {
-            match notes::list_notes(Some(sub_m), bname) {
+            match notes::list_notes(Some(sub_m), bname, &color) {
                 Ok(_) => {},
                 Err(e) => {
                     error::warning(&e.to_string());
@@ -131,7 +133,7 @@ fn main() {
             }
         },
         _ => {
-            match notes::list_notes(None, bname) {
+            match notes::list_notes(None, bname, &color) {
                 Ok(_) => {},
                 Err(e) => {
                     error::warning(&e.to_string());
