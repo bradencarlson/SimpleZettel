@@ -91,7 +91,7 @@
       As a side note, the numbering scheme above was chosen because it makes the
       most sense to the author of this program. However, the author recognizes
       that this might not be best for everyone, and plans on one day allowing
-      the user to specify a custom separator (inplace of the '.' used above)
+      the user to specify a custom separator (in place of the '.' used above)
       in their config file, and for allowing note names such as 1.1a. For now
       though, note names should fall into one of the two valid categories laid
       out above.
@@ -100,7 +100,8 @@
     <h2>Installation</h2>
     <p>
       It is recommended to install using Cargo. However, binaries for Linux are
-      provided in the <a href="https://github.com/bradencarlson/simplezettel">releases</a>
+      provided in the <a
+              href="https://github.com/bradencarlson/simplezettel/releases/">releases</a>
       page.
     </p>
 
@@ -127,7 +128,7 @@
     <h2>Subcommands</h2>
     <p>For all commands which operate on notes, the default behavior is to operate
     on notes from the currently selected box. You can change this with the
-    <code class="inline">-b</code> option as descriped above.</p>
+    <code class="inline">-b</code> option as described above.</p>
     <div class="subcommand">box</div>
       <div class="subcmd-container">
         <p class="subcmd-dsc">Perform operations on boxes. This subcommand
@@ -185,13 +186,12 @@
         <p class="subcmd-dsc">Add markdown notes to a box. You must specify the
         note name when calling this subcommand, for example,
         <code class="inline">szk add 1.23.2</code>. SimpleZettel will then drop the user
-        into <code class="inline">vim</code> to edit the note.  Once the user
+        into the editor specified in the config file (defaults to 
+        <code class="inline">vim</code>) to edit the note.  Once the user
         exits the editor, the user is asked if they would like to commit the
         change to <code class="inline">git</code>. If the user specifies that
         they would, they are once again dropped into an editor to specify the
-        commit message. Currently
-        <code class="inline">vim</code> is the only editor supported. This will
-        change in the future.</p>
+        commit message.</p>
       </div>
     <div class="subcommand">ls</div>
       <div class="subcmd-container">
@@ -206,10 +206,7 @@
     <div class="subcommand">edit</div>
       <div class="subcmd-container">
         <p class="subcmd-dsc">
-          Edit a note. Just like the <code class="inline">szk add</code> command,
-          the user is dropped into <code class="inline">vim</code> to edit the
-          notes contents. If the file is changed in any way, the user is
-          prompted to commit the changes to <code class="inline">git</code>.
+          Edit a note.
         </p>
       </div>
     <div class="subcommand">rm</div>
@@ -217,7 +214,8 @@
         <p class="subcmd-dsc">
           Remove a note from a box. Unlike the <code class="inline">szk box rm</code>
           command, this command <i>does</i> remove the note file from the
-          filesystem. Use carefully.
+          file system, and currently does not ask for confirmation. Use carefully
+          (and commit to <code class="inline">git</code> often).
         </p>
       </div>
     <div class="subcommand">import</div>
@@ -229,8 +227,13 @@
     <div class="subcommand">config</div>
       <div class="subcmd-container">
         <p class="subcmd-dsc">Check the config file for errors. Currently, this
-        only <i>tells</i> the user if there are errors present, not <i>where</i>
+        only tells the user if there <i>are</i> errors present, not <i>where</i>
         or <i>what</i> they are. Nice, huh?</p>
+      </div>
+    <div class="subcommand">search</div>
+      <div class="subcmd-container">
+        <p class="subcmd-dsc">Search for a string among all the cards in the
+        current box.</p>
       </div>
     <div class="subcommand">help</div>
       <div class="subcmd-container">
@@ -247,6 +250,27 @@
     TOML table: the <code class="inline">show</code> table. The valid keys for
     this table are shown below.
   </p>
+  <div class="subcommand">general</div>
+  <div class="subcmd-container">
+    <p class="subcmd-dsc">
+      The valid keys for the <code class="inline">general</code> table are as
+      follows.
+    </p>
+    <div class="level2">
+      <div class="subcommand">editor</div>
+      <p class="subcmd-dsc">
+        Defines the command to run editing any card, or adding a new card. This
+        command will be run with the card's path as its argument.
+      </p>
+      <div class="subcommand">highlight</div>
+      <p class="subcmd-dsc">
+        The color to use for card names and the indicator of the current box.
+        This must be a valid Ansi 256 color code as a 
+        <code class="inline">u8</code>. For example, the default value is 
+        <code class="inline">4</code>.
+      </p>
+    </div>
+  </div>
   <div class="subcommand">show</div>
   <div class="subcmd-container">
     <p class="subcmd-dsc">
@@ -278,7 +302,7 @@
   <div class="footer">
     This page is licensed under the 
     <a href="https://creativecommons.org/licenses/by-sa/4.0/">
-      Creative Commons Atribution-ShareAlike 4.0</a> 
+      Creative Commons Attribution-ShareAlike 4.0</a> 
     license.
   </div>
 </html>

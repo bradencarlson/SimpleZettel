@@ -33,7 +33,7 @@ pub enum ZkCmd {
 impl ZkConfig {
     pub fn new() -> Self {
         let mut z: ZkConfig = Default::default();
-        z.general.highlight = 167;
+        z.general.highlight = 4;
         z
     }
 }
