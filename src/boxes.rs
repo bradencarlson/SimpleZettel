@@ -8,11 +8,11 @@ use crate::error::ZkError;
 use crate::error;
 use crate::vcs;
 
-pub fn handle_subcommand(matches: &ArgMatches) -> Result<(), ZkError> {
+pub fn handle_subcommand(matches: &ArgMatches, color: &u8) -> Result<(), ZkError> {
     match matches.subcommand() {
         Some(("ls", ssub_m)) => {
             let all = ssub_m.get_flag("all");
-            list_boxes(all)?;
+            list_boxes(all, color)?;
         },
         Some(("add", ssub_m)) => {
             create_box(ssub_m)?;
@@ -24,7 +24,7 @@ pub fn handle_subcommand(matches: &ArgMatches) -> Result<(), ZkError> {
             track_box(ssub_m)?;
         },
         _ => {
-            list_boxes(false)?;
+            list_boxes(false, color)?;
         }
     }
     Ok(())
@@ -56,7 +56,7 @@ fn create_box(matches: &ArgMatches) -> Result<(), ZkError> {
     }
 }
 
-fn list_boxes(all: bool) -> Result<(), ZkError> {
+fn list_boxes(all: bool, color: &u8) -> Result<(), ZkError> {
     let zk_dir = utils::get_szettel_dir()?;
     let current = match utils::get_current_box() {
         Ok(p) => p,
@@ -68,6 +68,7 @@ fn list_boxes(all: bool) -> Result<(), ZkError> {
     };
     match fs::read_dir(&zk_dir) {
         Ok(iter) => {
+            let style = anstyle::Style::new().fg_color(Some(anstyle::Ansi256Color::from(*color).into())).bold();
             for entry in iter {
                 let mut pre = "  ";
                 match entry {
@@ -89,7 +90,7 @@ fn list_boxes(all: bool) -> Result<(), ZkError> {
                         }
                         if let Some(name) = path.file_name() {
                             if let Some(dir_name) = name.to_str() {
-                                utils::print_blue(pre);
+                                print!("{style}{pre}{style:#}");
                                 if dark {
                                     utils::print_black(dir_name);
                                     println!("");
@@ -113,7 +114,7 @@ fn list_boxes(all: bool) -> Result<(), ZkError> {
 
 }
 
-pub fn use_box(matches: &ArgMatches) -> Result<(), ZkError> {
+pub fn use_box(matches: &ArgMatches, color: &u8) -> Result<(), ZkError> {
     if let Some(name) = matches.get_one::<String>("name") {
         let path = utils::path_from_name(&name)?;
         if is_tracked(&path)? == false {
@@ -125,7 +126,7 @@ pub fn use_box(matches: &ArgMatches) -> Result<(), ZkError> {
                 current.push(".current");
                 match fs::write(current, name) {
                     Ok(_) => {
-                        list_boxes(false)?;
+                        list_boxes(false, color)?;
                         Ok(())
                     },
                     Err(_e) => Err(ZkError::Current)

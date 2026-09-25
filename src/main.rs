@@ -32,7 +32,7 @@ fn main() {
 
     match matches.subcommand() {
         Some(("box", sub_m)) => {
-            match boxes::handle_subcommand(sub_m) {
+            match boxes::handle_subcommand(sub_m, &color) {
                 Ok(_) => {},
                 Err(e) => {
                     error::warning(&e.to_string());
@@ -50,7 +50,7 @@ fn main() {
             }
         },
         Some(("use", sub_m)) => {
-            match boxes::use_box(sub_m) {
+            match boxes::use_box(sub_m, &color) {
                 Ok(_) => {},
                 Err(e) => {
                     error::warning(&e.to_string());
