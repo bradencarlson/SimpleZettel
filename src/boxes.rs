@@ -30,6 +30,32 @@ impl ZkBox {
     pub fn is_tracked(&self) -> &bool {
         &self.tracked
     }
+
+    pub fn name(&self) -> String {
+        match self.path.file_name() {
+            Some(os) => {
+                let name = match os.to_str() {
+                    Some(s) => s,
+                    None => ""
+                };
+                String::from(name)
+            },
+            None => {
+                String::new()
+            }
+        }
+    }
+
+    pub fn pretty_print(&self,prefix: &str, style: Option<anstyle::Style>) {
+        match style {
+            Some(s) => {
+                println!("{s}{}{s:#}{}", prefix, self.name());
+            },
+            None => {
+                println!("{}{}", prefix, self.name());
+            }
+        };
+    }
 }
 
 impl From<PathBuf> for ZkBox {
@@ -53,28 +79,44 @@ impl From<PathBuf> for ZkBox {
     }
 }
 
-pub fn handle_subcommand(matches: &ArgMatches, color: &u8) -> Result<(), ZkError> {
-    match matches.subcommand() {
-        Some(("ls", ssub_m)) => {
-            let all = ssub_m.get_flag("all");
-            list_boxes(all, color)?;
-        },
-        Some(("add", ssub_m)) => {
-            create_box(ssub_m)?;
-        },
-        Some(("rm", ssub_m)) => {
-            remove_tracking(ssub_m)?;
-        },
-        Some(("track", ssub_m)) => {
-            track_box(ssub_m)?;
-        },
-        _ => {
-            list_boxes(false, color)?;
-        }
+impl std::fmt::Display for ZkBox {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
+        write!(f, "{:?}", self);
+        Ok(())
     }
-    Ok(())
 }
 
+pub fn get_boxes() -> Vec::<ZkBox> {
+    let home = match utils::get_szettel_dir() {
+        Ok(p) => p,
+        Err(_) => {
+            return Vec::<ZkBox>::new();
+        }
+    };
+    let mut vec = Vec::<ZkBox>::new();
+    match fs::read_dir(&home) {
+        Ok(iter) => {
+            for item in iter {
+                match item {
+                    Ok(entry) => {
+                        if !entry.path().is_dir() {
+                            continue;
+                        }
+                        vec.push(entry.path().into());
+                    },
+                    Err(_) => {
+                        break;
+                    }
+                }
+            }
+        },
+        Err(_) => {
+            return Vec::<ZkBox>::new();
+        }
+    }
+    vec
+
+}
 
 fn create_box(matches: &ArgMatches) -> Result<(), ZkError> {
 
@@ -101,46 +143,17 @@ fn create_box(matches: &ArgMatches) -> Result<(), ZkError> {
     }
 }
 
-fn list_boxes(all: bool, color: &u8) -> Result<(), ZkError> {
-    let zk_dir = utils::get_szettel_dir()?;
-    let current = match utils::get_current_box() {
-        Ok(p) => p,
-        Err(ZkError::NoCurrentBox) => {
-            error::warning(&ZkError::NoCurrentBox.to_string());
-            PathBuf::new()
-        },
-        Err(e) => { return Err(e) }
-    };
-    match fs::read_dir(&zk_dir) {
-        Ok(iter) => {
-            let style = anstyle::Style::new().fg_color(Some(anstyle::Ansi256Color::from(*color).into())).bold();
-            for entry in iter {
-                let mut pre = "  ";
-                match entry {
-                    Ok(e) => {
-                        let mut dark = false;
-                        let path = e.path();
-                        if !path.is_dir() {
-                            continue;
-                        }
-                        if path == current {
-                            pre = "->";
-                        }
-                        let z = ZkBox::from(path);
-                        println!("{:?}", z);
-                    },
-                    Err(_) => {
-                        return Err(ZkError::Other(String::from("error")));
-                    }
-                }
-            }
-            Ok(())
-        },
-        Err(_) => {
-            Err(ZkError::Other(String::from("error")))
-        }
+pub fn list_boxes(bxs: Vec::<ZkBox>, all: bool, color: &u8) -> Result<(), ZkError> {
+    let style = anstyle::Style::new().fg_color(Some(anstyle::Ansi256Color::from(*color).into())).bold();
+    let current = utils::get_current_box()?;
+    for b in bxs.iter() {
+        let prefix = match *b.get_path() == current {
+            true => "->",
+            false => "  ",
+        };
+        b.pretty_print(&prefix, Some(style));
     }
-
+    Ok(())
 }
 
 pub fn use_box(matches: &ArgMatches, color: &u8) -> Result<(), ZkError> {
@@ -155,7 +168,7 @@ pub fn use_box(matches: &ArgMatches, color: &u8) -> Result<(), ZkError> {
                 current.push(".current");
                 match fs::write(current, name) {
                     Ok(_) => {
-                        list_boxes(false, color)?;
+                        //list_boxes(false, color)?;
                         Ok(())
                     },
                     Err(_e) => Err(ZkError::Current)

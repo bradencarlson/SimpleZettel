@@ -11,6 +11,8 @@ use regex::Regex;
 use crate::error::ZkError;
 use crate::config::ZkConfig;
 
+use crate::boxes::ZkBox;
+
 fn main() {
 
     let matches = args::parse_args();
@@ -32,10 +34,23 @@ fn main() {
 
     match matches.subcommand() {
         Some(("box", sub_m)) => {
-            match boxes::handle_subcommand(sub_m, &color) {
-                Ok(_) => {},
-                Err(e) => {
-                    error::warning(&e.to_string());
+            match sub_m.subcommand() {
+                Some(("ls", ssub_m)) => {
+                    let b = boxes::get_boxes();
+                    boxes::list_boxes(b, false, &color);
+                },
+                Some(("add", ssub_m)) => {
+                    println!("add");
+                },
+                Some(("rm", ssub_m)) => {
+                    println!("rm");
+                },
+                Some(("track", ssub_m)) => {
+                    println!("track");
+                },
+                _ => {
+                    let b = boxes::get_boxes();
+                    boxes::list_boxes(b, false, &color);
                 }
             };
         },
