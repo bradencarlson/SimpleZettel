@@ -135,7 +135,22 @@ fn main() {
                         }
                     }
                 },
-                None => {None}
+                None => {
+                    match sub_m.get_one::<String>("number") {
+                        Some(n) => {
+                            let mut pat = String::from("^");
+                            pat.push_str(n.as_str());
+                            match Regex::new(&pat) {
+                                Ok(p) => Some(p),
+                                Err(e) => {
+                                    error::warning(&e.to_string());
+                                    None
+                                }
+                            }
+                        },
+                        None => None
+                    }
+                }
             };
             let cards = match notes::get_cards(pattern.as_ref(), bname) {
                 Ok(c) => c, 
