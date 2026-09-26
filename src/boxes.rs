@@ -126,24 +126,8 @@ fn list_boxes(all: bool, color: &u8) -> Result<(), ZkError> {
                         if path == current {
                             pre = "->";
                         }
-                        if is_tracked(&path)? == false {
-                            if !all {
-                                continue;
-                            } 
-                            dark = true;
-
-                        }
-                        if let Some(name) = path.file_name() {
-                            if let Some(dir_name) = name.to_str() {
-                                print!("{style}{pre}{style:#}");
-                                if dark {
-                                    utils::print_black(dir_name);
-                                    println!("");
-                                } else {
-                                    println!("{}", dir_name);
-                                }
-                            }
-                        }
+                        let z = ZkBox::from(path);
+                        println!("{:?}", z);
                     },
                     Err(_) => {
                         return Err(ZkError::Other(String::from("error")));
