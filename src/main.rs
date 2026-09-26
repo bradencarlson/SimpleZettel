@@ -36,11 +36,14 @@ fn main() {
         Some(("box", sub_m)) => {
             match sub_m.subcommand() {
                 Some(("ls", ssub_m)) => {
+                    let all = ssub_m.get_flag("all");
                     let b = boxes::get_boxes();
                     boxes::list_boxes(b, false, &color);
                 },
                 Some(("add", ssub_m)) => {
-                    println!("add");
+                    if let Some(name) = ssub_m.get_one::<String>("name") {
+                        boxes::add_box(&name);
+                    }
                 },
                 Some(("rm", ssub_m)) => {
                     println!("rm");

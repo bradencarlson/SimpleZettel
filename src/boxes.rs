@@ -118,28 +118,23 @@ pub fn get_boxes() -> Vec::<ZkBox> {
 
 }
 
-fn create_box(matches: &ArgMatches) -> Result<(), ZkError> {
+pub fn add_box(name: &String) -> Result<(), ZkError> {
+    let path = utils::path_from_name(name)?;
 
-    if let Some(name) = matches.get_one::<String>("name") {
-        let path = utils::path_from_name(name)?;
-
-        match fs::exists(&path) {
-            Ok(true) => Err(ZkError::BoxExists),
-            Ok(false) => {
-                match fs::create_dir(&path) {
-                    Ok(_) => {
-                        vcs::init(&path)?;
-                        track(&path)?;
-                        println!("Created box successfully");
-                        Ok(())
-                    },
-                    Err(_) => Err(ZkError::BoxCreateFail)
-                }
-            },
-            Err(_) => return Err(ZkError::Access(path))
-        }
-    } else {
-        Err(ZkError::NoName)
+    match fs::exists(&path) {
+        Ok(true) => Err(ZkError::BoxExists),
+        Ok(false) => {
+            match fs::create_dir(&path) {
+                Ok(_) => {
+                    vcs::init(&path)?;
+                    track(&path)?;
+                    println!("Created box successfully");
+                    Ok(())
+                },
+                Err(_) => Err(ZkError::BoxCreateFail)
+            }
+        },
+        Err(_) => return Err(ZkError::Access(path))
     }
 }
 
@@ -168,7 +163,8 @@ pub fn use_box(matches: &ArgMatches, color: &u8) -> Result<(), ZkError> {
                 current.push(".current");
                 match fs::write(current, name) {
                     Ok(_) => {
-                        //list_boxes(false, color)?;
+                        let b = get_boxes();
+                        list_boxes(b, false, color)?;
                         Ok(())
                     },
                     Err(_e) => Err(ZkError::Current)
