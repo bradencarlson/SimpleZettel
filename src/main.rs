@@ -38,18 +38,39 @@ fn main() {
                 Some(("ls", ssub_m)) => {
                     let all = ssub_m.get_flag("all");
                     let b = boxes::get_boxes();
-                    boxes::list_boxes(b, false, &color);
+                    boxes::list_boxes(b, all, &color);
                 },
                 Some(("add", ssub_m)) => {
                     if let Some(name) = ssub_m.get_one::<String>("name") {
-                        boxes::add_box(&name);
+                        match boxes::add_box(&name) {
+                            Ok(_) => {},
+                            Err(e) => {
+                                error::warning(&e.to_string());
+                            }
+                        };
                     }
                 },
                 Some(("rm", ssub_m)) => {
-                    println!("rm");
+                    if let Some(name) = ssub_m.get_one::<String>("name") {
+                        match boxes::remove_tracking(&name) {
+                            Ok(_) => {
+                                error::info("successfully removed box");
+                            },
+                            Err(e) => {
+                                error::warning(&e.to_string());
+                            }
+                        };
+                    }
                 },
                 Some(("track", ssub_m)) => {
-                    println!("track");
+                    if let Some(name) = ssub_m.get_one::<String>("name") {
+                        match boxes::track_box(&name) {
+                            Ok(_) => {},
+                            Err(e) => {
+                                error::warning(&e.to_string());
+                            }
+                        };
+                    }
                 },
                 _ => {
                     let b = boxes::get_boxes();
@@ -68,10 +89,12 @@ fn main() {
             }
         },
         Some(("use", sub_m)) => {
-            match boxes::use_box(sub_m, &color) {
-                Ok(_) => {},
-                Err(e) => {
-                    error::warning(&e.to_string());
+            if let Some(name) = sub_m.get_one::<String>("name") {
+                match boxes::use_box(&name, &color) {
+                    Ok(_) => {},
+                    Err(e) => {
+                        error::warning(&e.to_string());
+                    }
                 }
             }
         },

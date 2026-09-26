@@ -27,8 +27,8 @@ impl ZkBox {
         false
     }
 
-    pub fn is_tracked(&self) -> &bool {
-        &self.tracked
+    pub fn is_tracked(&self) -> bool {
+        self.tracked
     }
 
     pub fn name(&self) -> String {
@@ -146,47 +146,41 @@ pub fn list_boxes(bxs: Vec::<ZkBox>, all: bool, color: &u8) -> Result<(), ZkErro
             true => "->",
             false => "  ",
         };
-        b.pretty_print(&prefix, Some(style));
+        if b.is_tracked() || all {
+            b.pretty_print(&prefix, Some(style));
+        }
     }
     Ok(())
 }
 
-pub fn use_box(matches: &ArgMatches, color: &u8) -> Result<(), ZkError> {
-    if let Some(name) = matches.get_one::<String>("name") {
-        let path = utils::path_from_name(&name)?;
-        if is_tracked(&path)? == false {
-            return Err(ZkError::BoxNotTracked);
-        };
-        match fs::exists(&path) {
-            Ok(true) => {
-                let mut current = utils::get_szettel_dir()?;
-                current.push(".current");
-                match fs::write(current, name) {
-                    Ok(_) => {
-                        let b = get_boxes();
-                        list_boxes(b, false, color)?;
-                        Ok(())
-                    },
-                    Err(_e) => Err(ZkError::Current)
-                }
-            },
-            _ => {
-                Err(ZkError::BoxInvalid)
+pub fn use_box(name: &String, color: &u8) -> Result<(), ZkError> {
+    let b: ZkBox = utils::path_from_name(&name)?.into();
+    if !b.is_tracked() {
+        return Err(ZkError::BoxNotTracked);
+    };
+    match fs::exists(&b.get_path()) {
+        Ok(true) => {
+            let mut current = utils::get_szettel_dir()?;
+            current.push(".current");
+            match fs::write(current, name) {
+                Ok(_) => {
+                    let b = get_boxes();
+                    list_boxes(b, false, color)?;
+                    Ok(())
+                },
+                Err(_e) => Err(ZkError::Current)
             }
+        },
+        _ => {
+            Err(ZkError::BoxInvalid)
         }
-    } else {
-        Err(ZkError::NoName)
     }
 }
 
-fn track_box(matches: &ArgMatches) -> Result<(), ZkError> {
-    if let Some(name) = matches.get_one::<String>("name") {
-        let path = utils::path_from_name(&name)?;
-        track(&path)?;
-        Ok(())
-    } else {
-        Err(ZkError::NoName)
-    }
+pub fn track_box(name: &String) -> Result<(), ZkError> {
+    let path = utils::path_from_name(&name)?;
+    track(&path)?;
+    Ok(())
 }
 
 
@@ -210,52 +204,27 @@ fn track(path: &PathBuf) -> Result<(), ZkError> {
     }
 }
 
-fn remove_tracking(matches: &ArgMatches) -> Result<(), ZkError> {
-    if let Some(name) = matches.get_one::<String>("name") {
-        let path = utils::path_from_name(name)?;
-        remove_track_file(&path)?;
-        Ok(())
-    } else {
-        Err(ZkError::NoName)
-    }
+pub fn remove_tracking(name: &String) -> Result<(), ZkError> {
+    let path = utils::path_from_name(name)?;
+    remove_track_file(path)?;
+    Ok(())
 }
 
-fn remove_track_file(path: &PathBuf) -> Result<(), ZkError> {
-    match is_tracked(path) {
-        Ok(true) => {
-            let mut track_file = PathBuf::from(path);
-            track_file.push(".track");
-            match fs::remove_file(track_file) {
-                Ok(_) => {
-                    println!("Successfully removed box");
-                    Ok(())
-                },
-                Err(_) => {
-                    Err(ZkError::BoxRemove)
-                }
+fn remove_track_file(path: PathBuf) -> Result<(), ZkError> {
+    let b: ZkBox = path.into();
+    if b.is_tracked() {
+        let mut track_file = PathBuf::from(b.get_path());
+        track_file.push(".track");
+        match fs::remove_file(track_file) {
+            Ok(_) => {
+                return Ok(());
+            },
+            Err(_) => {
+                return Err(ZkError::BoxRemove);
             }
-        },
-        _ => {
-            Err(ZkError::BoxNotTracked)
         }
+    } else {
+        return Err(ZkError::BoxNotTracked);
     }
-}
 
-fn is_tracked(path: &PathBuf) -> Result<bool, ZkError> {
-    utils::verify_path(path)?;
-    let mut track_file = PathBuf::from(path);
-    match fs::exists(&track_file) {
-        Ok(true) => {},
-        Ok(false) => {
-            return Err(ZkError::BoxInvalid)
-        },
-        Err(_) => {
-            return Err(ZkError::BoxCheck)
-        }
-    };
-    track_file.push(".track");
-    match fs::exists(&track_file) {
-        Ok(e) => Ok(e),
-        Err(_) => Err(ZkError::Access(track_file))
-    }
 }
