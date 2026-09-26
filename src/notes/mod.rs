@@ -350,7 +350,7 @@ pub fn import_file(m: &ArgMatches) -> Result<(), ZkError> {
 }
 
 pub fn search_notes(needle: &Regex, b: Option<&String>) -> Result<(), ZkError> {
-    let files = get_notes(None, b)?;
+    let files = get_cards(None, b)?;
     for file in files.iter() {
         if let Some(matches) = search_note(file, needle) {
             let card = ZkMatch { 
@@ -366,58 +366,20 @@ pub fn search_notes(needle: &Regex, b: Option<&String>) -> Result<(), ZkError> {
     Ok(())
 }
 
-pub fn list_notes(m: Option<&ArgMatches>, b: Option<&String>, color: &u8) -> Result<(), ZkError> {
-    match m {
-        Some(matches) => {
-            if let Ok(Some(num)) = matches.try_get_one::<String>("number") {
-                let mut pat = String::from("^");
-                pat.push_str(num.as_str());
-                let r = Regex::new(&pat).unwrap();
-                list_files(Some(&r), b, color)?;
-                Ok(())
-            } else if let Ok(Some(pat)) = matches.try_get_one::<String>("pattern") {
-                let r = match Regex::new(pat) {
-                    Ok(p) => p,
-                    Err(e) => {
-                        return Err(ZkError::Other(e.to_string()));
-                    }
-                };
-                list_files(Some(&r), b, color)?;
-                Ok(())
-            } else {
-                list_files(None, b, color)?;
-                Ok(())
-            }
-        },
-        None => {
-            list_files(None, b, color)?;
-            Ok(())
-        }
-    }
-}
-
-fn list_files(p: Option<&Regex>, b: Option<&String>, color: &u8) -> Result<(), ZkError> {
-    let bx = match b {
-        Some(name) => utils::get_box_from_name(name)?,
-        None => utils::get_current_box()?
-    };
-
-    let files = get_notes(p, b)?;
-
-    let max = match files.iter()
+pub fn list_cards(cards: Vec::<ZkCard>, style: Option<anstyle::Style>) -> Result<(), ZkError> {
+    let max = match cards.iter()
         .map(|c| c.get_number_length())
         .max() {
             Some(m) => m+4,
             None => 20
     };
-    let style = anstyle::Style::new().fg_color(Some(anstyle::Ansi256Color::from(*color).into())).bold();
-    for file in files.iter() {
-        file.pretty_print(max, Some(style));
+    for card in cards.iter() {
+        card.pretty_print(max, style);
     }
     Ok(())
 }
 
-fn get_notes(p: Option<&Regex>, b: Option<&String>) -> Result<Vec::<ZkCard>, ZkError> {
+pub fn get_cards(p: Option<&Regex>, b: Option<&String>) -> Result<Vec::<ZkCard>, ZkError> {
     let pat = match p {
         Some(pattern) => pattern, 
         None => &Regex::new("").unwrap()

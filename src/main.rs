@@ -30,6 +30,8 @@ fn main() {
 
     let color = config.general.highlight;
 
+    let style = anstyle::Style::new().fg_color(Some(anstyle::Ansi256Color::from(color).into()));
+
     let bname = matches.get_one::<String>("box");
 
     match matches.subcommand() {
@@ -123,12 +125,26 @@ fn main() {
             }
         },
         Some(("ls", sub_m)) => {
-            match notes::list_notes(Some(sub_m), bname, &color) {
-                Ok(_) => {},
+            let pattern = match sub_m.get_one::<String>("pattern") {
+                Some(pat) => {
+                    match Regex::new(pat) {
+                        Ok(p) => Some(p),
+                        Err(e) => {
+                            error::warning(&e.to_string());
+                            None
+                        }
+                    }
+                },
+                None => {None}
+            };
+            let cards = match notes::get_cards(pattern.as_ref(), bname) {
+                Ok(c) => c, 
                 Err(e) => {
                     error::warning(&e.to_string());
+                    return;
                 }
-            }
+            };
+            notes::list_cards(cards, Some(style));
         },
         Some(("config", _sub_m)) => {
             let check = match config::get_config() {
@@ -174,12 +190,14 @@ fn main() {
             }
         },
         _ => {
-            match notes::list_notes(None, bname, &color) {
-                Ok(_) => {},
+            let cards = match notes::get_cards(None, None) {
+                Ok(c) => c,
                 Err(e) => {
                     error::warning(&e.to_string());
+                    return;
                 }
-            }
+            };
+            notes::list_cards(cards, Some(style));
         }
     };
 
