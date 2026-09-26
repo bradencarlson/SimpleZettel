@@ -8,6 +8,51 @@ use crate::error::ZkError;
 use crate::error;
 use crate::vcs;
 
+#[derive(Debug,Default)]
+pub struct ZkBox {
+    path: PathBuf,
+    tracked: bool,
+}
+
+impl ZkBox {
+    pub fn new() -> Self {
+        Default::default()
+    }
+
+    pub fn get_path(&self) -> &PathBuf {
+        &self.path
+    }
+
+    pub fn is_current(&self) -> bool {
+        false
+    }
+
+    pub fn is_tracked(&self) -> &bool {
+        &self.tracked
+    }
+}
+
+impl From<PathBuf> for ZkBox {
+    fn from(path: PathBuf) -> Self {
+        match utils::verify_path(&path) {
+            Ok(_) => {},
+            Err(e) => {
+                return ZkBox::new();
+            }
+        };
+        let mut tracked = path.clone();
+        tracked.push(".track");
+        let track = match fs::exists(tracked) {
+            Ok(true) => true, 
+            _ => false
+        };
+        ZkBox {
+            path: path, 
+            tracked: track,
+        }
+    }
+}
+
 pub fn handle_subcommand(matches: &ArgMatches, color: &u8) -> Result<(), ZkError> {
     match matches.subcommand() {
         Some(("ls", ssub_m)) => {
