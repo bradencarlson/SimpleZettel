@@ -68,19 +68,23 @@ pub fn show_note(card: &ZkCard, show_cmds: &ZkShowCommands) -> Result<(), ZkErro
 }
 
 pub fn get_prefix(typ: &FileType, prefix: Option<&ZkPrefixes>) -> String {
-    match prefix {
-        Some(p) => {
-            match typ {
-                FileType::Markdown => p.md.clone(),
-                FileType::PDF => p.pdf.clone(),
-            }
-        },
-        None => {
-            match typ {
-                FileType::Markdown => String::from("   "),
-                FileType::PDF => String::from("(d)"),
+    if cfg!(feature = "filetype") {
+        match prefix {
+            Some(p) => {
+                match typ {
+                    FileType::Markdown => p.md.clone(),
+                    FileType::PDF => p.pdf.clone(),
+                }
+            },
+            None => {
+                match typ {
+                    FileType::Markdown => String::from("   "),
+                    FileType::PDF => String::from("(d)"),
+                }
             }
         }
+    } else {
+        String::new()
     }
 }
 
