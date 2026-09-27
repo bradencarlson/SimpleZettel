@@ -101,17 +101,13 @@ impl ZkCard {
         }
     }
     pub fn pretty_print(&self, space: usize, prefix: Option<&ZkPrefixes>, style: Option<anstyle::Style>) {
-        /*let pre = match prefix {
-            Some(p) => {
-            },
-            None ={}
-        }*/
+        let pre = ft::get_prefix(&self.filetype, prefix);
         match style {
             Some(sty) => {
-                println!("{}{sty}{}{sty:#}{}", self.filetype_prefix(), self.format_number(space), self.header);
+                println!("{}{sty}{}{sty:#}{}", pre, self.format_number(space), self.header);
             },
             None => {
-                println!("{}{}{}", self.filetype_prefix(), self.format_number(space), self.header);
+                println!("{}{}{}", pre, self.format_number(space), self.header);
             }
         };
     }
@@ -138,14 +134,6 @@ impl ZkCard {
             },
             ZkNumber::Invalid => s
         }
-    }
-    fn filetype_prefix(&self) -> String {
-        #[cfg(feature = "filetypes")]
-        return match self.filetype {
-            FileType::Markdown => "    ".to_string(),
-            FileType::PDF => "(d) ".to_string(),
-        };
-        String::new()
     }
 
     pub fn get_number(path: &PathBuf) -> ZkNumber {

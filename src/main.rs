@@ -159,7 +159,7 @@ fn main() {
                     return;
                 }
             };
-            notes::list_cards(cards, None, Some(style));
+            notes::list_cards(cards, Some(config.prefix), Some(style));
         },
         Some(("config", _sub_m)) => {
             let check = match config::get_config() {

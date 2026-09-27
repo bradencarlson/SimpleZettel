@@ -6,7 +6,7 @@ use std::process::Command;
 
 use crate::error::ZkError;
 use crate::notes::ZkCard;
-use crate::config::{ZkConfig,ZkCmd,ZkShowCommands};
+use crate::config::{ZkConfig,ZkCmd,ZkShowCommands,ZkPrefixes};
 
 #[derive(Debug)]
 pub enum FileType {
@@ -67,6 +67,23 @@ pub fn show_note(card: &ZkCard, show_cmds: &ZkShowCommands) -> Result<(), ZkErro
     Ok(())
 }
 
+pub fn get_prefix(typ: &FileType, prefix: Option<&ZkPrefixes>) -> String {
+    match prefix {
+        Some(p) => {
+            match typ {
+                FileType::Markdown => p.md.clone(),
+                FileType::PDF => p.pdf.clone(),
+            }
+        },
+        None => {
+            match typ {
+                FileType::Markdown => String::from("   "),
+                FileType::PDF => String::from("(d)"),
+            }
+        }
+    }
+}
+
 fn run_cmd(card: &ZkCard, cmd: &ZkCmd) -> Result<(), ZkError> {
     match cmd {
         ZkCmd::cmd(cmd) => {
@@ -80,6 +97,7 @@ fn run_cmd(card: &ZkCard, cmd: &ZkCmd) -> Result<(), ZkError> {
     };
     Ok(())
 }
+
 fn print_note(card: &ZkCard) -> Result<(), ZkError> {
     if let Ok(s) = fs::read_to_string(&card.path) {
         println!("{}", s);
