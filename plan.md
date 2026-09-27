@@ -71,8 +71,8 @@ List of subcommands desired:
       the `show` command.
         - [x], [x] md: command for markdown files
         - [x], [x] pdf: command for pdf files
-    - [ ], [ ] general: table for general settings.
-        - [ ], [ ] highlight: color used for arrow in boxes and filenames
+    - [x], [x] general: table for general settings.
+        - [x], [x] highlight: color used for arrow in boxes and filenames
     - [ ], [ ] filetype-prefix:
         - [ ], [ ] md: prefix to use for markdown files
         - [ ], [ ] pdf: prefix to use for pdf files

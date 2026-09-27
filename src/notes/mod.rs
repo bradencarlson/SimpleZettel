@@ -9,7 +9,7 @@ use regex::Regex;
 
 use crate::error::ZkError;
 use crate::utils;
-use crate::config::{ZkConfig,ZkCmd,ZkShowCommands};
+use crate::config::{ZkConfig,ZkCmd,ZkShowCommands,ZkPrefixes};
 use crate::vcs;
 
 pub mod ft;
@@ -100,7 +100,12 @@ impl ZkCard {
             ZkNumber::Invalid => 0
         }
     }
-    pub fn pretty_print(&self, space: usize, style: Option<anstyle::Style>) {
+    pub fn pretty_print(&self, space: usize, prefix: Option<&ZkPrefixes>, style: Option<anstyle::Style>) {
+        /*let pre = match prefix {
+            Some(p) => {
+            },
+            None ={}
+        }*/
         match style {
             Some(sty) => {
                 println!("{}{sty}{}{sty:#}{}", self.filetype_prefix(), self.format_number(space), self.header);
@@ -366,7 +371,7 @@ pub fn search_notes(needle: &Regex, b: Option<&String>) -> Result<(), ZkError> {
     Ok(())
 }
 
-pub fn list_cards(cards: Vec::<ZkCard>, style: Option<anstyle::Style>) -> Result<(), ZkError> {
+pub fn list_cards(cards: Vec::<ZkCard>, prefix: Option<ZkPrefixes>, style: Option<anstyle::Style>) -> Result<(), ZkError> {
     let max = match cards.iter()
         .map(|c| c.get_number_length())
         .max() {
@@ -374,7 +379,7 @@ pub fn list_cards(cards: Vec::<ZkCard>, style: Option<anstyle::Style>) -> Result
             None => 20
     };
     for card in cards.iter() {
-        card.pretty_print(max, style);
+        card.pretty_print(max, prefix.as_ref(), style);
     }
     Ok(())
 }

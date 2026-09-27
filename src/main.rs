@@ -159,7 +159,7 @@ fn main() {
                     return;
                 }
             };
-            notes::list_cards(cards, Some(style));
+            notes::list_cards(cards, None, Some(style));
         },
         Some(("config", _sub_m)) => {
             let check = match config::get_config() {
@@ -212,7 +212,7 @@ fn main() {
                     return;
                 }
             };
-            notes::list_cards(cards, Some(style));
+            notes::list_cards(cards, None, Some(style));
         }
     };
 
