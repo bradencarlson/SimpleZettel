@@ -126,7 +126,6 @@ pub fn parse_args() -> ArgMatches {
                 .short('n')
                 .long("number")
                 .conflicts_with("pattern")
-                // TODO: Add parser here to ensure it is a valid ZkNumber?
                 .help("list files whose number starts with the provided value")
                 .action(ArgAction::Set)
             )
@@ -151,6 +150,22 @@ pub fn parse_args() -> ArgMatches {
                 Arg::new("needle")
                 .required(true)
                 .help("string to search for")
+            )
+        )
+        .subcommand(
+            Command::new("mv")
+            .about("Rename a note")
+            .arg(
+                Arg::new("old")
+                .required(true)
+                .help("Name of note to move")
+                .action(ArgAction::Set)
+            )
+            .arg(
+                Arg::new("new")
+                .required(true)
+                .help("New name")
+                .action(ArgAction::Set)
             )
         )
         .get_matches()

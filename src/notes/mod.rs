@@ -309,6 +309,22 @@ pub fn edit_note(matches: &ArgMatches, b: Option<&String>, editor: &ZkCmd) -> Re
     }
 }
 
+pub fn move_note(old: &String, new: &String, b: Option<&String>) -> Result<(), ZkError> {
+    let o = utils::zkcard_from_name(old, b)?;
+    let n = utils::note_path_from_name(new, Some(o.filetype), b)?;
+    if let Ok(true) = fs::exists(&n) {
+            return Err(ZkError::NoteExists);
+    }
+    match fs::rename(o.path, n) {
+        Ok(_) => {
+            Ok(())
+        },
+        Err(_) => {
+            Err(ZkError::Move)
+        }
+    }
+}
+
 pub fn import_file(m: &ArgMatches) -> Result<(), ZkError> {
     if let Some(p) = m.get_one::<String>("path") {
         let path = PathBuf::from(p);

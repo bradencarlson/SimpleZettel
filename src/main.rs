@@ -204,6 +204,18 @@ fn main() {
                 }
             }
         },
+        Some(("mv", sub_m)) => {
+            if let Some(old) = sub_m.get_one::<String>("old") {
+                if let Some(new) = sub_m.get_one::<String>("new") {
+                    match notes::move_note(&old, &new, bname) {
+                        Ok(_) => { }, 
+                        Err(e) => {
+                            error::warning(&e.to_string());
+                        },
+                    }
+                }
+            }
+        },
         _ => {
             let cards = match notes::get_cards(None, None) {
                 Ok(c) => c,
