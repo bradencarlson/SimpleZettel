@@ -76,7 +76,7 @@ List of subcommands desired:
     - [x], [x] filetype-prefix:
         - [x], [x] md: prefix to use for markdown files
         - [x], [x] pdf: prefix to use for pdf files
-- [ ], [ ] mv: rename a note
+- [x], [x] mv: rename a note
 
 ### Low level commands
 
