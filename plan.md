@@ -49,7 +49,7 @@ List of subcommands desired:
         - [x], [x] -1 alias for passing the pattern ^1 to ls. like this:
           `szettel -1`? 
           this would probably be easier: `szettel -n 2`
-- [ ], [x] search: searches for a string among files in box
+- [x], [x] search: searches for a string among files in box
 - [x], [x] box: for managing boxes
     - [x], [x] ls: for listing boxes (maybe this should be the default behavior if no
       subcommand is found
@@ -67,15 +67,15 @@ List of subcommands desired:
   specify a new note name to go to, or list notes. Yeah, this is a big item.
 - [x], [x] import: copy a file into the box directory.
 - [x], [x] config: check config syntax, or print out that no config exists. 
-    - [ ], [x] show: show table for defining which commands to use when calling
+    - [x], [x] show: show table for defining which commands to use when calling
       the `show` command.
         - [x], [x] md: command for markdown files
         - [x], [x] pdf: command for pdf files
     - [x], [x] general: table for general settings.
         - [x], [x] highlight: color used for arrow in boxes and filenames
-    - [ ], [ ] filetype-prefix:
-        - [ ], [ ] md: prefix to use for markdown files
-        - [ ], [ ] pdf: prefix to use for pdf files
+    - [x], [x] filetype-prefix:
+        - [x], [x] md: prefix to use for markdown files
+        - [x], [x] pdf: prefix to use for pdf files
 - [ ], [ ] mv: rename a note
 
 ### Low level commands
