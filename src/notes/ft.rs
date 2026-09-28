@@ -68,7 +68,7 @@ pub fn show_note(card: &ZkCard, show_cmds: &ZkShowCommands) -> Result<(), ZkErro
 }
 
 pub fn get_prefix(typ: &FileType, prefix: Option<&ZkPrefixes>) -> String {
-    if cfg!(feature = "filetype") {
+    if cfg!(feature = "filetypes") {
         match prefix {
             Some(p) => {
                 match typ {
