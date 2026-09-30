@@ -86,7 +86,7 @@ impl std::fmt::Display for ZkBox {
     }
 }
 
-pub fn get_boxes() -> Vec::<ZkBox> {
+pub fn get_boxes(dir: &PathBuf) -> Vec::<ZkBox> {
     let home = match utils::get_szettel_dir() {
         Ok(p) => p,
         Err(_) => {
@@ -164,8 +164,8 @@ pub fn use_box(name: &String, color: &u8) -> Result<(), ZkError> {
             current.push(".current");
             match fs::write(current, name) {
                 Ok(_) => {
-                    let b = get_boxes();
-                    list_boxes(b, false, color)?;
+                    /*let b = get_boxes();
+                    list_boxes(b, false, color)?;*/
                     Ok(())
                 },
                 Err(_e) => Err(ZkError::Current)

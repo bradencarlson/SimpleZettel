@@ -28,9 +28,10 @@ fn main() {
         }
     };
 
-    let color = config.general.highlight;
+    let color = config.get_highlight();
+    let path = config.get_szk_home();
 
-    let style = anstyle::Style::new().fg_color(Some(anstyle::Ansi256Color::from(color).into()));
+    let style = anstyle::Style::new().fg_color(Some(anstyle::Ansi256Color::from(*color).into()));
 
     let bname = matches.get_one::<String>("box");
 
@@ -39,8 +40,8 @@ fn main() {
             match sub_m.subcommand() {
                 Some(("ls", ssub_m)) => {
                     let all = ssub_m.get_flag("all");
-                    let b = boxes::get_boxes();
-                    boxes::list_boxes(b, all, &color);
+                    let b = boxes::get_boxes(path);
+                    boxes::list_boxes(b, all, color);
                 },
                 Some(("add", ssub_m)) => {
                     if let Some(name) = ssub_m.get_one::<String>("name") {
@@ -75,13 +76,13 @@ fn main() {
                     }
                 },
                 _ => {
-                    let b = boxes::get_boxes();
-                    boxes::list_boxes(b, false, &color);
+                    let b = boxes::get_boxes(path);
+                    boxes::list_boxes(b, false, color);
                 }
             };
         },
         Some(("add", sub_m)) => {
-            match notes::add_note(sub_m, bname, &config.general.editor) {
+            match notes::add_note(sub_m, bname, config.get_editor()) {
                 Ok(_) => {
                     println!("Note added successfully.");
                 },
@@ -92,7 +93,7 @@ fn main() {
         },
         Some(("use", sub_m)) => {
             if let Some(name) = sub_m.get_one::<String>("name") {
-                match boxes::use_box(&name, &color) {
+                match boxes::use_box(&name, color) {
                     Ok(_) => {},
                     Err(e) => {
                         error::warning(&e.to_string());
@@ -101,7 +102,7 @@ fn main() {
             }
         },
         Some(("edit", sub_m)) => {
-            match notes::edit_note(sub_m, bname, &config.general.editor) {
+            match notes::edit_note(sub_m, bname, &config.get_editor()) {
                 Ok(_) => {},
                 Err(e) => {
                     error::warning(&e.to_string());
@@ -117,7 +118,7 @@ fn main() {
             }
         },
         Some(("show", sub_m)) => {
-            match notes::show_note(sub_m, &config.show, bname) {
+            match notes::show_note(sub_m, config.get_show_cmds(), bname) {
                 Ok(_) => {},
                 Err(e) => {
                     error::warning(&e.to_string());
@@ -159,7 +160,7 @@ fn main() {
                     return;
                 }
             };
-            notes::list_cards(cards, Some(config.prefix), Some(style));
+            notes::list_cards(cards, Some(config.get_prefix()), Some(style));
         },
         Some(("config", _sub_m)) => {
             let check = match config::get_config() {
@@ -224,7 +225,7 @@ fn main() {
                     return;
                 }
             };
-            notes::list_cards(cards, Some(config.prefix), Some(style));
+            notes::list_cards(cards, Some(config.get_prefix()), Some(style));
         }
     };
 

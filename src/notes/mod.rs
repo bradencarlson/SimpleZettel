@@ -375,7 +375,7 @@ pub fn search_notes(needle: &Regex, b: Option<&String>) -> Result<(), ZkError> {
     Ok(())
 }
 
-pub fn list_cards(cards: Vec::<ZkCard>, prefix: Option<ZkPrefixes>, style: Option<anstyle::Style>) -> Result<(), ZkError> {
+pub fn list_cards(cards: Vec::<ZkCard>, prefix: Option<&ZkPrefixes>, style: Option<anstyle::Style>) -> Result<(), ZkError> {
     let max = match cards.iter()
         .map(|c| c.get_number_length())
         .max() {
@@ -383,7 +383,7 @@ pub fn list_cards(cards: Vec::<ZkCard>, prefix: Option<ZkPrefixes>, style: Optio
             None => 20
     };
     for card in cards.iter() {
-        card.pretty_print(max, prefix.as_ref(), style);
+        card.pretty_print(max, prefix, style);
     }
     Ok(())
 }
