@@ -9,7 +9,7 @@ use regex::Regex;
 
 use crate::error::ZkError;
 use crate::utils;
-use crate::config::{ZkConfig,ZkCmd,ZkShowCommands,ZkPrefixes};
+use crate::config::{ZkCmd,ZkShowCommands,ZkPrefixes};
 use crate::vcs;
 
 pub mod ft;

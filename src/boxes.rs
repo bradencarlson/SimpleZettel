@@ -1,8 +1,5 @@
 use std::fs;
-use std::ffi::{OsStr,OsString};
 use std::path::PathBuf;
-use std::process::Command;
-use clap::ArgMatches;
 
 use crate::utils;
 use crate::error::ZkError;
@@ -33,7 +30,7 @@ impl ZkBox {
         self.tracked
     }
 
-    pub fn name(&self) -> String {
+    fn name(&self) -> String {
         match self.path.file_name() {
             Some(os) => {
                 let name = match os.to_str() {

@@ -1,4 +1,4 @@
-use std::path::{Path, PathBuf};
+use std::path::{Path};
 use std::fs::File;
 use std::fs;
 use std::io::Read;
@@ -52,9 +52,7 @@ pub fn show_note(card: &ZkCard, show_cmds: &ZkShowCommands) -> Result<(), ZkErro
         FileType::PDF => {
             match show_cmds.pdf {
                 ZkCmd::cmd(ref cmd) => {
-                    Command::new(cmd)
-                        .arg(&card.path)
-                        .status();
+                    run_cmd(&card, &ZkCmd::cmd(cmd.to_string()))?;
                     return Ok(());
                 },
                 ZkCmd::Invalid => {
@@ -91,9 +89,16 @@ pub fn get_prefix(typ: &FileType, prefix: Option<&ZkPrefixes>) -> String {
 fn run_cmd(card: &ZkCard, cmd: &ZkCmd) -> Result<(), ZkError> {
     match cmd {
         ZkCmd::cmd(cmd) => {
-            Command::new(cmd)
+            match Command::new(cmd)
                 .arg(&card.path)
-                .status();
+                .status() {
+                    Ok(_) => {
+                        return Ok(());
+                    },
+                    Err(e) => {
+                        return Err(ZkError::Other(String::from("failed to show note")));
+                    }
+            };
         }, 
         ZkCmd::Invalid => {
             print_note(card)?;

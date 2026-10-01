@@ -27,9 +27,9 @@ pub fn add() -> Result<(), ZkError> {
 #[cfg(feature = "git")]
 pub fn commit() -> Result<bool, ZkError> {
     let resp = utils::prompt_user("Would you like to commit changes to git? [Y/n]")?;
-    let Y = String::from("Y");
+    let yes = String::from("Y");
     let y = String::from("y");
-    if resp != Y && resp != y {
+    if resp != yes && resp != y {
         return Ok(false);
     }
     let current = utils::get_current_box()?;
