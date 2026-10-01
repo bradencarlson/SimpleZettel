@@ -1,4 +1,5 @@
 use std::fs;
+use std::ffi::{OsStr,OsString};
 use std::path::PathBuf;
 use std::process::Command;
 use clap::ArgMatches;
@@ -8,10 +9,11 @@ use crate::error::ZkError;
 use crate::error;
 use crate::vcs;
 
-#[derive(Debug,Default)]
+#[derive(Debug,Default,PartialEq)]
 pub struct ZkBox {
     path: PathBuf,
     tracked: bool,
+    current: bool,
 }
 
 impl ZkBox {
@@ -24,7 +26,7 @@ impl ZkBox {
     }
 
     pub fn is_current(&self) -> bool {
-        false
+        self.current
     }
 
     pub fn is_tracked(&self) -> bool {
@@ -60,12 +62,12 @@ impl ZkBox {
 
 impl From<PathBuf> for ZkBox {
     fn from(path: PathBuf) -> Self {
-        match utils::verify_path(&path) {
+        /*match utils::verify_path(&path) {
             Ok(_) => {},
             Err(e) => {
                 return ZkBox::new();
             }
-        };
+        };*/
         let mut tracked = path.clone();
         tracked.push(".track");
         let track = match fs::exists(tracked) {
@@ -75,6 +77,7 @@ impl From<PathBuf> for ZkBox {
         ZkBox {
             path: path, 
             tracked: track,
+            current: false
         }
     }
 }
@@ -86,15 +89,31 @@ impl std::fmt::Display for ZkBox {
     }
 }
 
-pub fn get_boxes(dir: &PathBuf) -> Vec::<ZkBox> {
-    let home = match utils::get_szettel_dir() {
-        Ok(p) => p,
-        Err(_) => {
-            return Vec::<ZkBox>::new();
+pub fn get_current_box(base_dir: &PathBuf) -> Result<ZkBox, ZkError> {
+    let mut current = base_dir.clone();
+    current.push(".current");
+    match fs::read_to_string(&current) {
+        Ok(c) => {
+            let mut box_path = base_dir.clone();
+            box_path.push(c);
+            Ok(ZkBox::from(box_path))
+        }, 
+        _ => {
+            Err(ZkError::NoCurrentBox)
+        }
+    }
+}
+
+pub fn get_boxes(base_dir: &PathBuf) -> Result<Vec::<ZkBox>, ZkError> {
+    let mut vec = Vec::<ZkBox>::new();
+    let current_box = match get_current_box(base_dir) {
+        Ok(bx) => bx,
+        Err(e) => {
+            error::warning(&e.to_string());
+            ZkBox::new()
         }
     };
-    let mut vec = Vec::<ZkBox>::new();
-    match fs::read_dir(&home) {
+    match fs::read_dir(&base_dir) {
         Ok(iter) => {
             for item in iter {
                 match item {
@@ -102,7 +121,11 @@ pub fn get_boxes(dir: &PathBuf) -> Vec::<ZkBox> {
                         if !entry.path().is_dir() {
                             continue;
                         }
-                        vec.push(entry.path().into());
+                        let mut b = ZkBox::from(entry.path());
+                        if b.path == current_box.path {
+                            b.current = true;
+                        }
+                        vec.push(b);
                     },
                     Err(_) => {
                         break;
@@ -111,16 +134,16 @@ pub fn get_boxes(dir: &PathBuf) -> Vec::<ZkBox> {
             }
         },
         Err(_) => {
-            return Vec::<ZkBox>::new();
+            return Err(ZkError::Access(base_dir.clone()));
         }
     }
-    vec
+    Ok(vec)
 
 }
 
-pub fn add_box(name: &String) -> Result<(), ZkError> {
-    let path = utils::path_from_name(name)?;
-
+pub fn add_box(base_dir: &PathBuf, name: &String) -> Result<(), ZkError> {
+    let mut path = base_dir.clone();
+    path.push(name);
     match fs::exists(&path) {
         Ok(true) => Err(ZkError::BoxExists),
         Ok(false) => {
@@ -227,4 +250,25 @@ fn remove_track_file(path: PathBuf) -> Result<(), ZkError> {
         return Err(ZkError::BoxNotTracked);
     }
 
+}
+
+#[test]
+fn get_list_of_boxes() {
+    let base_dir = PathBuf::from("tests");
+    let b = get_boxes(&base_dir).expect("Could not get boxes from tests directory");
+    assert_eq!(b.len(), 4);
+    println!("{:?}", b);
+    assert!(b.contains(
+            &ZkBox {
+                path: PathBuf::from("tests/short"),
+                tracked: true,
+                current: false,
+            })
+    );
+}
+
+#[test]
+fn invalid_box_dir() {
+    let base_dir = PathBuf::from("tests/invalid");
+    assert_eq!(get_boxes(&base_dir), Err(ZkError::Access(base_dir)));
 }

@@ -68,7 +68,7 @@ impl fmt::Display for ZkError {
             ZkError::InvalidNotePath(path) => write!(f, "invalid note path: {}", path.display()),
             ZkError::InvalidPath => write!(f, "Something weird has happened; I tried to access a directory outside of ~/.szettel"),
             ZkError::Move => write!(f, "Failed to move note."),
-            ZkError::NoCurrentBox => write!(f, "No current box. Run `szettel box` to view boxes, and `szettel use`\nto set the current box."),
+            ZkError::NoCurrentBox => write!(f, "No current box. Run `szk box` to view boxes, and `szk use`\nto set the current box."),
             ZkError::NoHome =>  write!(f, "failed to find users home directory"),
             ZkError::NoName => write!(f, "no name provided"),
             ZkError::NoteAddArgs => write!(f, "no name or number found"),

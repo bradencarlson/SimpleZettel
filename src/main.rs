@@ -29,7 +29,7 @@ fn main() {
     };
 
     let color = config.get_highlight();
-    let path = config.get_szk_home();
+    let base_dir = config.get_szk_home();
 
     let style = anstyle::Style::new().fg_color(Some(anstyle::Ansi256Color::from(*color).into()));
 
@@ -40,12 +40,19 @@ fn main() {
             match sub_m.subcommand() {
                 Some(("ls", ssub_m)) => {
                     let all = ssub_m.get_flag("all");
-                    let b = boxes::get_boxes(path);
+                    let b = match boxes::get_boxes(base_dir) {
+                        Ok(box_list) => box_list,
+                        Err(e) => {
+                            error::warning(&e.to_string());
+                            return;
+                        }
+                    };
+                    println!("{:?}" ,b);
                     boxes::list_boxes(b, all, color);
                 },
                 Some(("add", ssub_m)) => {
                     if let Some(name) = ssub_m.get_one::<String>("name") {
-                        match boxes::add_box(&name) {
+                        match boxes::add_box(base_dir, &name) {
                             Ok(_) => {},
                             Err(e) => {
                                 error::warning(&e.to_string());
@@ -76,7 +83,14 @@ fn main() {
                     }
                 },
                 _ => {
-                    let b = boxes::get_boxes(path);
+                    let b = match boxes::get_boxes(base_dir) {
+                        Ok(box_list) => box_list,
+                        Err(e) => {
+                            error::warning(&e.to_string());
+                            return;
+                        }
+                    };
+
                     boxes::list_boxes(b, false, color);
                 }
             };
