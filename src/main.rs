@@ -1,3 +1,4 @@
+use std::path::PathBuf;
 mod args;
 mod boxes;
 mod notes;
@@ -33,7 +34,22 @@ fn main() {
 
     let style = anstyle::Style::new().fg_color(Some(anstyle::Ansi256Color::from(*color).into()));
 
-    let bname = matches.get_one::<String>("box");
+    let bx = match matches.get_one::<String>("box") {
+        Some(bname) => {
+            let mut home = base_dir.clone();
+            home.push(bname);
+            Some(ZkBox::from(home))
+        },
+        None => {
+            match boxes::get_current_box(&base_dir) {
+                Ok(zkbox) => Some(zkbox),
+                Err(e) => {
+                    error::warning(&e.to_string());
+                    None
+                }
+            }
+        }
+    };
 
     match matches.subcommand() {
         Some(("box", sub_m)) => {
@@ -48,7 +64,12 @@ fn main() {
                         }
                     };
                     println!("{:?}" ,b);
-                    boxes::list_boxes(b, all, color);
+                    match boxes::list_boxes(b, all, color) {
+                        Ok(_) => {},
+                        Err(e) => {
+                            error::warning(&e.to_string());
+                        }
+                    };
                 },
                 Some(("add", ssub_m)) => {
                     if let Some(name) = ssub_m.get_one::<String>("name") {
@@ -91,19 +112,24 @@ fn main() {
                         }
                     };
 
-                    boxes::list_boxes(b, false, color);
+                    match boxes::list_boxes(b, false, color) {
+                        Ok(_) => {},
+                        Err(e) => {
+                            error::warning(&e.to_string());
+                        }
+                    };
                 }
             };
         },
         Some(("add", sub_m)) => {
-            match notes::add_note(sub_m, bname, config.get_editor()) {
+            /*match notes::add_note(sub_m, bname, config.get_editor()) {
                 Ok(_) => {
                     println!("Note added successfully.");
                 },
                 Err(e) => {
                     error::warning(&e.to_string());
                 },
-            }
+            }*/
         },
         Some(("use", sub_m)) => {
             if let Some(name) = sub_m.get_one::<String>("name") {
@@ -116,30 +142,37 @@ fn main() {
             }
         },
         Some(("edit", sub_m)) => {
-            match notes::edit_note(sub_m, bname, &config.get_editor()) {
+            /*match notes::edit_note(sub_m, bname, &config.get_editor()) {
                 Ok(_) => {},
                 Err(e) => {
                     error::warning(&e.to_string());
                 }
-            }
+            }*/
         },
         Some(("rm", sub_m)) => {
-            match notes::rm_note(sub_m, bname) {
+            /*match notes::rm_note(sub_m, bname) {
                 Ok(_) => {},
                 Err(e) => {
                     error::warning(&e.to_string());
                 }
-            }
+            }*/
         },
         Some(("show", sub_m)) => {
-            match notes::show_note(sub_m, config.get_show_cmds(), bname) {
+            /*match notes::show_note(sub_m, config.get_show_cmds(), bname) {
                 Ok(_) => {},
                 Err(e) => {
                     error::warning(&e.to_string());
                 }
-            }
+            }*/
         },
         Some(("ls", sub_m)) => {
+            let bx = match bx {
+                Some(b) => b,
+                None => {
+                    error::warning("no current box");
+                    return;
+                }
+            };
             let pattern = match sub_m.get_one::<String>("pattern") {
                 Some(pat) => {
                     match Regex::new(pat) {
@@ -167,14 +200,19 @@ fn main() {
                     }
                 }
             };
-            let cards = match notes::get_cards(pattern.as_ref(), bname) {
+            let cards = match bx.get_cards(pattern.as_ref()) {
                 Ok(c) => c, 
                 Err(e) => {
                     error::warning(&e.to_string());
                     return;
                 }
             };
-            notes::list_cards(cards, Some(config.get_prefix()), Some(style));
+            match notes::list_cards(cards, Some(config.get_prefix()), Some(style)) {
+                Ok(_) => {},
+                Err(e) => {
+                    error::warning(&e.to_string());
+                }
+            };
         },
         Some(("config", _sub_m)) => {
             let check = match config::get_config() {
@@ -208,12 +246,12 @@ fn main() {
         Some(("search", sub_m)) => {
             if let Some(needle) = sub_m.get_one::<String>("needle") {
                 if let Ok(r) = Regex::new(needle) {
-                    match notes::search_notes(&r, bname) {
+                    /*match notes::search_notes(&r, bname) {
                         Ok(_) => {},
                         Err(e) => {
                             error::warning(&e.to_string());
                         }
-                    }
+                    }*/
                 } else {
                     error::warning("failed to parse pattern");
                 }
@@ -222,12 +260,12 @@ fn main() {
         Some(("mv", sub_m)) => {
             if let Some(old) = sub_m.get_one::<String>("old") {
                 if let Some(new) = sub_m.get_one::<String>("new") {
-                    match notes::move_note(&old, &new, bname) {
+                    /*match notes::move_note(&old, &new, bname) {
                         Ok(_) => { }, 
                         Err(e) => {
                             error::warning(&e.to_string());
                         },
-                    }
+                    }*/
                 }
             }
         },
@@ -239,7 +277,12 @@ fn main() {
                     return;
                 }
             };
-            notes::list_cards(cards, Some(config.get_prefix()), Some(style));
+            match notes::list_cards(cards, Some(config.get_prefix()), Some(style)) {
+                Ok(_) => {},
+                Err(e) => {
+                    error::warning(&e.to_string());
+                }
+            };
         }
     };
 

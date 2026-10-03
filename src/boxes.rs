@@ -1,5 +1,10 @@
 use std::fs;
+use std::fs::File;
+use std::process::Command;
 use std::path::PathBuf;
+use regex::Regex;
+use crate::notes::ZkCard;
+use crate::config::ZkCmd;
 
 use crate::utils;
 use crate::error::ZkError;
@@ -44,6 +49,61 @@ impl ZkBox {
             }
         }
     }
+    pub fn get_cards(&self, p: Option<&Regex>) -> Result<Vec::<ZkCard>, ZkError> {
+        let pat = match p {
+            Some(pattern) => pattern, 
+            None => &Regex::new("").unwrap()
+        };
+        let hidden = Regex::new(r"^\.").unwrap();
+        let mut files = Vec::<ZkCard>::new();
+        if let Ok(iter) = fs::read_dir(&self.path) {
+            for entry in iter {
+                let e = match entry {
+                    Ok(e) => {e},
+                    Err(_) => {continue;}
+                };
+                let path = e.path();
+                let filename = match path.file_stem() {
+                    Some(f) => {
+                        match f.to_str() {
+                            Some(s) => s,
+                            None => {continue;}
+                        }
+                    },
+                    None => {continue;}
+                };
+                if hidden.is_match(&filename) {
+                    continue;
+                }
+                if pat.is_match(&filename) {
+                    files.push(ZkCard::from(path));
+                }
+            }
+        }
+        files.sort();
+        Ok(files)
+    }
+
+    pub fn add_card(&self, name: &String, editor: Option<&ZkCmd>) -> Result<(), ZkError> {
+        let mut file = self.path.clone();
+        file.push(name);
+        match fs::exists(&file) {
+            Ok(true) => {
+                return Err(ZkError::NoteExists);
+            },
+            _ => {}
+        };
+        match File::create(&file) {
+            Ok(_) => {
+                edit_file(&file, editor)?;
+                return Ok(());
+            },
+            Err(_) => {
+                return Err(ZkError::NoteCreate);
+            }
+        }
+        Err(ZkError::NoteAddArgs)
+    }
 
     pub fn pretty_print(&self,prefix: &str, style: Option<anstyle::Style>) {
         match style {
@@ -59,12 +119,6 @@ impl ZkBox {
 
 impl From<PathBuf> for ZkBox {
     fn from(path: PathBuf) -> Self {
-        /*match utils::verify_path(&path) {
-            Ok(_) => {},
-            Err(e) => {
-                return ZkBox::new();
-            }
-        };*/
         let mut tracked = path.clone();
         tracked.push(".track");
         let track = match fs::exists(tracked) {
@@ -81,7 +135,7 @@ impl From<PathBuf> for ZkBox {
 
 impl std::fmt::Display for ZkBox {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
-        write!(f, "{:?}", self);
+        let _ = write!(f, "{:?}", self);
         Ok(())
     }
 }
@@ -247,6 +301,33 @@ fn remove_track_file(path: PathBuf) -> Result<(), ZkError> {
         return Err(ZkError::BoxNotTracked);
     }
 
+}
+
+fn edit_file(path: &PathBuf, editor: Option<&ZkCmd>) -> Result<(), ZkError> {
+    let mut hashes = utils::HashPair::new();
+    hashes.push_path(&path)?;
+    let cmd = match editor {
+        Some(ZkCmd::cmd(edit_cmd)) => edit_cmd,
+        _ => "vim"
+    };
+    match Command::new(cmd)
+        .arg(&path)
+        .status() {
+            Ok(status) => {
+                if status.success() {
+                    hashes.push_path(&path)?;
+                    if hashes.equal() {
+                        return Ok(())
+                    }
+                    vcs::add()?;
+                    vcs::commit()?;
+                    Ok(())
+                } else {
+                    Err(ZkError::Other(String::from("something went wrong while opening vim for the user")))
+                }
+            },
+            Err(_) => Err(ZkError::Other(String::from("something went wrong while opening vim for the user")))
+    }
 }
 
 #[test]

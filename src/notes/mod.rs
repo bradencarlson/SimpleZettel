@@ -62,9 +62,9 @@ impl std::fmt::Display for ZkMatch<'_> {
                 Some(s) => s,
                 None => "invalid filename found"
             };
-            write!(f, "{}\n", fname);
+            let _ = write!(f, "{}\n", fname);
             for line in &self.matches {
-                write!(f, "{}: {}\n", line.lineno, line.content);
+                let _ = write!(f, "{}: {}\n", line.lineno, line.content);
             }
         }
         Ok(())
@@ -358,6 +358,10 @@ pub fn import_file(m: &ArgMatches) -> Result<(), ZkError> {
     Ok(())
 }
 
+pub fn get_cards(a: Option<&String>, b: Option<&String>) -> Result<Vec::<ZkCard>, ZkError> {
+    Ok(Vec::<ZkCard>::new())
+}
+
 pub fn search_notes(needle: &Regex, b: Option<&String>) -> Result<(), ZkError> {
     let files = get_cards(None, b)?;
     for file in files.iter() {
@@ -388,44 +392,6 @@ pub fn list_cards(cards: Vec::<ZkCard>, prefix: Option<&ZkPrefixes>, style: Opti
     Ok(())
 }
 
-pub fn get_cards(p: Option<&Regex>, b: Option<&String>) -> Result<Vec::<ZkCard>, ZkError> {
-    let pat = match p {
-        Some(pattern) => pattern, 
-        None => &Regex::new("").unwrap()
-    };
-    let bx = match b {
-        Some(bname) => utils::get_box_from_name(bname)?,
-        None => utils::get_current_box()?
-    };
-    let hidden = Regex::new(r"^\.").unwrap();
-    let mut files = Vec::<ZkCard>::new();
-    if let Ok(iter) = fs::read_dir(bx) {
-        for entry in iter {
-            let e = match entry {
-                Ok(e) => {e},
-                Err(_) => {continue;}
-            };
-            let path = e.path();
-            let filename = match path.file_stem() {
-                Some(f) => {
-                    match f.to_str() {
-                        Some(s) => s,
-                        None => {continue;}
-                    }
-                },
-                None => {continue;}
-            };
-            if hidden.is_match(&filename) {
-                continue;
-            }
-            if pat.is_match(&filename) {
-                files.push(ZkCard::from(path));
-            }
-        }
-    }
-    files.sort();
-    Ok(files)
-}
 
 
 fn edit_file(path: &PathBuf, editor: &ZkCmd) -> Result<(), ZkError> {
