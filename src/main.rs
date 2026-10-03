@@ -131,14 +131,6 @@ fn main() {
                             error::warning(&e.to_string());
                         }
                     };
-                /*match notes::add_note(sub_m, bname, config.get_editor()) {
-                    Ok(_) => {
-                        println!("Note added successfully.");
-                    },
-                    Err(e) => {
-                        error::warning(&e.to_string());
-                    },
-                }*/
                 }
             }
         },
@@ -153,12 +145,16 @@ fn main() {
             }
         },
         Some(("edit", sub_m)) => {
-            /*match notes::edit_note(sub_m, bname, &config.get_editor()) {
-                Ok(_) => {},
-                Err(e) => {
-                    error::warning(&e.to_string());
+            if let Some(bx) = bx {
+                if let Some(name) = sub_m.get_one::<String>("name") {
+                    match bx.edit_card(name, editor) {
+                        Ok(_) => {},
+                        Err(e) => {
+                            error::warning(&e.to_string());
+                        }
+                    };
                 }
-            }*/
+            }
         },
         Some(("rm", sub_m)) => {
             /*match notes::rm_note(sub_m, bname) {

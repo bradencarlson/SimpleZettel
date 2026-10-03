@@ -106,6 +106,29 @@ impl ZkBox {
         Err(ZkError::NoteAddArgs)
     }
 
+    pub fn edit_card(&self, name: &String, editor: &ZkCmd) -> Result<(), ZkError> {
+        let mut path = self.path.clone();
+        path.push(name);
+        path.set_extension("md");
+        if self.card_exists(name)? {
+            edit_file(&path, editor)?;
+            Ok(())
+        } else {
+            Err(ZkError::NoteNotExists)
+        }
+    }
+
+    fn card_exists(&self, name: &String) -> Result<bool, ZkError> {
+        let mut path = self.path.clone();
+        path.push(name);
+        path.set_extension("md");
+        match fs::exists(&path) {
+            Ok(true) => Ok(true),
+            Ok(false) => Ok(false),
+            Err(e) => Err(ZkError::NoteRead(path))
+        }
+    }
+
     pub fn pretty_print(&self,prefix: &str, style: Option<anstyle::Style>) {
         match style {
             Some(s) => {
