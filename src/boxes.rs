@@ -84,9 +84,10 @@ impl ZkBox {
         Ok(files)
     }
 
-    pub fn add_card(&self, name: &String, editor: Option<&ZkCmd>) -> Result<(), ZkError> {
+    pub fn add_card(&self, name: &String, editor: &ZkCmd) -> Result<(), ZkError> {
         let mut file = self.path.clone();
         file.push(name);
+        file.set_extension("md");
         match fs::exists(&file) {
             Ok(true) => {
                 return Err(ZkError::NoteExists);
@@ -303,11 +304,11 @@ fn remove_track_file(path: PathBuf) -> Result<(), ZkError> {
 
 }
 
-fn edit_file(path: &PathBuf, editor: Option<&ZkCmd>) -> Result<(), ZkError> {
+fn edit_file(path: &PathBuf, editor: &ZkCmd) -> Result<(), ZkError> {
     let mut hashes = utils::HashPair::new();
     hashes.push_path(&path)?;
     let cmd = match editor {
-        Some(ZkCmd::cmd(edit_cmd)) => edit_cmd,
+        ZkCmd::cmd(edit_cmd) => edit_cmd,
         _ => "vim"
     };
     match Command::new(cmd)
