@@ -228,157 +228,6 @@ impl std::cmp::Ord for ZkCard {
     }
 }
 
-
-pub fn add_note(matches: &ArgMatches, b: Option<&String>, editor: &ZkCmd) -> Result<(), ZkError> {
-    if let Some(name) = matches.get_one::<String>("name") {
-        let file = utils::note_path_from_name(name, None, b)?;
-        match fs::exists(&file) {
-            Ok(true) => {
-                return Err(ZkError::NoteExists);
-            },
-            _ => {}
-        };
-        match File::create(&file) {
-            Ok(_) => {
-                edit_file(&file, editor)?;
-                return Ok(());
-            },
-            Err(_) => {
-                return Err(ZkError::NoteCreate);
-            }
-        }
-    }
-    if let Some(num) = matches.get_one::<String>("number") {
-        parse_number(&num)?;
-        let file = utils::note_path_from_name(num, None, b)?;
-        match fs::exists(&file) {
-            Ok(true) => {
-                return Err(ZkError::NoteExists);
-            },
-            _ => {}
-        };
-        match File::create(&file) {
-            Ok(_) => {
-                edit_file(&file, editor)?;
-                return Ok(());
-            },
-            Err(_) => {
-                return Err(ZkError::NoteCreate);
-            }
-        }
-    }
-    Err(ZkError::NoteAddArgs)
-}
-
-pub fn show_note(matches: &ArgMatches, show_cmds: &ZkShowCommands, b: Option<&String>) -> Result<(), ZkError> {
-    if let Some(name) = matches.get_one::<String>("name") {
-        let note = utils::zkcard_from_name(name, b)?;
-        ft::show_note(&note, show_cmds)?;
-        Ok(())
-    } else {
-        Err(ZkError::NoName)
-    }
-}
-
-pub fn rm_note(matches: &ArgMatches, b: Option<&String>) -> Result<(), ZkError> {
-    if let Some(name) = matches.get_one::<String>("name") {
-        let note = utils::zkcard_from_name(name, b)?;
-        match fs::remove_file(&note.path) {
-            Ok(()) => {
-                println!("succesfully removed note");
-                Ok(())
-            },
-            Err(_e) => {
-                Err(ZkError::Other(String::from("could not remove note")))
-            }
-        }
-    } else {
-        Err(ZkError::NoName)
-    }
-}
-
-pub fn edit_note(matches: &ArgMatches, b: Option<&String>, editor: &ZkCmd) -> Result<(), ZkError> {
-    if let Some(name) = matches.get_one::<String>("name") {
-        let note = utils::note_path_from_name(name, None, b)?;
-        if utils::note_exists(&note)? {
-            edit_file(&note, editor)?;
-        };
-        Ok(())
-    } else {
-        Err(ZkError::NoName)
-    }
-}
-
-pub fn move_note(old: &String, new: &String, b: Option<&String>) -> Result<(), ZkError> {
-    let o = utils::zkcard_from_name(old, b)?;
-    let n = utils::note_path_from_name(new, Some(o.filetype), b)?;
-    if let Ok(true) = fs::exists(&n) {
-            return Err(ZkError::NoteExists);
-    }
-    match fs::rename(o.path, n) {
-        Ok(_) => {
-            Ok(())
-        },
-        Err(_) => {
-            Err(ZkError::Move)
-        }
-    }
-}
-
-pub fn import_file(m: &ArgMatches) -> Result<(), ZkError> {
-    if let Some(p) = m.get_one::<String>("path") {
-        let path = PathBuf::from(p);
-        match fs::exists(&path) {
-            Ok(true) => {},
-            Ok(false) => {
-                return Err(ZkError::Other(String::from("import path does not exist")));
-            },
-            Err(_) => {
-                return Err(ZkError::Access(path));
-            }
-        };
-        let mut new_file = utils::get_current_box()?;
-        if let Some(fname) = path.file_name() {
-            new_file.push(fname);
-            match fs::copy(path, new_file) {
-                Ok(_) => {
-                    return Ok(());
-                },
-                Err(_) => {
-                    return Err(ZkError::ImportFail);
-                }
-            }
-        } else {
-            return Err(ZkError::Other(String::from("unable to get filename of import path")));
-        }
-
-    } else {
-        return Err(ZkError::ImportArgs);
-    }
-    Ok(())
-}
-
-pub fn get_cards(a: Option<&String>, b: Option<&String>) -> Result<Vec::<ZkCard>, ZkError> {
-    Ok(Vec::<ZkCard>::new())
-}
-
-pub fn search_notes(needle: &Regex, b: Option<&String>) -> Result<(), ZkError> {
-    let files = get_cards(None, b)?;
-    for file in files.iter() {
-        if let Some(matches) = search_note(file, needle) {
-            let card = ZkMatch { 
-                card: file.clone(),
-                matches: matches
-            };
-            let l = &card.matches.len();
-            if *l > 0  {
-                println!("{}", card);
-            }
-        }
-    }
-    Ok(())
-}
-
 pub fn list_cards(cards: Vec::<ZkCard>, prefix: Option<&ZkPrefixes>, style: Option<anstyle::Style>) -> Result<(), ZkError> {
     let max = match cards.iter()
         .map(|c| c.get_number_length())
@@ -390,36 +239,6 @@ pub fn list_cards(cards: Vec::<ZkCard>, prefix: Option<&ZkPrefixes>, style: Opti
         card.pretty_print(max, prefix, style);
     }
     Ok(())
-}
-
-
-
-fn edit_file(path: &PathBuf, editor: &ZkCmd) -> Result<(), ZkError> {
-    utils::verify_note_path(path)?;
-    let mut hashes = utils::HashPair::new();
-    hashes.push_path(&path)?;
-    let cmd = match editor {
-        ZkCmd::cmd(edit_cmd) => edit_cmd,
-        _ => "vim"
-    };
-    match Command::new(cmd)
-        .arg(&path)
-        .status() {
-            Ok(status) => {
-                if status.success() {
-                    hashes.push_path(&path)?;
-                    if hashes.equal() {
-                        return Ok(())
-                    }
-                    vcs::add()?;
-                    vcs::commit()?;
-                    Ok(())
-                } else {
-                    Err(ZkError::Other(String::from("something went wrong while opening vim for the user")))
-                }
-            },
-            Err(_) => Err(ZkError::Other(String::from("something went wrong while opening vim for the user")))
-    }
 }
 
 fn parse_number(num: &str) -> Result<Vec::<usize>, ZkError> {
@@ -435,11 +254,6 @@ fn parse_number(num: &str) -> Result<Vec::<usize>, ZkError> {
         };
     }
     Ok(v)
-}
-
-
-fn insert_number(path: &PathBuf, num: &Vec::<usize>) -> Result<(), ZkError> {
-    Ok(())
 }
 
 fn get_first_header(path: &PathBuf) -> Result<String, ZkError> {
@@ -464,27 +278,6 @@ fn get_first_header(path: &PathBuf) -> Result<String, ZkError> {
     }
 }
 
-fn search_note<'a>(card: &'a ZkCard, needle: &Regex) -> Option<Vec::<ZkLine>> {
-    let f = match File::open(&card.path) {
-        Ok(file) => file,
-        Err(_) => return None
-    };
-    let mut matches = Vec::<ZkLine>::new();
-    let mut reader = BufReader::new(f);
-    let mut lines = reader.lines();
-    let mut line_no = 0;
-    while let Some(Ok(line)) = lines.next() {
-        line_no += 1;
-        if needle.is_match(line.as_str()) {
-            matches.push(ZkLine {
-                lineno: line_no,
-                content: line
-            });
-        }
-    }
-    Some(matches)
-}
-
 fn get_references(path: &PathBuf) -> Result<Vec::<ZkRef>, ZkError> {
     let mut refs = Vec::<ZkRef>::new();
     // TODO: Perhaps this method should just assume that someone else has checked this?
@@ -498,7 +291,7 @@ fn get_references(path: &PathBuf) -> Result<Vec::<ZkRef>, ZkError> {
                 if reference.is_match(&line) {
                     let mut matches = reference.captures_iter(&line);
                     while let Some(f_name) = matches.next() {
-                        let p: ZkPath = match utils::note_path_from_name(&f_name["link"], None, None) {
+                        /*let p: ZkPath = match utils::note_path_from_name(&f_name["link"], None, None) {
                             Ok(pth) => ZkPath::Path(pth),
                             Err(_) => ZkPath::Invalid
                         };
@@ -506,7 +299,7 @@ fn get_references(path: &PathBuf) -> Result<Vec::<ZkRef>, ZkError> {
                             path: p,
                             label: String::from(&f_name["linkname"]),
                         };
-                        refs.push(zkp);
+                        refs.push(zkp);*/
                     }
                 }
             }

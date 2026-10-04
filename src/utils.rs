@@ -81,16 +81,6 @@ impl HashPair {
     }
 }
 
-pub fn print_blue(msg: &str) {
-    let blue = anstyle::Style::new().fg_color(Some(anstyle::AnsiColor::Blue.into())).bold();
-    print!("{blue}{}{blue:#}", msg);
-}
-
-pub fn print_black(msg: &str) {
-    let black = anstyle::Style::new().fg_color(Some(anstyle::AnsiColor::BrightBlack.into()));
-    print!("{black}{}{black:#}", msg);
-}
-
 pub fn prompt_user(msg: &str) -> Result<String, ZkError> {
     println!("{}", msg);
     let mut buff = String::new();
@@ -111,43 +101,6 @@ pub fn path_from_name(name: &str) -> Result<PathBuf, ZkError> {
     }
 }
 
-pub fn note_path_from_name(name: &str, filetype: Option<FileType>, b: Option<&String>) -> Result<PathBuf, ZkError> {
-    let extension: String = match filetype {
-        Some(ft) => ft.get_ext(),
-        None => String::from("md")
-    };
-    let mut file = match b {
-        Some(bname) => get_box_from_name(bname)?,
-        None => get_current_box()?,
-    };
-    file.push(name);
-    if let Some(ext) = file.extension() {
-        if *ext == *extension {
-            return Ok(file);
-        }
-    }
-    file.add_extension(extension);
-    Ok(file)
-}
-
-pub fn zkcard_from_name(name: &str, b: Option<&String>) -> Result<ZkCard, ZkError> {
-    let path = match b {
-        Some(bname) => get_box_from_name(bname)?,
-        None => get_current_box()?,
-    };
-    if let Ok(iter) = fs::read_dir(&path) {
-        for entry in iter {
-            let fname = get_filename(&entry)?;
-            let p = get_filepath(&entry)?;
-            if fname == name {
-                return Ok(ZkCard::from(p.to_path_buf()));
-            }
-        }
-    } else {
-        return Err(ZkError::Other(String::from("could not open current box")));
-    }
-    Err(ZkError::NoteNotExists)
-}
 
 fn get_filename(entry: &io::Result<DirEntry>) -> Result<String, ZkError> {
     match entry {
@@ -224,45 +177,6 @@ pub fn verify_note_path(path: &PathBuf) -> Result<(), ZkError> {
     }
 }
 
-pub fn get_current_box() -> Result<PathBuf, ZkError> {
-    let mut current = get_szettel_dir()?;
-    current.push(".current");
-    match fs::read_to_string(&current) {
-        Ok(content) => {
-            let current = path_from_name(&content.trim())?;
-            match current.try_exists() {
-                Ok(true) => {
-                    Ok(current)
-                },
-                Ok(false) => {
-                    Err(ZkError::NoCurrentBox)
-                },
-                Err(e) => {
-                    Err(ZkError::Other(String::from("I couldn't read the ~/.szettel/.current file. I might need you to delete it for me.")))
-                }
-            }
-        },
-        Err(e) => Err(ZkError::NoCurrentBox)
-    }
-}
-
-pub fn get_box_from_name(name: &String) -> Result<PathBuf, ZkError> {
-    let mut p = get_szettel_dir()?;
-    p.push(name);
-    match p.is_dir() {
-        true => Ok(p),
-        false => Err(ZkError::BoxInvalid)
-    }
-}
-
-pub fn note_exists(note: &Path) -> Result<bool, ZkError> {
-    match fs::exists(&note)? {
-        true => {Ok(true)},
-        false => {
-            return Err(ZkError::NoteNotExists);
-        }
-    }
-}
 
 #[test]
 fn valid_path() {

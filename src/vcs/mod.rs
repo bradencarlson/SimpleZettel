@@ -9,14 +9,14 @@ pub fn init(path: &PathBuf) -> Result<(), ZkError> {
     Ok(())
 }
 
-pub fn add() -> Result<(), ZkError> {
+pub fn add(base_dir: &PathBuf) -> Result<(), ZkError> {
     #[cfg(feature = "git")]
-    git::add()?;
+    git::add(base_dir)?;
     Ok(())
 }
 
-pub fn commit() -> Result<(), ZkError> {
+pub fn commit(base_dir: &PathBuf) -> Result<(), ZkError> {
     #[cfg(feature = "git")]
-    git::commit()?;
+    git::commit(base_dir)?;
     Ok(())
 }

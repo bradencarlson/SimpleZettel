@@ -57,15 +57,14 @@ fn main() {
             match sub_m.subcommand() {
                 Some(("ls", ssub_m)) => {
                     let all = ssub_m.get_flag("all");
-                    let b = match boxes::get_boxes(base_dir) {
+                    /*let b = match boxes::get_boxes(base_dir) {
                         Ok(box_list) => box_list,
                         Err(e) => {
                             error::warning(&e.to_string());
                             return;
                         }
-                    };
-                    println!("{:?}" ,b);
-                    match boxes::list_boxes(b, all, color) {
+                    };*/
+                    match boxes::list_boxes(base_dir, all, color) {
                         Ok(_) => {},
                         Err(e) => {
                             error::warning(&e.to_string());
@@ -105,15 +104,15 @@ fn main() {
                     }
                 },
                 _ => {
-                    let b = match boxes::get_boxes(base_dir) {
+                    /*let b = match boxes::get_boxes(base_dir) {
                         Ok(box_list) => box_list,
                         Err(e) => {
                             error::warning(&e.to_string());
                             return;
                         }
-                    };
+                    };*/
 
-                    match boxes::list_boxes(b, false, color) {
+                    match boxes::list_boxes(base_dir, false, color) {
                         Ok(_) => {},
                         Err(e) => {
                             error::warning(&e.to_string());
@@ -292,19 +291,21 @@ fn main() {
             }
         },
         _ => {
-            let cards = match notes::get_cards(None, None) {
-                Ok(c) => c,
-                Err(e) => {
-                    error::warning(&e.to_string());
-                    return;
-                }
-            };
-            match notes::list_cards(cards, Some(config.get_prefix()), Some(style)) {
-                Ok(_) => {},
-                Err(e) => {
-                    error::warning(&e.to_string());
-                }
-            };
+            if let Some(bx) = bx {
+                let cards = match bx.get_cards(None) {
+                    Ok(c) => c, 
+                    Err(e) => {
+                        error::warning(&e.to_string());
+                        return;
+                    }
+                };
+                match notes::list_cards(cards, Some(config.get_prefix()), Some(style)) {
+                    Ok(_) => {},
+                    Err(e) => {
+                        error::warning(&e.to_string());
+                    }
+                };
+            }
         }
     };
 

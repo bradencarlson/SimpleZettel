@@ -101,6 +101,8 @@ impl ZkBox {
         match File::create(&file) {
             Ok(_) => {
                 edit_file(&file, editor)?;
+                vcs::add(&self.path)?;
+                vcs::commit(&self.path)?;
                 return Ok(());
             },
             Err(_) => {
@@ -116,6 +118,8 @@ impl ZkBox {
         path.set_extension("md");
         if self.card_exists(name)? {
             edit_file(&path, editor)?;
+            vcs::add(&self.path)?;
+            vcs::commit(&self.path)?;
             Ok(())
         } else {
             Err(ZkError::NoteNotExists)
@@ -376,11 +380,11 @@ pub fn add_box(base_dir: &PathBuf, name: &String) -> Result<(), ZkError> {
     }
 }
 
-pub fn list_boxes(bxs: Vec::<ZkBox>, all: bool, color: &u8) -> Result<(), ZkError> {
+pub fn list_boxes(base_dir: &PathBuf, all: bool, color: &u8) -> Result<(), ZkError> {
     let style = anstyle::Style::new().fg_color(Some(anstyle::Ansi256Color::from(*color).into())).bold();
-    let current = utils::get_current_box()?;
+    let bxs = get_boxes(base_dir)?;
     for b in bxs.iter() {
-        let prefix = match *b.get_path() == current {
+        let prefix = match b.is_current() {
             true => "->",
             false => "  ",
         };
@@ -483,8 +487,6 @@ fn edit_file(path: &PathBuf, editor: &ZkCmd) -> Result<(), ZkError> {
                     if hashes.equal() {
                         return Ok(())
                     }
-                    vcs::add()?;
-                    vcs::commit()?;
                     Ok(())
                 } else {
                     Err(ZkError::Other(String::from("something went wrong while opening vim for the user")))
