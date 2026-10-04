@@ -36,7 +36,7 @@ pub struct ZkLine {
 
 #[derive(Debug)]
 pub struct ZkCard {
-    path: PathBuf,
+    pub path: PathBuf,
     number: ZkNumber,
     header: String,
     filetype: FileType,

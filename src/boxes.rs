@@ -118,6 +118,19 @@ impl ZkBox {
         }
     }
 
+    pub fn rm_card(&self, name: &String) -> Result<(), ZkError> {
+        let card = self.find_card(name)?;
+        match fs::remove_file(&card.path) {
+            Ok(()) => {
+                println!("succesfully removed note");
+                Ok(())
+            },
+            Err(_e) => {
+                Err(ZkError::Other(String::from("could not remove note")))
+            }
+        }
+    }
+
     fn card_exists(&self, name: &String) -> Result<bool, ZkError> {
         let mut path = self.path.clone();
         path.push(name);
@@ -127,6 +140,34 @@ impl ZkBox {
             Ok(false) => Ok(false),
             Err(e) => Err(ZkError::NoteRead(path))
         }
+    }
+
+    fn find_card(&self, name: &String) -> Result<ZkCard, ZkError> {
+        let mut path = self.path.clone();
+        path.push(name);
+        let iter = match fs::read_dir(&self.path) {
+            Ok(it) => it, 
+            Err(e) => {
+                return Err(ZkError::Access(self.path.clone()));
+            }
+        };
+        for entry in iter {
+            let entry = match entry {
+                Ok(e) => e, 
+                Err(_) => {
+                    break;
+                }
+            };
+            let p = entry.path();
+            if let Some(fstem) = p.file_stem() {
+                if let Some(fname) = fstem.to_str() {
+                    if name.starts_with(fname) {
+                        return Ok(ZkCard::from(p));
+                    }
+                }
+            }
+        }
+        Err(ZkError::NoteNotExists)
     }
 
     pub fn pretty_print(&self,prefix: &str, style: Option<anstyle::Style>) {

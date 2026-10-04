@@ -157,12 +157,16 @@ fn main() {
             }
         },
         Some(("rm", sub_m)) => {
-            /*match notes::rm_note(sub_m, bname) {
-                Ok(_) => {},
-                Err(e) => {
-                    error::warning(&e.to_string());
+            if let Some(bx) = bx {
+                if let Some(name) = sub_m.get_one::<String>("name") {
+                    match bx.rm_card(name) {
+                        Ok(_) => {},
+                        Err(e) => {
+                            error::warning(&e.to_string());
+                        }
+                    };
                 }
-            }*/
+            }
         },
         Some(("show", sub_m)) => {
             /*match notes::show_note(sub_m, config.get_show_cmds(), bname) {
