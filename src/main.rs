@@ -169,61 +169,60 @@ fn main() {
             }
         },
         Some(("show", sub_m)) => {
-            /*match notes::show_note(sub_m, config.get_show_cmds(), bname) {
-                Ok(_) => {},
-                Err(e) => {
-                    error::warning(&e.to_string());
-                }
-            }*/
-        },
-        Some(("ls", sub_m)) => {
-            let bx = match bx {
-                Some(b) => b,
-                None => {
-                    error::warning("no current box");
-                    return;
-                }
-            };
-            let pattern = match sub_m.get_one::<String>("pattern") {
-                Some(pat) => {
-                    match Regex::new(pat) {
-                        Ok(p) => Some(p),
+            if let Some(bx) = bx {
+                if let Some(name) = sub_m.get_one::<String>("name") {
+                    match bx.show_card(name, config.get_show_cmds()) {
+                        Ok(_) => {},
                         Err(e) => {
                             error::warning(&e.to_string());
-                            None
+                        }
+                    };
+                }
+            }
+        },
+        Some(("ls", sub_m)) => {
+            if let Some(bx) = bx {
+                let pattern = match sub_m.get_one::<String>("pattern") {
+                    Some(pat) => {
+                        match Regex::new(pat) {
+                            Ok(p) => Some(p),
+                            Err(e) => {
+                                error::warning(&e.to_string());
+                                None
+                            }
+                        }
+                    },
+                    None => {
+                        match sub_m.get_one::<String>("number") {
+                            Some(n) => {
+                                let mut pat = String::from("^");
+                                pat.push_str(n.as_str());
+                                match Regex::new(&pat) {
+                                    Ok(p) => Some(p),
+                                    Err(e) => {
+                                        error::warning(&e.to_string());
+                                        None
+                                    }
+                                }
+                            },
+                            None => None
                         }
                     }
-                },
-                None => {
-                    match sub_m.get_one::<String>("number") {
-                        Some(n) => {
-                            let mut pat = String::from("^");
-                            pat.push_str(n.as_str());
-                            match Regex::new(&pat) {
-                                Ok(p) => Some(p),
-                                Err(e) => {
-                                    error::warning(&e.to_string());
-                                    None
-                                }
-                            }
-                        },
-                        None => None
+                };
+                let cards = match bx.get_cards(pattern.as_ref()) {
+                    Ok(c) => c, 
+                    Err(e) => {
+                        error::warning(&e.to_string());
+                        return;
                     }
-                }
-            };
-            let cards = match bx.get_cards(pattern.as_ref()) {
-                Ok(c) => c, 
-                Err(e) => {
-                    error::warning(&e.to_string());
-                    return;
-                }
-            };
-            match notes::list_cards(cards, Some(config.get_prefix()), Some(style)) {
-                Ok(_) => {},
-                Err(e) => {
-                    error::warning(&e.to_string());
-                }
-            };
+                };
+                match notes::list_cards(cards, Some(config.get_prefix()), Some(style)) {
+                    Ok(_) => {},
+                    Err(e) => {
+                        error::warning(&e.to_string());
+                    }
+                };
+            }
         },
         Some(("config", _sub_m)) => {
             let check = match config::get_config() {

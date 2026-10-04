@@ -4,12 +4,13 @@ use std::process::Command;
 use std::path::PathBuf;
 use regex::Regex;
 use crate::notes::ZkCard;
-use crate::config::ZkCmd;
+use crate::config::{ZkShowCommands,ZkCmd};
 
 use crate::utils;
 use crate::error::ZkError;
 use crate::error;
 use crate::vcs;
+use crate::notes::ft;
 
 #[derive(Debug,Default,PartialEq)]
 pub struct ZkBox {
@@ -129,6 +130,12 @@ impl ZkBox {
                 Err(ZkError::Other(String::from("could not remove note")))
             }
         }
+    }
+
+    pub fn show_card(&self, name: &String, show_cmds: &ZkShowCommands) -> Result<(), ZkError> {
+        let card = self.find_card(name)?;
+        ft::show_note(&card, show_cmds)?;
+        Ok(())
     }
 
     fn card_exists(&self, name: &String) -> Result<bool, ZkError> {
