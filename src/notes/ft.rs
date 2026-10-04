@@ -8,7 +8,7 @@ use crate::error::ZkError;
 use crate::notes::ZkCard;
 use crate::config::{ZkConfig,ZkCmd,ZkShowCommands,ZkPrefixes};
 
-#[derive(Debug)]
+#[derive(Debug,Clone)]
 pub enum FileType {
     Markdown,
     PDF,

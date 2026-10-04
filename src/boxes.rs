@@ -1,5 +1,6 @@
 use std::fs;
 use std::fs::File;
+use std::io::{BufRead,BufReader};
 use std::process::Command;
 use std::path::PathBuf;
 use regex::Regex;
@@ -11,6 +12,7 @@ use crate::error::ZkError;
 use crate::error;
 use crate::vcs;
 use crate::notes::ft;
+use crate::notes::{ZkLine,ZkMatch};
 
 #[derive(Debug,Default,PartialEq)]
 pub struct ZkBox {
@@ -162,6 +164,45 @@ impl ZkBox {
         } else {
             return Err(ZkError::Other(String::from("unable to get filename of import path")));
         }
+    }
+
+    pub fn search_cards(&self, needle: &Regex) -> Result<Vec::<ZkMatch>, ZkError> {
+        let mut mat = Vec::<ZkMatch>::new();
+        let cards = self.get_cards(None)?;
+        for card in cards.iter() {
+            if let Some(matches) = ZkBox::search(&card, needle) {
+                let l = &matches.len();
+                if *l > 0  {
+                    let match_location = ZkMatch { 
+                        card: card.clone(),
+                        matches: matches
+                    };
+                    mat.push(match_location);
+                }
+            }
+        }
+        Ok(mat)
+    }
+
+    fn search(card: &ZkCard, needle: &Regex) -> Option<Vec::<ZkLine>> {
+        let f = match File::open(&card.path) {
+            Ok(file) => file,
+            Err(_) => return None
+        };
+        let mut matches = Vec::<ZkLine>::new();
+        let mut reader = BufReader::new(f);
+        let mut lines = reader.lines();
+        let mut line_no = 0;
+        while let Some(Ok(line)) = lines.next() {
+            line_no += 1;
+            if needle.is_match(line.as_str()) {
+                matches.push(ZkLine {
+                    lineno: line_no,
+                    content: line
+                });
+            }
+        }
+        Some(matches)
     }
 
     fn card_exists(&self, name: &String) -> Result<bool, ZkError> {
@@ -447,4 +488,19 @@ fn get_list_of_boxes() {
 fn invalid_box_dir() {
     let base_dir = PathBuf::from("tests/invalid");
     assert_eq!(get_boxes(&base_dir), Err(ZkError::Access(base_dir)));
+}
+
+#[test]
+fn string_search() {
+    let test_file = PathBuf::from("tests/files/1.md");
+    let card = ZkCard::from(test_file);
+    let pat = Regex::new("File").expect("Failed to create regex.");
+    let matches = ZkBox::search(&card, &pat).expect("Failed to run search on card.");
+    assert_eq!(matches.len(), 1);
+    assert_eq!(matches, vec![
+        ZkLine {
+            lineno: 5,
+            content: String::from("# File 1")
+        }]
+    );
 }

@@ -15,26 +15,26 @@ use crate::vcs;
 pub mod ft;
 use ft::FileType;
 
-#[derive(PartialEq,Debug)]
+#[derive(PartialEq,Debug,Clone)]
 pub enum ZkNumber {
     Num(Vec::<usize>),
     Alpha(String),
     Invalid
 }
 
-#[derive(Debug)]
-pub struct ZkMatch<'a> {
-    card: &'a ZkCard,
-    matches: Vec::<ZkLine>
+#[derive(Debug,Clone)]
+pub struct ZkMatch {
+    pub card: ZkCard,
+    pub matches: Vec::<ZkLine>
 }
 
-#[derive(Debug)]
+#[derive(Debug,PartialEq,Clone)]
 pub struct ZkLine {
-    lineno: usize,
-    content: String
+    pub lineno: usize,
+    pub content: String
 }
 
-#[derive(Debug)]
+#[derive(Debug,Clone)]
 pub struct ZkCard {
     pub path: PathBuf,
     number: ZkNumber,
@@ -43,19 +43,19 @@ pub struct ZkCard {
     references: Vec::<ZkRef>,
 }
 
-#[derive(Debug)]
+#[derive(Debug,Clone)]
 pub enum ZkPath {
     Path(PathBuf),
     Invalid
 }
 
-#[derive(Debug)]
+#[derive(Debug,Clone)]
 pub struct ZkRef {
     path: ZkPath,
     label: String,
 }
 
-impl std::fmt::Display for ZkMatch<'_> {
+impl std::fmt::Display for ZkMatch {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
         if let Some(filename) = self.card.path.file_name() {
             let fname = match filename.to_str() {
@@ -367,7 +367,7 @@ pub fn search_notes(needle: &Regex, b: Option<&String>) -> Result<(), ZkError> {
     for file in files.iter() {
         if let Some(matches) = search_note(file, needle) {
             let card = ZkMatch { 
-                card: file,
+                card: file.clone(),
                 matches: matches
             };
             let l = &card.matches.len();

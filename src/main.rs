@@ -257,16 +257,21 @@ fn main() {
             }
         },
         Some(("search", sub_m)) => {
-            if let Some(needle) = sub_m.get_one::<String>("needle") {
-                if let Ok(r) = Regex::new(needle) {
-                    /*match notes::search_notes(&r, bname) {
-                        Ok(_) => {},
-                        Err(e) => {
-                            error::warning(&e.to_string());
-                        }
-                    }*/
-                } else {
-                    error::warning("failed to parse pattern");
+            if let Some(bx) = bx {
+                if let Some(needle) = sub_m.get_one::<String>("needle") {
+                    if let Ok(r) = Regex::new(needle) {
+                        match bx.search_cards(&r) {
+                            Ok(v) => {
+                                println!("{:?}", v);
+                            },
+                            Err(e) => {
+                                error::warning(&e.to_string());
+                            }
+                        };
+                        
+                    } else {
+                        error::warning("failed to parse pattern");
+                    }
                 }
             }
         },
