@@ -6,7 +6,7 @@ use std::process::Command;
 use std::path::PathBuf;
 use regex::Regex;
 use crate::notes::ZkCard;
-use crate::config::{ZkShowCommands,ZkCmd};
+use crate::config::{ZkPrefixes,ZkShowCommands,ZkCmd};
 
 use crate::utils;
 use crate::error::ZkError;
@@ -88,6 +88,20 @@ impl ZkBox {
         Ok(files)
     }
 
+    pub fn list_cards(&self, p: Option<&Regex>, prefix: Option<&ZkPrefixes>, style: Option<anstyle::Style>) -> Result<(), ZkError> {
+        let cards = self.get_cards(p)?;
+        let max = match cards.iter()
+            .map(|c| c.get_number_length())
+            .max() {
+                Some(m) => m+4,
+                None => 20
+        };
+        for card in cards.iter() {
+            card.pretty_print(max, prefix, style);
+        }
+        Ok(())
+    }
+
     pub fn add_card(&self, name: &String, editor: &ZkCmd) -> Result<(), ZkError> {
         let mut file = self.path.clone();
         file.push(name);
@@ -109,7 +123,6 @@ impl ZkBox {
                 return Err(ZkError::NoteCreate);
             }
         }
-        Err(ZkError::NoteAddArgs)
     }
 
     pub fn edit_card(&self, name: &String, editor: &ZkCmd) -> Result<(), ZkError> {
@@ -219,7 +232,7 @@ impl ZkBox {
             Err(_) => return None
         };
         let mut matches = Vec::<ZkLine>::new();
-        let mut reader = BufReader::new(f);
+        let reader = BufReader::new(f);
         let mut lines = reader.lines();
         let mut line_no = 0;
         while let Some(Ok(line)) = lines.next() {
@@ -241,7 +254,7 @@ impl ZkBox {
         match fs::exists(&path) {
             Ok(true) => Ok(true),
             Ok(false) => Ok(false),
-            Err(e) => Err(ZkError::NoteRead(path))
+            Err(_e) => Err(ZkError::NoteRead(path))
         }
     }
 
@@ -250,7 +263,7 @@ impl ZkBox {
         path.push(name);
         let iter = match fs::read_dir(&self.path) {
             Ok(it) => it, 
-            Err(e) => {
+            Err(_e) => {
                 return Err(ZkError::Access(self.path.clone()));
             }
         };
@@ -395,23 +408,25 @@ pub fn list_boxes(base_dir: &PathBuf, all: bool, color: &u8) -> Result<(), ZkErr
     Ok(())
 }
 
-pub fn use_box(name: &String, color: &u8) -> Result<(), ZkError> {
-    let b: ZkBox = utils::path_from_name(&name)?.into();
+pub fn use_box(base_dir: &PathBuf, name: &String, color: &u8) -> Result<(), ZkError> {
+    let mut box_path = base_dir.clone();
+    box_path.push(name);
+    let b = ZkBox::from(box_path);
     if !b.is_tracked() {
         return Err(ZkError::BoxNotTracked);
     };
     match fs::exists(&b.get_path()) {
         Ok(true) => {
-            let mut current = utils::get_szettel_dir()?;
+            let mut current = base_dir.clone();
             current.push(".current");
             match fs::write(current, name) {
-                Ok(_) => {
-                    /*let b = get_boxes();
-                    list_boxes(b, false, color)?;*/
-                    Ok(())
-                },
-                Err(_e) => Err(ZkError::Current)
-            }
+                Ok(_) => {},
+                Err(e) => {
+                    return Err(ZkError::Current);
+                }
+            };
+            list_boxes(base_dir, false, color)?;
+            Ok(())
         },
         _ => {
             Err(ZkError::BoxInvalid)
@@ -475,7 +490,7 @@ fn edit_file(path: &PathBuf, editor: &ZkCmd) -> Result<(), ZkError> {
     let mut hashes = utils::HashPair::new();
     hashes.push_path(&path)?;
     let cmd = match editor {
-        ZkCmd::cmd(edit_cmd) => edit_cmd,
+        ZkCmd::Cmd(edit_cmd) => edit_cmd,
         _ => "vim"
     };
     match Command::new(cmd)

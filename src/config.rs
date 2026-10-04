@@ -1,4 +1,3 @@
-use std::assert_matches;
 use std::env;
 use std::fs;
 use std::path::PathBuf;
@@ -35,7 +34,7 @@ pub struct ZkPrefixes {
 
 #[derive(Debug,PartialEq,Default)]
 pub enum ZkCmd {
-    cmd(String),
+    Cmd(String),
     #[default]
     Invalid,
 }
@@ -102,7 +101,7 @@ pub fn get_config() -> Result<ZkConfig, ZkError> {
             Ok(tab) => {
                 return Ok(parse_table(tab)?);
             },
-            Err(e) => {
+            Err(_e) => {
                 return Err(ZkError::ConfigError);
             }
         };
@@ -118,12 +117,12 @@ fn parse_table(tab: Table) -> Result<ZkConfig, ZkError> {
         if let Some(c) = cmd_tab.get("md") {
             let v = c.to_string();
             let v = clean_value(&v);
-            config.show.md = ZkCmd::cmd(v.to_string());
+            config.show.md = ZkCmd::Cmd(v.to_string());
         }
         if let Some(c) = cmd_tab.get("pdf") {
             let v = c.to_string();
             let v = clean_value(&v);
-            config.show.pdf = ZkCmd::cmd(v.to_string());
+            config.show.pdf = ZkCmd::Cmd(v.to_string());
         }
     }
     if let Some(cmd_tab) = tab.get("general") {
@@ -141,7 +140,7 @@ fn parse_table(tab: Table) -> Result<ZkConfig, ZkError> {
         if let Some(c) = cmd_tab.get("editor") {
             let v = c.to_string();
             let v = clean_value(&v);
-            config.general.editor = ZkCmd::cmd(v.to_string());
+            config.general.editor = ZkCmd::Cmd(v.to_string());
         }
         if let Some(c) = cmd_tab.get("dir") {
             let v = c.to_string();
@@ -154,7 +153,7 @@ fn parse_table(tab: Table) -> Result<ZkConfig, ZkError> {
                     Ok(false) => {
                         return Err(ZkError::ConfigHomeDir);
                     },
-                    Err(e) => {
+                    Err(_e) => {
                         return Err(ZkError::Other(String::from("Could not read directory specified in config file.")));
                     }
                 };
@@ -173,7 +172,7 @@ fn parse_table(tab: Table) -> Result<ZkConfig, ZkError> {
                     Ok(false) => {
                         return Err(ZkError::ConfigHomeDir);
                     },
-                    Err(e) => {
+                    Err(_e) => {
                         return Err(ZkError::Other(String::from("Could not read directory specified in config file.")));
                     }
                 };
@@ -222,8 +221,8 @@ md = 'glow'
     let conf1 = parse_table(tab1).unwrap();
     let mut home = env::home_dir().unwrap();
     home.push(".szettel");
-    assert_eq!(conf1.show.md, ZkCmd::cmd(String::from("glow")));
-    assert_eq!(conf1.general.editor, ZkCmd::cmd(String::from("vim")));
+    assert_eq!(conf1.show.md, ZkCmd::Cmd(String::from("glow")));
+    assert_eq!(conf1.general.editor, ZkCmd::Cmd(String::from("vim")));
     assert_eq!(conf1.general.highlight, 129u8);
     assert_eq!(conf1.show.pdf, ZkCmd::Invalid);
     assert_eq!(conf1.general.dir, home);
@@ -239,9 +238,9 @@ pdf = 'sioyek'
 ";
     let tab2 = c2.parse::<Table>().unwrap();
     let conf2 = parse_table(tab2).unwrap();
-    assert_eq!(conf2.show.md, ZkCmd::cmd(String::from("glow")));
-    assert_eq!(conf2.show.pdf, ZkCmd::cmd(String::from("sioyek")));
-    assert_eq!(conf2.general.editor, ZkCmd::cmd(String::from("nano")));
+    assert_eq!(conf2.show.md, ZkCmd::Cmd(String::from("glow")));
+    assert_eq!(conf2.show.pdf, ZkCmd::Cmd(String::from("sioyek")));
+    assert_eq!(conf2.general.editor, ZkCmd::Cmd(String::from("nano")));
     assert_eq!(conf2.general.highlight, 4u8);
     assert_eq!(conf2.general.dir, PathBuf::from("/root"));
 
@@ -258,9 +257,9 @@ pdf = 'sioyek'
     let conf2 = parse_table(tab2).unwrap();
     let mut home = env::home_dir().unwrap();
     home.push("Documents");
-    assert_eq!(conf2.show.md, ZkCmd::cmd(String::from("glow")));
-    assert_eq!(conf2.show.pdf, ZkCmd::cmd(String::from("sioyek")));
-    assert_eq!(conf2.general.editor, ZkCmd::cmd(String::from("nano")));
+    assert_eq!(conf2.show.md, ZkCmd::Cmd(String::from("glow")));
+    assert_eq!(conf2.show.pdf, ZkCmd::Cmd(String::from("sioyek")));
+    assert_eq!(conf2.general.editor, ZkCmd::Cmd(String::from("nano")));
     assert_eq!(conf2.general.highlight, 4u8);
     assert_eq!(conf2.general.dir, home);
 }

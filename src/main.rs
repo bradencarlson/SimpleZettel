@@ -135,7 +135,7 @@ fn main() {
         },
         Some(("use", sub_m)) => {
             if let Some(name) = sub_m.get_one::<String>("name") {
-                match boxes::use_box(&name, color) {
+                match boxes::use_box(base_dir, &name, color) {
                     Ok(_) => {},
                     Err(e) => {
                         error::warning(&e.to_string());
@@ -208,14 +208,7 @@ fn main() {
                         }
                     }
                 };
-                let cards = match bx.get_cards(pattern.as_ref()) {
-                    Ok(c) => c, 
-                    Err(e) => {
-                        error::warning(&e.to_string());
-                        return;
-                    }
-                };
-                match notes::list_cards(cards, Some(config.get_prefix()), Some(style)) {
+                match bx.list_cards(pattern.as_ref(), Some(config.get_prefix()), Some(style)) {
                     Ok(_) => {},
                     Err(e) => {
                         error::warning(&e.to_string());
@@ -224,8 +217,8 @@ fn main() {
             }
         },
         Some(("config", _sub_m)) => {
-            let check = match config::get_config() {
-                Ok(c) => {
+            match config::get_config() {
+                Ok(_) => {
                     error::info("config check passed");
                 },
                 Err(ZkError::ConfigNotExists) => {
@@ -292,14 +285,7 @@ fn main() {
         },
         _ => {
             if let Some(bx) = bx {
-                let cards = match bx.get_cards(None) {
-                    Ok(c) => c, 
-                    Err(e) => {
-                        error::warning(&e.to_string());
-                        return;
-                    }
-                };
-                match notes::list_cards(cards, Some(config.get_prefix()), Some(style)) {
+                match bx.list_cards(None, Some(config.get_prefix()), Some(style)) {
                     Ok(_) => {},
                     Err(e) => {
                         error::warning(&e.to_string());

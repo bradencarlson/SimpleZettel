@@ -1,16 +1,12 @@
 use std::cmp::Ordering;
-use std::fs;
 use std::fs::File;
 use std::io::{BufRead,BufReader};
 use std::path::PathBuf;
-use std::process::Command;
-use clap::ArgMatches;
 use regex::Regex;
 
 use crate::error::ZkError;
 use crate::utils;
-use crate::config::{ZkCmd,ZkShowCommands,ZkPrefixes};
-use crate::vcs;
+use crate::config::ZkPrefixes;
 
 pub mod ft;
 use ft::FileType;
@@ -74,13 +70,13 @@ impl std::fmt::Display for ZkMatch {
 impl From<PathBuf> for ZkCard {
     fn from(path: PathBuf) -> Self {
         let number = ZkCard::get_number(&path);
-        let header = match get_first_header(&path) {
+        let header = match ZkCard::get_first_header(&path) {
             Ok(s) => s,
-            Err(e) => String::from("No valid header")
+            Err(_e) => String::from("No valid header")
         };
         let filetype = match ft::get_filetype(&path) {
             Ok(f) => f,
-            Err(e) => FileType::Markdown
+            Err(_e) => FileType::Markdown
         };
         ZkCard {
             path: path,
@@ -139,7 +135,7 @@ impl ZkCard {
     pub fn get_number(path: &PathBuf) -> ZkNumber {
         if let Some(f) = path.file_stem() {
             if let Some(fname) = f.to_str() {
-                if let Ok(v) = parse_number(fname) {
+                if let Ok(v) = ZkCard::parse_number(fname) {
                     return ZkNumber::Num(v);
                 } else {
                     return ZkNumber::Alpha(fname.to_string());
@@ -152,6 +148,42 @@ impl ZkCard {
         }
     }
 
+    pub fn get_first_header(path: &PathBuf) -> Result<String, ZkError> {
+        utils::verify_note_path(&path)?;
+        if let Ok(f) = File::open(path) {
+            let reader = BufReader::new(f);
+            let header = Regex::new("^[[:space:]]*#[[:space:]]*(?<label>.*)").unwrap();
+            let mut iter = reader.lines();
+            while let Some(line_result) = iter.next() {
+                if let Ok(line) = line_result {
+                    if header.is_match(&line) {
+                        let mut matches = header.captures_iter(&line);
+                        if let Some(h) = matches.next() {
+                            return Ok(String::from(&h["label"]));
+                        }
+                    }
+                }
+            }
+            return Err(ZkError::NoteHeader);
+        } else {
+            Err(ZkError::Access(path.to_path_buf()))
+        }
+    }
+
+    fn parse_number(num: &str) -> Result<Vec::<usize>, ZkError> {
+        let mut v = Vec::<usize>::new();
+        for number in num.split('.') {
+            match number.parse::<usize>() {
+                Ok(n) => {
+                    v.push(n);
+                },
+                Err(_) => {
+                    return Err(ZkError::NoteNumber);
+                }
+            };
+        }
+        Ok(v)
+    }
 }
 
 impl std::fmt::Display for ZkCard {
@@ -228,60 +260,8 @@ impl std::cmp::Ord for ZkCard {
     }
 }
 
-pub fn list_cards(cards: Vec::<ZkCard>, prefix: Option<&ZkPrefixes>, style: Option<anstyle::Style>) -> Result<(), ZkError> {
-    let max = match cards.iter()
-        .map(|c| c.get_number_length())
-        .max() {
-            Some(m) => m+4,
-            None => 20
-    };
-    for card in cards.iter() {
-        card.pretty_print(max, prefix, style);
-    }
-    Ok(())
-}
-
-fn parse_number(num: &str) -> Result<Vec::<usize>, ZkError> {
-    let mut v = Vec::<usize>::new();
-    for number in num.split('.') {
-        match number.parse::<usize>() {
-            Ok(n) => {
-                v.push(n);
-            },
-            Err(_) => {
-                return Err(ZkError::NoteNumber);
-            }
-        };
-    }
-    Ok(v)
-}
-
-fn get_first_header(path: &PathBuf) -> Result<String, ZkError> {
-    utils::verify_note_path(&path)?;
-    if let Ok(f) = File::open(path) {
-        let reader = BufReader::new(f);
-        let header = Regex::new("^[[:space:]]*#[[:space:]]*(?<label>.*)").unwrap();
-        let mut iter = reader.lines();
-        while let Some(line_result) = iter.next() {
-            if let Ok(line) = line_result {
-                if header.is_match(&line) {
-                    let mut matches = header.captures_iter(&line);
-                    if let Some(h) = matches.next() {
-                        return Ok(String::from(&h["label"]));
-                    }
-                }
-            }
-        }
-        return Err(ZkError::NoteHeader);
-    } else {
-        Err(ZkError::Access(path.to_path_buf()))
-    }
-}
-
-fn get_references(path: &PathBuf) -> Result<Vec::<ZkRef>, ZkError> {
+/*fn get_references(path: &PathBuf) -> Result<Vec::<ZkRef>, ZkError> {
     let mut refs = Vec::<ZkRef>::new();
-    // TODO: Perhaps this method should just assume that someone else has checked this?
-    //utils::verify_note_path(&path)?;
     if let Ok(f) = File::open(path) {
         let reader = BufReader::new(f);
         let mut iter = reader.lines();
@@ -308,7 +288,7 @@ fn get_references(path: &PathBuf) -> Result<Vec::<ZkRef>, ZkError> {
         return Err(ZkError::Access(path.to_path_buf()))
     }
     Ok(refs)
-}
+}*/
 
 #[test]
 fn ordering() {

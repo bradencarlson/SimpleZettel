@@ -1,14 +1,11 @@
 use std::env;
 use std::fs;
 use std::io;
-use std::fs::{DirEntry};
 use std::hash::{DefaultHasher, Hash, Hasher};
 use std::assert_matches;
 use std::path::{Path, PathBuf};
 
 use crate::error::ZkError;
-use crate::notes::ft::FileType;
-use crate::notes::ZkCard;
 
 #[derive(Debug)]
 pub struct HashPair {
@@ -84,7 +81,7 @@ impl HashPair {
 pub fn prompt_user(msg: &str) -> Result<String, ZkError> {
     println!("{}", msg);
     let mut buff = String::new();
-    if let Ok(resp) = io::stdin().read_line(&mut buff) {
+    if let Ok(_resp) = io::stdin().read_line(&mut buff) {
         buff.pop();
         Ok(buff)
     } else {
@@ -101,40 +98,6 @@ pub fn path_from_name(name: &str) -> Result<PathBuf, ZkError> {
     }
 }
 
-
-fn get_filename(entry: &io::Result<DirEntry>) -> Result<String, ZkError> {
-    match entry {
-        Ok(ent) => {
-            let path = ent.path();
-            if let Some(name) = path.file_stem() {
-                match name.to_str() {
-                    Some(n) => {
-                        Ok(n.to_string())
-                    }, 
-                    None => {
-                        Err(ZkError::Other(String::from("failed to get note name")))
-                    }
-                }
-            } else {
-                Err(ZkError::Other(String::from("failed to get note name")))
-            }
-        },
-        Err(_) => {
-            Err(ZkError::Other(String::from("something went wrong wile reading box directory")))
-        }
-    }
-}
-
-fn get_filepath(entry: &io::Result<DirEntry>) -> Result<PathBuf, ZkError> {
-    match entry {
-        Ok(ent) => {
-            Ok(ent.path())
-        },
-        Err(_) => {
-            Err(ZkError::Other(String::from("something went wrong wile reading box directory")))
-        }
-    }
-}
 
 pub fn get_szettel_dir() -> Result<PathBuf, ZkError> {
     if let Some(mut path) = env::home_dir() {

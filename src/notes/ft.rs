@@ -6,7 +6,7 @@ use std::process::Command;
 
 use crate::error::ZkError;
 use crate::notes::ZkCard;
-use crate::config::{ZkConfig,ZkCmd,ZkShowCommands,ZkPrefixes};
+use crate::config::{ZkCmd,ZkShowCommands,ZkPrefixes};
 
 #[derive(Debug,Clone)]
 pub enum FileType {
@@ -27,7 +27,7 @@ pub fn get_filetype(path: &Path) -> Result<FileType, ZkError> {
     if cfg!(feature = "filetypes") {
         if let Ok(mut f) = File::open(path) {
             let mut buff = [0u8; 10];
-            let n = f.read(&mut buff)?;
+            let _n = f.read(&mut buff)?;
             if buff[0..5] == [0x25, 0x50, 0x44, 0x46, 0x2D] {
                 return Ok(FileType::PDF);
             }
@@ -51,8 +51,8 @@ pub fn show_note(card: &ZkCard, show_cmds: &ZkShowCommands) -> Result<(), ZkErro
         },
         FileType::PDF => {
             match show_cmds.pdf {
-                ZkCmd::cmd(ref cmd) => {
-                    run_cmd(&card, &ZkCmd::cmd(cmd.to_string()))?;
+                ZkCmd::Cmd(ref cmd) => {
+                    run_cmd(&card, &ZkCmd::Cmd(cmd.to_string()))?;
                     return Ok(());
                 },
                 ZkCmd::Invalid => {
@@ -88,14 +88,14 @@ pub fn get_prefix(typ: &FileType, prefix: Option<&ZkPrefixes>) -> String {
 
 fn run_cmd(card: &ZkCard, cmd: &ZkCmd) -> Result<(), ZkError> {
     match cmd {
-        ZkCmd::cmd(cmd) => {
+        ZkCmd::Cmd(cmd) => {
             match Command::new(cmd)
                 .arg(&card.path)
                 .status() {
                     Ok(_) => {
                         return Ok(());
                     },
-                    Err(e) => {
+                    Err(_e) => {
                         return Err(ZkError::Other(String::from("failed to show note")));
                     }
             };
