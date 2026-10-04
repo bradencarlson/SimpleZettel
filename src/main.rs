@@ -244,14 +244,17 @@ fn main() {
             };
         },
         Some(("import", sub_m)) => {
-            match notes::import_file(&sub_m) {
-                Ok(_) => {
-                    println!("file successfully imported to current box");
-                },
-                Err(e) => {
-                    error::warning(&e.to_string());
+            if let Some(bx) = bx {
+                if let Some(p) = sub_m.get_one::<String>("path") {
+                    let path = PathBuf::from(p);
+                    match bx.import_file(&path) {
+                        Ok(_) => {},
+                        Err(e) => {
+                            error::warning(&e.to_string());
+                        }
+                    };
                 }
-            };
+            }
         },
         Some(("search", sub_m)) => {
             if let Some(needle) = sub_m.get_one::<String>("needle") {

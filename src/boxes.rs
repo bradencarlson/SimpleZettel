@@ -137,6 +137,32 @@ impl ZkBox {
         ft::show_note(&card, show_cmds)?;
         Ok(())
     }
+    
+    pub fn import_file(&self, path: &PathBuf) -> Result<(), ZkError> {
+        match fs::exists(&path) {
+            Ok(true) => {},
+            Ok(false) => {
+                return Err(ZkError::Other(String::from("import path does not exist")));
+            },
+            Err(_) => {
+                return Err(ZkError::Access(path.clone()));
+            }
+        };
+        if let Some(fname) = path.file_name() {
+            let mut new_path = self.path.clone();
+            new_path.push(fname);
+            match fs::copy(path, new_path) {
+                Ok(_) => {
+                    return Ok(());
+                },
+                Err(_) => {
+                    return Err(ZkError::ImportFail);
+                }
+            }
+        } else {
+            return Err(ZkError::Other(String::from("unable to get filename of import path")));
+        }
+    }
 
     fn card_exists(&self, name: &String) -> Result<bool, ZkError> {
         let mut path = self.path.clone();
