@@ -1,4 +1,5 @@
 use std::fs;
+use std::ffi::OsString;
 use std::fs::File;
 use std::io::{BufRead,BufReader};
 use std::process::Command;
@@ -163,6 +164,30 @@ impl ZkBox {
             }
         } else {
             return Err(ZkError::Other(String::from("unable to get filename of import path")));
+        }
+    }
+
+    pub fn move_card(&self, old: &String, new: &String) -> Result<(), ZkError> {
+        let card = self.find_card(old)?;
+        let mut new_path = self.path.clone();
+        new_path.push(new);
+        if let Some(ext) = new_path.extension() {
+            if *ext != OsString::from(card.filetype.get_ext()) {
+                new_path.add_extension(card.filetype.get_ext());
+            }
+        } else {
+            new_path.add_extension(card.filetype.get_ext());
+        }
+        if let Ok(true) = fs::exists(&new_path) {
+                return Err(ZkError::NoteExists);
+        }
+        match fs::rename(card.path, new_path) {
+            Ok(_) => {
+                Ok(())
+            },
+            Err(_) => {
+                Err(ZkError::Move)
+            }
         }
     }
 

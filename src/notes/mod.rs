@@ -39,7 +39,7 @@ pub struct ZkCard {
     pub path: PathBuf,
     number: ZkNumber,
     header: String,
-    filetype: FileType,
+    pub filetype: FileType,
     references: Vec::<ZkRef>,
 }
 

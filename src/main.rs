@@ -276,14 +276,18 @@ fn main() {
             }
         },
         Some(("mv", sub_m)) => {
-            if let Some(old) = sub_m.get_one::<String>("old") {
-                if let Some(new) = sub_m.get_one::<String>("new") {
-                    /*match notes::move_note(&old, &new, bname) {
-                        Ok(_) => { }, 
-                        Err(e) => {
-                            error::warning(&e.to_string());
-                        },
-                    }*/
+            if let Some(bx) = bx {
+                if let Some(old) = sub_m.get_one::<String>("old") {
+                    if let Some(new) = sub_m.get_one::<String>("new") {
+                        match bx.move_card(&old, &new) {
+                            Ok(_) => {
+                                error::info("card renamed successfully.");
+                            },
+                            Err(e) => {
+                                error::warning(&e.to_string());
+                            }
+                        };
+                    }
                 }
             }
         },
