@@ -238,7 +238,9 @@ fn main() {
                     if let Ok(r) = Regex::new(needle) {
                         match bx.search_cards(&r) {
                             Ok(v) => {
-                                println!("{:?}", v);
+                                for m in v.iter() {
+                                    println!("{}", m);
+                                }
                             },
                             Err(e) => {
                                 error::warning(&e.to_string());
