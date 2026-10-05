@@ -108,7 +108,7 @@ fn main() {
         Some(("add", sub_m)) => {
             if let Some(bx) = bx {
                 if let Some(name) = sub_m.get_one::<String>("name") {
-                    match bx.add_card(name, editor) {
+                    match bx.add_card(&name, editor) {
                         Ok(_) => {},
                         Err(e) => {
                             error::warning(&e.to_string());

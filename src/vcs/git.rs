@@ -5,9 +5,8 @@ use crate::utils;
 use crate::boxes;
 
 pub fn add(base_dir: &PathBuf) -> Result<(), ZkError> {
-    let current = boxes::get_current_box(base_dir)?;
     match Command::new("git")
-        .current_dir(&current.get_path())
+        .current_dir(base_dir)
         .arg("add")
         .arg(".")
         .status() {
@@ -33,9 +32,8 @@ pub fn commit(base_dir: &PathBuf) -> Result<bool, ZkError> {
     if resp != yes && resp != y {
         return Ok(false);
     }
-    let current = boxes::get_current_box(base_dir)?;
     match Command::new("git")
-        .current_dir(&current.get_path())
+        .current_dir(base_dir)
         .arg("commit")
         .status() {
             Ok(status) => {
