@@ -277,9 +277,9 @@ impl ZkBox {
                 }
             };
             let p = entry.path();
-            if let Some(fstem) = p.file_stem() {
+            if let Some(fstem) = p.file_name() {
                 if let Some(fname) = fstem.to_str() {
-                    if name.starts_with(fname) {
+                    if fname.starts_with(name) {
                         return Ok(ZkCard::from(p));
                     }
                 }
@@ -329,8 +329,10 @@ pub fn get_current_box(base_dir: &PathBuf) -> Result<ZkBox, ZkError> {
     match fs::read_to_string(&current) {
         Ok(c) => {
             let mut box_path = base_dir.clone();
-            box_path.push(c);
-            Ok(ZkBox::from(box_path))
+            box_path.push(c.trim());
+            let mut current_box = ZkBox::from(box_path);
+            current_box.current = true;
+            Ok(current_box)
         }, 
         _ => {
             Err(ZkError::NoCurrentBox)
@@ -555,4 +557,98 @@ fn string_search() {
             content: String::from("# File 1")
         }]
     );
+}
+
+#[test]
+fn card_names() {
+    let name = String::from("1.md");
+    let base_dir = PathBuf::from("tests/files");
+    let bx = ZkBox::from(base_dir);
+    assert!(bx.card_exists(&name).expect("failed to check for card."));
+    
+    let name = String::from("invalid");
+    assert!(!bx.card_exists(&name).expect("failed to check for card."));
+
+    let name = String::from("2");
+    assert!(bx.card_exists(&name).expect("failed to check for card."));
+
+    let name = String::from("new-file");
+    assert!(bx.card_exists(&name).expect("failed to check for card."));
+
+}
+
+#[test]
+fn finding_cards() {
+    let base_dir = PathBuf::from("tests/files");
+    let bx = ZkBox::from(base_dir);
+
+    let name = String::from("1");
+    bx.find_card(&name).expect("failed to find card 1.md");
+    let name = String::from("1.m");
+    bx.find_card(&name).expect("failed to find card 1.md");
+    let name = String::from("1.md");
+    bx.find_card(&name).expect("failed to find card 1.md");
+    let name = String::from("new-");
+    bx.find_card(&name).expect("failed to find card new-file.md");
+
+    let name = String::from("invalid");
+    assert_eq!(bx.find_card(&name), Err(ZkError::NoteNotExists));
+
+}
+
+#[test]
+fn getting_current_box() {
+    let base_dir = PathBuf::from("tests");
+    let current = get_current_box(&base_dir).expect("failed to get current box.");
+    let expected = PathBuf::from("tests/files");
+    let mut expected_box = ZkBox::from(expected);
+    expected_box.current = true;
+
+    assert_eq!(current, expected_box);
+}
+
+#[test]
+fn getting_boxes() {
+    let base_dir = PathBuf::from("tests");
+    let bxs = get_boxes(&base_dir).expect("failed to get boxes.");
+    assert_eq!(bxs.len(), 4);
+
+    assert!(bxs.contains(
+            &ZkBox {
+                path: PathBuf::from("tests/files"), 
+                tracked: true,
+                current: true
+            })
+    );
+    assert!(bxs.contains(
+            &ZkBox {
+                path: PathBuf::from("tests/short"), 
+                tracked: true,
+                current: false
+            })
+    );
+    assert!(bxs.contains(
+            &ZkBox {
+                path: PathBuf::from("tests/bib"), 
+                tracked: false,
+                current: false
+            })
+    );
+
+}
+
+#[test]
+fn adding_boxes() {
+    let base_dir = PathBuf::from("tests");
+    let name = String::from("files");
+    assert_eq!(add_box(&base_dir, &name), Err(ZkError::BoxExists));
+    let name = String::from("bib");
+    assert_eq!(add_box(&base_dir, &name), Err(ZkError::BoxExists));
+}
+
+#[test]
+fn using_boxes() {
+    let base_dir = PathBuf::from("tests");
+    let name = String::from("bib");
+    assert_eq!(use_box(&base_dir, &name, &0u8), Err(ZkError::BoxNotTracked));
 }
