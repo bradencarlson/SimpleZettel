@@ -56,13 +56,6 @@ fn main() {
             match sub_m.subcommand() {
                 Some(("ls", ssub_m)) => {
                     let all = ssub_m.get_flag("all");
-                    /*let b = match boxes::get_boxes(base_dir) {
-                        Ok(box_list) => box_list,
-                        Err(e) => {
-                            error::warning(&e.to_string());
-                            return;
-                        }
-                    };*/
                     match boxes::list_boxes(base_dir, all, color) {
                         Ok(_) => {},
                         Err(e) => {
@@ -82,14 +75,14 @@ fn main() {
                 },
                 Some(("rm", ssub_m)) => {
                     if let Some(name) = ssub_m.get_one::<String>("name") {
-                        /*match boxes::remove_tracking(&name) {
+                        match boxes::remove_tracking(base_dir, &name) {
                             Ok(_) => {
                                 error::info("successfully removed box");
                             },
                             Err(e) => {
                                 error::warning(&e.to_string());
                             }
-                        };*/
+                        };
                     }
                 },
                 Some(("track", ssub_m)) => {
@@ -103,14 +96,6 @@ fn main() {
                     }
                 },
                 _ => {
-                    /*let b = match boxes::get_boxes(base_dir) {
-                        Ok(box_list) => box_list,
-                        Err(e) => {
-                            error::warning(&e.to_string());
-                            return;
-                        }
-                    };*/
-
                     match boxes::list_boxes(base_dir, false, color) {
                         Ok(_) => {},
                         Err(e) => {

@@ -467,13 +467,18 @@ pub fn track(base_dir: &PathBuf, name: &String) -> Result<(), ZkError> {
     }
 }
 
-/*pub fn remove_tracking(name: &String) -> Result<(), ZkError> {
-    let path = utils::path_from_name(name)?;
-    remove_track_file(path)?;
-    Ok(())
-}*/
-
-fn remove_track_file(path: PathBuf) -> Result<(), ZkError> {
+pub fn remove_tracking(base_dir: &PathBuf, name: &String) -> Result<(), ZkError> {
+    let mut path = base_dir.clone();
+    path.push(name);
+    match fs::exists(&path) {
+        Ok(true) => {},
+        Ok(false) => {
+            return Err(ZkError::BoxInvalid);
+        },
+        Err(_e) => {
+            return Err(ZkError::BoxCheck);
+        }
+    };
     let b: ZkBox = path.into();
     if b.is_tracked() {
         let mut track_file = PathBuf::from(b.get_path());
@@ -489,7 +494,6 @@ fn remove_track_file(path: PathBuf) -> Result<(), ZkError> {
     } else {
         return Err(ZkError::BoxNotTracked);
     }
-
 }
 
 fn edit_file(path: &PathBuf, editor: &ZkCmd) -> Result<(), ZkError> {
