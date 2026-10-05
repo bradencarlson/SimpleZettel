@@ -423,7 +423,7 @@ pub fn use_box(base_dir: &PathBuf, name: &String, color: &u8) -> Result<(), ZkEr
             current.push(".current");
             match fs::write(current, name) {
                 Ok(_) => {},
-                Err(e) => {
+                Err(_e) => {
                     return Err(ZkError::Current);
                 }
             };

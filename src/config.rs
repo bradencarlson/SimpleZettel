@@ -59,12 +59,6 @@ impl ZkConfig {
     pub fn get_show_cmds(&self) -> &ZkShowCommands {
         &self.show
     }
-    pub fn get_md_show_cmd(&self) -> &ZkCmd {
-        &self.show.md
-    }
-    pub fn get_pdf_show_cmd(&self) -> &ZkCmd {
-        &self.show.pdf
-    }
     pub fn get_editor(&self) -> &ZkCmd {
         &self.general.editor
     }
@@ -74,13 +68,6 @@ impl ZkConfig {
     pub fn get_prefix(&self) -> &ZkPrefixes {
         &self.prefix
     }
-    pub fn get_md_prefix(&self) -> &String {
-        &self.prefix.md
-    }
-    pub fn get_pdf_prefix(&self) -> &String {
-        &self.prefix.pdf
-    }
-
 }
 
 pub fn get_config() -> Result<ZkConfig, ZkError> {

@@ -5,7 +5,6 @@ use std::path::PathBuf;
 use regex::Regex;
 
 use crate::error::ZkError;
-use crate::utils;
 use crate::config::ZkPrefixes;
 
 use crate::boxes::ft::{self,FileType};
