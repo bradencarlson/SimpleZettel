@@ -128,17 +128,11 @@ impl ZkBox {
     }
 
     pub fn edit_card(&self, name: &String, editor: &ZkCmd) -> Result<(), ZkError> {
-        let mut path = self.path.clone();
-        path.push(name);
-        path.set_extension("md");
-        if self.card_exists(name)? {
-            edit_file(&path, editor)?;
-            vcs::add(&self.path)?;
-            vcs::commit(&self.path)?;
-            Ok(())
-        } else {
-            Err(ZkError::NoteNotExists)
-        }
+        let card = self.find_card(name)?;
+        edit_file(&card.path, editor)?;
+        vcs::add(&self.path)?;
+        vcs::commit(&self.path)?;
+        Ok(())
     }
 
     pub fn rm_card(&self, name: &String) -> Result<(), ZkError> {
@@ -277,9 +271,9 @@ impl ZkBox {
                 }
             };
             let p = entry.path();
-            if let Some(fstem) = p.file_name() {
+            if let Some(fstem) = p.file_stem() {
                 if let Some(fname) = fstem.to_str() {
-                    if fname.starts_with(name) {
+                    if fname == name {
                         return Ok(ZkCard::from(p));
                     }
                 }
