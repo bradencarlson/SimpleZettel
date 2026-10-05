@@ -1,7 +1,6 @@
 use std::path::PathBuf;
 mod args;
 mod boxes;
-mod notes;
 mod utils;
 mod error;
 mod config;
@@ -83,19 +82,19 @@ fn main() {
                 },
                 Some(("rm", ssub_m)) => {
                     if let Some(name) = ssub_m.get_one::<String>("name") {
-                        match boxes::remove_tracking(&name) {
+                        /*match boxes::remove_tracking(&name) {
                             Ok(_) => {
                                 error::info("successfully removed box");
                             },
                             Err(e) => {
                                 error::warning(&e.to_string());
                             }
-                        };
+                        };*/
                     }
                 },
                 Some(("track", ssub_m)) => {
                     if let Some(name) = ssub_m.get_one::<String>("name") {
-                        match boxes::track_box(&name) {
+                        match boxes::track(base_dir, &name) {
                             Ok(_) => {},
                             Err(e) => {
                                 error::warning(&e.to_string());

@@ -5,15 +5,17 @@ use std::io::{BufRead,BufReader};
 use std::process::Command;
 use std::path::PathBuf;
 use regex::Regex;
-use crate::notes::ZkCard;
 use crate::config::{ZkPrefixes,ZkShowCommands,ZkCmd};
 
 use crate::utils;
 use crate::error::ZkError;
 use crate::error;
 use crate::vcs;
-use crate::notes::ft;
-use crate::notes::{ZkLine,ZkMatch};
+
+pub mod notes;
+pub mod ft;
+
+use notes::{ZkCard,ZkLine,ZkMatch};
 
 #[derive(Debug,Default,PartialEq)]
 pub struct ZkBox {
@@ -382,7 +384,7 @@ pub fn add_box(base_dir: &PathBuf, name: &String) -> Result<(), ZkError> {
             match fs::create_dir(&path) {
                 Ok(_) => {
                     vcs::init(&path)?;
-                    track(&path)?;
+                    track(base_dir, name)?;
                     println!("Created box successfully");
                     Ok(())
                 },
@@ -434,16 +436,20 @@ pub fn use_box(base_dir: &PathBuf, name: &String, color: &u8) -> Result<(), ZkEr
     }
 }
 
-pub fn track_box(name: &String) -> Result<(), ZkError> {
-    let path = utils::path_from_name(&name)?;
-    track(&path)?;
-    Ok(())
-}
 
+pub fn track(base_dir: &PathBuf, name: &String) -> Result<(), ZkError> {
+    let mut track_file = PathBuf::from(base_dir);
+    track_file.push(name);
+    match fs::exists(&track_file) {
+        Ok(true) => {},
+        Ok(false) => {
+            return Err(ZkError::BoxInvalid);
+        },
+        Err(_e) => {
+            return Err(ZkError::BoxCheck);
+        }
+    };
 
-fn track(path: &PathBuf) -> Result<(), ZkError> {
-    utils::verify_path(path)?;
-    let mut track_file = PathBuf::from(path);
     track_file.push(".track");
     match fs::exists(&track_file) {
         Ok(true) => {
@@ -461,11 +467,11 @@ fn track(path: &PathBuf) -> Result<(), ZkError> {
     }
 }
 
-pub fn remove_tracking(name: &String) -> Result<(), ZkError> {
+/*pub fn remove_tracking(name: &String) -> Result<(), ZkError> {
     let path = utils::path_from_name(name)?;
     remove_track_file(path)?;
     Ok(())
-}
+}*/
 
 fn remove_track_file(path: PathBuf) -> Result<(), ZkError> {
     let b: ZkBox = path.into();

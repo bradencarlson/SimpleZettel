@@ -89,16 +89,6 @@ pub fn prompt_user(msg: &str) -> Result<String, ZkError> {
     }
 }
 
-pub fn path_from_name(name: &str) -> Result<PathBuf, ZkError> {
-    let mut root = get_szettel_dir()?;
-    root.push(name);
-    match verify_path(&root) {
-        Ok(_) => Ok(root),
-        Err(e) => Err(e)
-    }
-}
-
-
 pub fn get_szettel_dir() -> Result<PathBuf, ZkError> {
     if let Some(mut path) = env::home_dir() {
         path.push(".szettel/");
@@ -116,52 +106,6 @@ pub fn get_szettel_dir() -> Result<PathBuf, ZkError> {
         Err(ZkError::NoHome)
     }
 
-}
-
-pub fn verify_path(path: &PathBuf) -> Result<(), ZkError> {
-    let zk_home = get_szettel_dir()?;
-    if let Some(parent) = path.parent() {
-        if parent == zk_home {
-            Ok(())
-        } else {
-            Err(ZkError::InvalidPath)
-        }
-    } else {
-        Err(ZkError::InvalidPath)
-    }
-
-}
-
-pub fn verify_note_path(path: &PathBuf) -> Result<(), ZkError> {
-    let zk_home = get_szettel_dir()?;
-    match path.starts_with(zk_home) {
-        true => Ok(()),
-        false => Err(ZkError::InvalidNotePath(path.clone()))
-    }
-}
-
-
-#[test]
-fn valid_path() {
-    if let Some(mut path) = env::home_dir() {
-        path.push(".szettel/test");
-        assert_eq!(verify_path(&path), Ok(()));
-    }
-
-}
-
-#[test]
-fn invalid_path() {
-    let invalid_path = PathBuf::from("~/Documents/dir");
-    assert_eq!(verify_path(&invalid_path), Err(ZkError::InvalidPath));
-}
-
-#[test]
-fn deep_path() {
-    if let Some(mut invalid_path) = env::home_dir() {
-        invalid_path.push(".szettel/test/one");
-        assert_eq!(verify_path(&invalid_path), Err(ZkError::InvalidPath));
-    }
 }
 
 #[test]

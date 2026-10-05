@@ -5,7 +5,7 @@ use std::io::Read;
 use std::process::Command;
 
 use crate::error::ZkError;
-use crate::notes::ZkCard;
+use crate::boxes::notes::ZkCard;
 use crate::config::{ZkCmd,ZkShowCommands,ZkPrefixes};
 
 #[derive(Debug,Clone)]

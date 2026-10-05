@@ -52,7 +52,6 @@ pub fn commit(base_dir: &PathBuf) -> Result<bool, ZkError> {
 }
 
 pub fn init(path: &PathBuf) -> Result<(), ZkError> {
-    utils::verify_path(path)?;
     match Command::new("git")
         .arg("init")
         .arg(path)

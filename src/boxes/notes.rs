@@ -8,8 +8,7 @@ use crate::error::ZkError;
 use crate::utils;
 use crate::config::ZkPrefixes;
 
-pub mod ft;
-use ft::FileType;
+use crate::boxes::ft::{self,FileType};
 
 #[derive(PartialEq,Debug,Clone)]
 pub enum ZkNumber {
@@ -149,7 +148,6 @@ impl ZkCard {
     }
 
     pub fn get_first_header(path: &PathBuf) -> Result<String, ZkError> {
-        utils::verify_note_path(&path)?;
         if let Ok(f) = File::open(path) {
             let reader = BufReader::new(f);
             let header = Regex::new("^[[:space:]]*#[[:space:]]*(?<label>.*)").unwrap();
