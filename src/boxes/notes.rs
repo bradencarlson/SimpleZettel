@@ -2,10 +2,12 @@ use std::cmp::Ordering;
 use std::fs::File;
 use std::io::{BufRead,BufReader};
 use std::path::PathBuf;
+use std::process::Command;
 use regex::Regex;
 
+use crate::utils;
 use crate::error::ZkError;
-use crate::config::ZkPrefixes;
+use crate::config::{ZkCmd,ZkPrefixes};
 
 use crate::boxes::ft::{self,FileType};
 
@@ -51,15 +53,9 @@ pub struct ZkRef {
 
 impl std::fmt::Display for ZkMatch {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
-        if let Some(filename) = self.card.path.file_name() {
-            let fname = match filename.to_str() {
-                Some(s) => s,
-                None => "invalid filename found"
-            };
-            let _ = write!(f, "{}\n", fname);
-            for line in &self.matches {
-                let _ = write!(f, "{}: {}\n", line.lineno, line.content);
-            }
+        let _ = write!(f, "{}\n", self.card);
+        for line in &self.matches {
+            let _ = write!(f, "{}: {}\n", line.lineno, line.content);
         }
         Ok(())
     }
@@ -129,6 +125,30 @@ impl ZkCard {
             ZkNumber::Invalid => s
         }
     }
+    pub fn edit(&self, editor: &ZkCmd) -> Result<(), ZkError> {
+        let mut hashes = utils::HashPair::new();
+        hashes.push_path(&self.path)?;
+        let cmd = match editor {
+            ZkCmd::Cmd(edit_cmd) => edit_cmd,
+            _ => "vim"
+        };
+        match Command::new(cmd)
+            .arg(&self.path)
+            .status() {
+                Ok(status) => {
+                    if status.success() {
+                        hashes.push_path(&self.path)?;
+                        if hashes.equal() {
+                            return Ok(())
+                        }
+                        Ok(())
+                    } else {
+                        Err(ZkError::Other(String::from("something went wrong while opening vim for the user")))
+                    }
+                },
+                Err(_) => Err(ZkError::Other(String::from("something went wrong while opening vim for the user")))
+        }
+    }
 
     pub fn get_number(path: &PathBuf) -> ZkNumber {
         if let Some(f) = path.file_stem() {
@@ -188,8 +208,8 @@ impl std::fmt::Display for ZkCard {
         let blue = anstyle::Style::new().fg_color(Some(anstyle::AnsiColor::Blue.into())).bold();
         let red = anstyle::Style::new().fg_color(Some(anstyle::AnsiColor::Red.into())).bold();
         match self.number {
-            ZkNumber::Num(ref v) => write!(f, "{blue}{:?}{blue:#}\t{}", v, self.header),
-            ZkNumber::Alpha(ref s) => write!(f, "{blue}{:?}{blue:#}\t{}", s, self.header),
+            ZkNumber::Num(ref v) => write!(f, "{blue}{}{blue:#}{}", self.format_number(0), self.header),
+            ZkNumber::Alpha(ref s) => write!(f, "{blue}{}{blue:#} {}", s, self.header),
             ZkNumber::Invalid => write!(f, "{red}{}{red:#}", self.path.display())
         }
     }

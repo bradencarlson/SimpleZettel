@@ -117,7 +117,8 @@ impl ZkBox {
         };
         match File::create(&file) {
             Ok(_) => {
-                edit_file(&file, editor)?;
+                let card: ZkCard = file.into();
+                card.edit(editor)?;
                 vcs::add(&self.path)?;
                 vcs::commit(&self.path)?;
                 return Ok(());
@@ -130,7 +131,7 @@ impl ZkBox {
 
     pub fn edit_card(&self, name: &String, editor: &ZkCmd) -> Result<(), ZkError> {
         let card = self.find_card(name)?;
-        edit_file(&card.path, editor)?;
+        card.edit(editor)?;
         vcs::add(&self.path)?;
         vcs::commit(&self.path)?;
         Ok(())
@@ -493,30 +494,6 @@ pub fn remove_tracking(base_dir: &PathBuf, name: &String) -> Result<(), ZkError>
     }
 }
 
-fn edit_file(path: &PathBuf, editor: &ZkCmd) -> Result<(), ZkError> {
-    let mut hashes = utils::HashPair::new();
-    hashes.push_path(&path)?;
-    let cmd = match editor {
-        ZkCmd::Cmd(edit_cmd) => edit_cmd,
-        _ => "vim"
-    };
-    match Command::new(cmd)
-        .arg(&path)
-        .status() {
-            Ok(status) => {
-                if status.success() {
-                    hashes.push_path(&path)?;
-                    if hashes.equal() {
-                        return Ok(())
-                    }
-                    Ok(())
-                } else {
-                    Err(ZkError::Other(String::from("something went wrong while opening vim for the user")))
-                }
-            },
-            Err(_) => Err(ZkError::Other(String::from("something went wrong while opening vim for the user")))
-    }
-}
 
 #[test]
 fn get_list_of_boxes() {
