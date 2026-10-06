@@ -208,7 +208,7 @@ impl std::fmt::Display for ZkCard {
         let blue = anstyle::Style::new().fg_color(Some(anstyle::AnsiColor::Blue.into())).bold();
         let red = anstyle::Style::new().fg_color(Some(anstyle::AnsiColor::Red.into())).bold();
         match self.number {
-            ZkNumber::Num(ref v) => write!(f, "{blue}{}{blue:#}{}", self.format_number(0), self.header),
+            ZkNumber::Num(ref v) => write!(f, "{blue}{}{blue:#} {}", self.format_number(0), self.header),
             ZkNumber::Alpha(ref s) => write!(f, "{blue}{}{blue:#} {}", s, self.header),
             ZkNumber::Invalid => write!(f, "{red}{}{red:#}", self.path.display())
         }
