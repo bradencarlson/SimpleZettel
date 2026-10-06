@@ -139,7 +139,7 @@ impl ZkBox {
 
     pub fn rm_card(&self, name: &String) -> Result<(), ZkError> {
         let card = self.find_card(name)?;
-        match fs::remove_file(&card.path) {
+        match fs::remove_file(card.get_path()) {
             Ok(()) => {
                 println!("succesfully removed note");
                 Ok(())
@@ -187,16 +187,16 @@ impl ZkBox {
         let mut new_path = self.path.clone();
         new_path.push(new);
         if let Some(ext) = new_path.extension() {
-            if *ext != OsString::from(card.filetype.get_ext()) {
-                new_path.add_extension(card.filetype.get_ext());
+            if *ext != OsString::from(card.get_filetype().get_ext()) {
+                new_path.add_extension(card.get_filetype().get_ext());
             }
         } else {
-            new_path.add_extension(card.filetype.get_ext());
+            new_path.add_extension(card.get_filetype().get_ext());
         }
         if let Ok(true) = fs::exists(&new_path) {
                 return Err(ZkError::NoteExists);
         }
-        match fs::rename(card.path, new_path) {
+        match fs::rename(card.get_path(), new_path) {
             Ok(_) => {
                 Ok(())
             },
@@ -225,7 +225,7 @@ impl ZkBox {
     }
 
     fn search(card: &ZkCard, needle: &Regex) -> Option<Vec::<ZkLine>> {
-        let f = match File::open(&card.path) {
+        let f = match File::open(card.get_path()) {
             Ok(file) => file,
             Err(_) => return None
         };

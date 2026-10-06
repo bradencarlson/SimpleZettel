@@ -32,10 +32,10 @@ pub struct ZkLine {
 
 #[derive(Debug,Clone)]
 pub struct ZkCard {
-    pub path: PathBuf,
+    path: PathBuf,
     number: ZkNumber,
     header: String,
-    pub filetype: FileType,
+    filetype: FileType,
     references: Vec::<ZkRef>,
 }
 
@@ -89,6 +89,15 @@ impl ZkCard {
             ZkNumber::Alpha(ref s) => s.len(),
             ZkNumber::Invalid => 0
         }
+    }
+    pub fn get_path(&self) -> &PathBuf {
+        &self.path
+    }
+    pub fn get_filetype(&self) -> &FileType {
+        &self.filetype
+    }
+    pub fn get_header(&self) -> &String {
+        &self.header
     }
     pub fn pretty_print(&self, space: usize, prefix: Option<&ZkPrefixes>, style: Option<anstyle::Style>) {
         let pre = ft::get_prefix(&self.filetype, prefix);
@@ -325,4 +334,17 @@ fn ordering() {
     assert!(c5 < c4);
     assert!(c5 < c6);
     assert!(c6 < c4);
+}
+
+#[test]
+fn card_properties() {
+    let card: ZkCard = PathBuf::from("tests/files/1.md").into();
+    assert_eq!( card.get_path(), &PathBuf::from("tests/files/1.md"));
+    assert_eq!( card.get_filetype(), &FileType::Markdown);
+    assert_eq!( card.get_number_length(), 1);
+
+    let header = card.get_header();
+    let expected_header = String::from("File 1");
+    assert_eq!( header, &expected_header);
+
 }

@@ -8,7 +8,7 @@ use crate::error::ZkError;
 use crate::boxes::notes::ZkCard;
 use crate::config::{ZkCmd,ZkShowCommands,ZkPrefixes};
 
-#[derive(Debug,Clone)]
+#[derive(Debug,Clone,PartialEq)]
 pub enum FileType {
     Markdown,
     PDF,
@@ -45,7 +45,7 @@ pub fn show_note(card: &ZkCard, show_cmds: &ZkShowCommands) -> Result<(), ZkErro
         print_note(card)?;
         return Ok(());
     }
-    match card.filetype {
+    match card.get_filetype() {
         FileType::Markdown => {
             run_cmd(&card, &show_cmds.md)?;
         },
@@ -90,7 +90,7 @@ fn run_cmd(card: &ZkCard, cmd: &ZkCmd) -> Result<(), ZkError> {
     match cmd {
         ZkCmd::Cmd(cmd) => {
             match Command::new(cmd)
-                .arg(&card.path)
+                .arg(card.get_path())
                 .status() {
                     Ok(_) => {
                         return Ok(());
@@ -108,10 +108,10 @@ fn run_cmd(card: &ZkCard, cmd: &ZkCmd) -> Result<(), ZkError> {
 }
 
 fn print_note(card: &ZkCard) -> Result<(), ZkError> {
-    if let Ok(s) = fs::read_to_string(&card.path) {
+    if let Ok(s) = fs::read_to_string(card.get_path()) {
         println!("{}", s);
     } else {
-        return Err(ZkError::NoteRead(card.path.clone()));
+        return Err(ZkError::NoteRead(card.get_path().clone()));
     }
     Ok(())
 }
