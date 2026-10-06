@@ -239,6 +239,10 @@ dir = 'Documents'
 [show]
 md = 'glow'
 pdf = 'sioyek'
+
+[prefix]
+md = '  '
+pdf = 'd '
 ";
     let tab2 = c2.parse::<Table>().unwrap();
     let conf2 = parse_table(tab2).unwrap();
@@ -249,4 +253,6 @@ pdf = 'sioyek'
     assert_eq!(conf2.general.editor, ZkCmd::Cmd(String::from("nano")));
     assert_eq!(conf2.general.highlight, 4u8);
     assert_eq!(conf2.general.dir, home);
+    assert_eq!(conf2.prefix.md, String::from("  "));
+    assert_eq!(conf2.prefix.pdf, String::from("d "));
 }
