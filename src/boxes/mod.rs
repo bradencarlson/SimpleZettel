@@ -340,8 +340,7 @@ pub fn get_boxes(base_dir: &PathBuf) -> Result<Vec::<ZkBox>, ZkError> {
     let mut vec = Vec::<ZkBox>::new();
     let current_box = match get_current_box(base_dir) {
         Ok(bx) => bx,
-        Err(e) => {
-            error::warning(&e.to_string());
+        Err(_e) => {
             ZkBox::new()
         }
     };

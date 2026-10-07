@@ -43,6 +43,7 @@ fn main() {
         None => {
             match boxes::get_current_box(&base_dir) {
                 Ok(zkbox) => Some(zkbox),
+                Err(ZkError::NoCurrentBox) => None,
                 Err(e) => {
                     error::warning(&e.to_string());
                     None

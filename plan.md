@@ -47,8 +47,8 @@ List of subcommands desired:
         - [x], [x] the user can specify the list a different box (via a flag or some
           other notation)
         - [x], [x] -1 alias for passing the pattern ^1 to ls. like this:
-          `szettel -1`? 
-          this would probably be easier: `szettel -n 2`
+          `szk -1`? 
+          this would probably be easier: `szk -n 2`
 - [x], [x] search: searches for a string among files in box
 - [x], [x] box: for managing boxes
     - [x], [x] ls: for listing boxes (maybe this should be the default behavior if no
@@ -87,22 +87,22 @@ List of subcommands desired:
 
 ### File Structure
 
-This is what the file structure of the `.szettel` directory will look like.
-`szettel` should be able to run without any of the hidden folders or track files or
+This is what the file structure of the `.szk` directory will look like.
+`szk` should be able to run without any of the hidden folders or track files or
 cache directories. Meaning, if I were to drop a bunch of markdown files into a
 directory, it could detect it and add any needed information for faster
 processing in the future.
 
 The `.current` file simple denotes which box I am currently looking at. If this
-is absent, `szettel` should report that it is in a "headless" state.
+is absent, `szk` should report that it is in a "headless" state.
 
 The `.track` file in a box directory simply denotes that that box is tracked by
-`szettel`. Removing a box simply means deleting this file.
+`szk`. Removing a box simply means deleting this file.
 
-You will see that each box has a `.git` directory, the command `szettel box add ...`
+You will see that each box has a `.git` directory, the command `szk box add ...`
 should not only create the box, but initialize git tracking there as well.
 
-~/.szettel
+~/.szk
 |-- .current
 |-- box1
 |-- box2
@@ -124,7 +124,7 @@ filenames matching
 ```
 For example '1', '1.2.12.3', or '10.9', or any valid sequence of characters
 which are able to be read into a String in rust (namely, UTF-8 characters). When
-listing files in a box, `szettel` will treat these differently. Since `szettel` was
+listing files in a box, `szk` will treat these differently. Since `szk` was
 designed to manage a Zettelkasten, filenames matching the regular expression
 above are assumed to come before any alphanumeric filenames. See the next
 section for an example.
@@ -150,7 +150,7 @@ in the order that `ls | sort` puts them in):
 example.md
 file-one.md
 ```
-Then `szettel` will list these in the following order:
+Then `szk` will list these in the following order:
 ```
 1.1.md
 1.2.md
