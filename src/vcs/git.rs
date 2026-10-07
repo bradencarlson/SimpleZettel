@@ -2,11 +2,11 @@ use std::path::PathBuf;
 use std::process::Command;
 use crate::error::ZkError;
 use crate::utils;
+use crate::boxes;
 
-pub fn add() -> Result<(), ZkError> {
-    let current = utils::get_current_box()?;
+pub fn add(base_dir: &PathBuf) -> Result<(), ZkError> {
     match Command::new("git")
-        .current_dir(&current)
+        .current_dir(base_dir)
         .arg("add")
         .arg(".")
         .status() {
@@ -25,16 +25,15 @@ pub fn add() -> Result<(), ZkError> {
 }
 
 #[cfg(feature = "git")]
-pub fn commit() -> Result<bool, ZkError> {
+pub fn commit(base_dir: &PathBuf) -> Result<bool, ZkError> {
     let resp = utils::prompt_user("Would you like to commit changes to git? [Y/n]")?;
-    let Y = String::from("Y");
+    let yes = String::from("Y");
     let y = String::from("y");
-    if resp != Y && resp != y {
+    if resp != yes && resp != y {
         return Ok(false);
     }
-    let current = utils::get_current_box()?;
     match Command::new("git")
-        .current_dir(&current)
+        .current_dir(base_dir)
         .arg("commit")
         .status() {
             Ok(status) => {
@@ -51,7 +50,6 @@ pub fn commit() -> Result<bool, ZkError> {
 }
 
 pub fn init(path: &PathBuf) -> Result<(), ZkError> {
-    utils::verify_path(path)?;
     match Command::new("git")
         .arg("init")
         .arg(path)

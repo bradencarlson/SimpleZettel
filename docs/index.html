@@ -218,6 +218,18 @@
           (and commit to <code class="inline">git</code> often).
         </p>
       </div>
+    <div class="subcommand">mv</div>
+      <div class="subcmd-container">
+        <p class="subcmd-dsc">
+          Rename a note. Requires the name of the note to be moved, as well as
+          the new name. It is recommended that no file extensions be specified
+          on either argument. For example, to rename note 
+          <code class="inline">testing-one</code> to 
+          <code class="inline">one</code>, use 
+          <code class="inline">szk mv testing-one one</code>. This will fail if
+          a note exists with the specified new name.
+        </p>
+      </div>
     <div class="subcommand">import</div>
       <div class="subcmd-container">
         <p class="subcmd-dsc">Copy a file into the current box. This is not
@@ -246,9 +258,8 @@
   <p>
     The configuration of <code class="inline">szk</code> is still very limited, but will expanded in the
     future. The config file should be located at 
-    <code class="inline">~/.szettel/config.toml</code>, and should contain a single
-    TOML table: the <code class="inline">show</code> table. The valid keys for
-    this table are shown below.
+    <code class="inline">~/.szettel/config.toml</code>. The valid tables and keys
+    are shown below.
   </p>
   <div class="subcommand">general</div>
   <div class="subcmd-container">
@@ -293,6 +304,25 @@
         <code class="inline">sioyek</code>.  This
         currently only supports a command with out any arguments. This will be
         changed in the future.
+      </p>
+    </div>
+  </div>
+  <div class="subcommand">prefix</div>
+  <div class="subcmd-container">
+    <p class="subcmd-dsc">
+      Prefixes are used to indicate the filetype of each card, if the
+      <code class="inline">filetypes</code> feature is enabled during
+      compilation. It is recommended that each of the following have the same
+      number of characters (otherwise columns may not align properly).
+    </p>
+    <div class="level2">
+      <div class="subcommand">md</div>
+      <p class="subcmd-dsc">
+        The string to be shown before a Markdown card name. 
+      </p>
+      <div class="subcommand">pdf</div>
+      <p class="subcmd-dsc">
+        The string to be shown before a PDF card name. 
       </p>
     </div>
   </div>
