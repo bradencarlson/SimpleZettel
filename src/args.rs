@@ -2,7 +2,7 @@ use clap::{Command, ArgAction, Arg, ArgMatches};
 
 pub fn parse_args() -> ArgMatches {
     Command::new("szk")
-        .version("0.3.0")
+        .version("")
         .arg(
             Arg::new("box")
             .required(false)

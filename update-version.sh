@@ -1,12 +1,16 @@
 #!/bin/bash
 
+exec < /dev/tty
+
+V=$1
+
 if [[ -z "$1" ]]; then 
-        echo "No version given!"
-        echo "usage: update-version.sh <version-number>"
+        printf "Specify the new version number: "
+        read -r V trash
 fi
 
-sed -i -E "s/version\(\"[a-zA-Z0-9\.]*\"\)/version(\"$1\")/" src/args.rs
-sed -i -E "s/version = .*/version = \"$1\"/" Cargo.toml
+sed -i -E "s/version\(\"[a-zA-Z0-9\.]*\"\)/version(\"$V\")/" src/args.rs
+sed -i -E "s/version = .*/version = \"$V\"/" Cargo.toml
 
 # Update the version in Cargo.lock
 cargo update -w

@@ -1,6 +1,6 @@
 [package]
 name = "szk"
-version = "0.3.0"
+version = ""
 edition = "2024"
 
 [dependencies]
