@@ -41,7 +41,7 @@ impl ZkBox {
         self.tracked
     }
 
-    fn name(&self) -> String {
+    pub fn name(&self) -> String {
         match self.path.file_name() {
             Some(os) => {
                 let name = match os.to_str() {

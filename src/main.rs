@@ -22,6 +22,7 @@ mod tui;
 
 use regex::Regex;
 
+use crate::tui::App;
 use crate::error::ZkError;
 use crate::config::ZkConfig;
 
@@ -29,9 +30,8 @@ use crate::boxes::ZkBox;
 
 fn main() {
 
-    ratatui::run(|terminal| tui::App::default().run(terminal));
 
-    /*let matches = args::parse_args();
+    let matches = args::parse_args();
 
     let config = match config::get_config() {
         Ok(c) => c,
@@ -67,6 +67,14 @@ fn main() {
             }
         }
     };
+
+    let mut app = App::default();
+
+    app.set_box(bx);
+
+    ratatui::run(|terminal| app.run(terminal));
+
+    /*
 
     match matches.subcommand() {
         Some(("box", sub_m)) => {

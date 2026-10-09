@@ -11,10 +11,12 @@ use ratatui::{
     Frame,
 };
 
-#[derive(Debug, Default)]
+use crate::boxes::{self, ZkBox};
+
+#[derive(Debug,Default)]
 pub struct App {
     exit: bool,
-
+    current_box: Option<ZkBox>,
 }
 
 impl App {
@@ -24,6 +26,10 @@ impl App {
             self.handle_events()?;
         }
         Ok(())
+    }
+
+    pub fn set_box(&mut self, card: Option<ZkBox>) {
+        self.current_box = card;
     }
 
     fn draw(&self, frame: &mut Frame) {
@@ -55,10 +61,16 @@ impl App {
 impl Widget for &App {
     fn render(self, area: Rect, buf: &mut Buffer) {
         let title = Line::from(" SimpleZettel ".bold());
+        let box_name = match self.current_box {
+                    Some(ref bx) => bx.name(),
+                    None => String::from("no current box."),
+                };
+
         let block = Block::bordered()
-            .title(title)
+            .title(Line::from(box_name.bold()))
             .border_set(border::THICK);
-        let text = Text::from(Line::from("hello there!"));
+
+        let text = Text::from(Line::from("text here"));
 
         let side = Text::from(Line::from("side panel"));
 
