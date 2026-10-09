@@ -2,7 +2,7 @@ use std::io;
 use crossterm::event::{self, Event, KeyCode, KeyEventKind, KeyEvent};
 use ratatui::{
     buffer::Buffer, 
-    layout::Rect, 
+    layout::{Constraint, Direction, Layout,Rect},
     style::Stylize,
     symbols::border,
     text::{Line,Text},
@@ -60,9 +60,40 @@ impl Widget for &App {
             .border_set(border::THICK);
         let text = Text::from(Line::from("hello there!"));
 
+        let side = Text::from(Line::from("side panel"));
+
+        let main = Layout::default()
+            .direction(Direction::Horizontal)
+            .constraints(vec![
+                Constraint::Percentage(65),
+                Constraint::Percentage(35)
+            ])
+            .split(area);
+
+        let side_panel = Layout::default()
+            .direction(Direction::Vertical)
+            .constraints(vec![
+                Constraint::Percentage(50),
+                Constraint::Percentage(50)
+            ])
+            .split(main[1]);
+
+
         Paragraph::new(text)
             .centered()
             .block(block)
-            .render(area, buf);
+            .render(main[0], buf);
+
+        Paragraph::new(side)
+            .block(Block::bordered()
+                .title(Line::from(" References ".bold()))
+                .border_set(border::THICK))
+            .render(side_panel[0], buf);
+
+        Paragraph::new(Line::from("children cards"))
+            .block(Block::bordered()
+                .title(Line::from(" Cards ".bold()))
+                .border_set(border::THICK))
+            .render(side_panel[1], buf);
     }
 }
