@@ -1,10 +1,24 @@
 use std::path::PathBuf;
+
+use std::io;
+use crossterm::event::{self, Event, KeyCode, KeyEventKind, KeyEvent};
+use ratatui::{
+    buffer::Buffer, 
+    layout::Rect, 
+    style::Stylize,
+    symbols::border,
+    text::{Line,Text},
+    widgets::{Block,Paragraph,Widget},
+    DefaultTerminal, 
+    Frame,
+};
 mod args;
 mod boxes;
 mod utils;
 mod error;
 mod config;
 mod vcs;
+mod tui;
 
 use regex::Regex;
 
@@ -15,7 +29,9 @@ use crate::boxes::ZkBox;
 
 fn main() {
 
-    let matches = args::parse_args();
+    ratatui::run(|terminal| tui::App::default().run(terminal));
+
+    /*let matches = args::parse_args();
 
     let config = match config::get_config() {
         Ok(c) => c,
@@ -280,6 +296,6 @@ fn main() {
                 };
             }
         }
-    };
+    };*/
 
 }
