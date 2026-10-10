@@ -11,7 +11,7 @@ use ratatui::{
     Frame,
 };
 
-use crate::boxes::{self, ZkBox};
+use crate::boxes::{self, ZkBox, notes::ZkCard};
 
 pub mod widgets;
 
@@ -21,11 +21,14 @@ use regex::Regex;
 pub enum State {
     #[default]
     DisplayAllCards,
+    ShowCard,
 }
 
 pub enum Message {
     IncrementSelected,
     DecrementSelected,
+    ShowSelectedCard,
+    DisplayAllCards,
     Exit,
     NoMessage,
 }
@@ -34,6 +37,7 @@ pub enum Message {
 pub struct App {
     exit: bool,
     current_box: Option<ZkBox>,
+    card_list: Option<Vec::<ZkCard>>,
     state: State,
     selected_index: usize,
 }
@@ -48,8 +52,14 @@ impl App {
         Ok(())
     }
 
-    pub fn set_box(&mut self, card: Option<ZkBox>) {
-        self.current_box = card;
+    pub fn set_box(&mut self, bx: Option<ZkBox>) {
+        if let Some(ref bx) = bx {
+            self.card_list = match bx.get_cards(None) {
+                Ok(v) => Some(v),
+                Err(_) => None
+            };
+        }
+        self.current_box = bx;
     }
 
     fn draw(&self, frame: &mut Frame) {
@@ -68,12 +78,28 @@ impl App {
     fn get_message(&mut self) -> io::Result<Message> {
         match event::read()? {
             Event::Key(key_event) if key_event.kind == KeyEventKind::Press => {
-                return match key_event.code {
-                    KeyCode::Char('q') => Ok(Message::Exit),
-                    KeyCode::Char('j') => Ok(Message::IncrementSelected),
-                    KeyCode::Char('k') => Ok(Message::DecrementSelected),
-                    _ => Ok(Message::NoMessage)
+                // global key binds
+                match key_event.code {
+                    KeyCode::Char('q') => return Ok(Message::Exit),
+                    _ => {}
                 };
+                // state specifig key binds
+                match self.state {
+                    State::DisplayAllCards => {
+                        return match key_event.code {
+                            KeyCode::Char('j') => Ok(Message::IncrementSelected),
+                            KeyCode::Char('k') => Ok(Message::DecrementSelected),
+                            KeyCode::Enter => Ok(Message::ShowSelectedCard),
+                            _ => Ok(Message::NoMessage)
+                        };
+                    },
+                    State::ShowCard => {
+                        return match key_event.code {
+                            KeyCode::Esc => Ok(Message::DisplayAllCards),
+                            _ => Ok(Message::NoMessage)
+                        };
+                    }
+                }
             },
             _ => {}
         };
@@ -84,6 +110,8 @@ impl App {
         match message {
             Message::IncrementSelected => self.increment_selected(),
             Message::DecrementSelected => self.decrement_selected(),
+            Message::ShowSelectedCard => self.state = State::ShowCard,
+            Message::DisplayAllCards => self.state = State::DisplayAllCards,
             Message::Exit => self.exit(),
             Message::NoMessage => {},
         };
@@ -97,7 +125,8 @@ impl App {
 impl Widget for &App {
     fn render(self, area: Rect, buf: &mut Buffer) {
         match self.state {
-            State::DisplayAllCards => self.render_display_cards(area,buf)
+            State::DisplayAllCards => self.render_display_cards(area,buf),
+            State::ShowCard => self.render_show_card(area, buf),
         }
     }
 
@@ -105,8 +134,35 @@ impl Widget for &App {
 
 impl App {
 
+    fn render_show_card(&self, area: Rect, buf: &mut Buffer) {
+        let box_name = match self.current_box {
+            Some(ref bx) => {
+                let mut s = bx.name();
+                s.push(' ');
+                s.insert(0, ' ');
+                s
+            },
+            None => String::from(" no current box "),
+        };
+
+        let main = widgets::card_layout(area);
+
+        let card_content = match self.card_list {
+            Some(ref list) => {
+                list[self.selected_index].get_content()
+            },
+            None => {
+                String::from("Card content unavailable")
+            }
+        };
+
+        Paragraph::new(card_content)
+            .block(Block::bordered()
+                .title(box_name))
+            .render(main[0], buf);
+    }
+
     fn render_display_cards(&self, area: Rect, buf: &mut Buffer) {
-        let title = Line::from(" SimpleZettel ".bold());
         let box_name = match self.current_box {
             Some(ref bx) => {
                 let mut s = bx.name();
@@ -138,51 +194,34 @@ impl App {
 
         let side = Text::from(Line::from("side panel"));
 
-        let main = widgets::main_layout(area);
-
         Paragraph::new(content)
             .block(block)
-            .render(main[0], buf);
+            .render(area, buf);
 
-        Paragraph::new(side)
-            .block(Block::bordered()
-                .title(Line::from(" References ".bold()))
-                .border_set(border::THICK))
-            .render(main[1], buf);
-
-        Paragraph::new(Line::from("children cards"))
-            .block(Block::bordered()
-                .title(Line::from(" Cards ".bold()))
-                .border_set(border::THICK))
-            .render(main[2], buf);
     }
 
     fn get_card_list(&self) -> Option<Vec::<Line>> {
-        match self.current_box {
-            Some(ref bx) => {
-                if let Ok(cards) = bx.get_cards(None) {
-                    let max = match cards.iter()
-                        .map(|c| c.get_number_length())
-                        .max() {
-                            Some(m) => m, 
-                            None => 20
-                    };
-                    let mut lines = Vec::<Line>::new();
-                    let mut counter: usize = 0;
-                    for card in cards.iter() {
-                        let mut s = card.format_number(max);
-                        s.push_str(card.get_header().as_str());
-                        let mut line: Line = s.into();
-                        if counter == self.selected_index {
-                            line = line.bold();
-                        }
-                        lines.push(line);
-                        counter += 1;
+        match self.card_list {
+            Some(ref cards) => {
+                let max = match cards.iter()
+                    .map(|c| c.get_number_length())
+                    .max() {
+                        Some(m) => m, 
+                        None => 20
+                };
+                let mut lines = Vec::<Line>::new();
+                let mut counter: usize = 0;
+                for card in cards.iter() {
+                    let mut s = card.format_number(max);
+                    s.push_str(card.get_header().as_str());
+                    let mut line: Line = s.into();
+                    if counter == self.selected_index {
+                        line = line.bold().blue();
                     }
-                    Some(lines)
-                } else {
-                    None
+                    lines.push(line);
+                    counter += 1;
                 }
+                Some(lines)
             },
             None => {
                 None

@@ -11,22 +11,22 @@ use ratatui::{
     Frame,
 };
 
-pub fn main_layout(area: Rect) -> Vec::<Rect> {
-        let main = Layout::default()
-            .direction(Direction::Horizontal)
-            .constraints(vec![
-                Constraint::Percentage(65),
-                Constraint::Percentage(35)
-            ])
-            .split(area);
+pub fn card_layout(area: Rect) -> Vec::<Rect> {
+    let main = Layout::default()
+        .direction(Direction::Horizontal)
+        .constraints(vec![
+            Constraint::Percentage(65),
+            Constraint::Percentage(35)
+        ])
+        .split(area);
 
-        let side_panel = Layout::default()
-            .direction(Direction::Vertical)
-            .constraints(vec![
-                Constraint::Percentage(50),
-                Constraint::Percentage(50)
-            ])
-            .split(main[1]);
+    let side_panel = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints(vec![
+            Constraint::Percentage(50),
+            Constraint::Percentage(50)
+        ])
+        .split(main[1]);
 
-        vec![main[0], side_panel[0], side_panel[1]]
+    vec![main[0], side_panel[0], side_panel[1]]
 }

@@ -1,5 +1,5 @@
 use std::cmp::Ordering;
-use std::fs::File;
+use std::fs::{self, File};
 use std::io::{BufRead,BufReader};
 use std::path::PathBuf;
 use std::process::Command;
@@ -193,6 +193,14 @@ impl ZkCard {
             return Err(ZkError::NoteHeader);
         } else {
             Err(ZkError::Access(path.to_path_buf()))
+        }
+    }
+
+    pub fn get_content(&self) -> String {
+        if let Ok(s) = fs::read_to_string(&self.path) {
+            s
+        } else {
+            String::new()
         }
     }
 
