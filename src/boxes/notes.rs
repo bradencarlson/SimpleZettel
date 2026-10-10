@@ -110,7 +110,7 @@ impl ZkCard {
             }
         };
     }
-    fn format_number(&self, space: usize) -> String {
+    pub fn format_number(&self, space: usize) -> String {
         let mut s = String::new();
         match self.number {
             ZkNumber::Num(ref v) => {
