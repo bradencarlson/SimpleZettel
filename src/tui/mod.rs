@@ -13,10 +13,21 @@ use ratatui::{
 
 use crate::boxes::{self, ZkBox};
 
+pub mod widgets;
+
+use regex::Regex;
+
+#[derive(Default,Debug)]
+pub enum State {
+    #[default]
+    DisplayAllCards,
+}
+
 #[derive(Debug,Default)]
 pub struct App {
     exit: bool,
     current_box: Option<ZkBox>,
+    state: State
 }
 
 impl App {
@@ -60,10 +71,25 @@ impl App {
 
 impl Widget for &App {
     fn render(self, area: Rect, buf: &mut Buffer) {
+        match self.state {
+            State::DisplayAllCards => self.render_display_cards(area,buf)
+        }
+    }
+
+}
+
+impl App {
+
+    fn render_display_cards(&self, area: Rect, buf: &mut Buffer) {
         let title = Line::from(" SimpleZettel ".bold());
         let box_name = match self.current_box {
-                    Some(ref bx) => bx.name(),
-                    None => String::from("no current box."),
+                    Some(ref bx) => {
+                        let mut s = bx.name();
+                        s.push(' ');
+                        s.insert(0, ' ');
+                        s
+                    },
+                    None => String::from(" no current box "),
                 };
 
         let block = Block::bordered()
@@ -74,22 +100,7 @@ impl Widget for &App {
 
         let side = Text::from(Line::from("side panel"));
 
-        let main = Layout::default()
-            .direction(Direction::Horizontal)
-            .constraints(vec![
-                Constraint::Percentage(65),
-                Constraint::Percentage(35)
-            ])
-            .split(area);
-
-        let side_panel = Layout::default()
-            .direction(Direction::Vertical)
-            .constraints(vec![
-                Constraint::Percentage(50),
-                Constraint::Percentage(50)
-            ])
-            .split(main[1]);
-
+        let main = widgets::main_layout(area);
 
         Paragraph::new(text)
             .centered()
@@ -100,12 +111,12 @@ impl Widget for &App {
             .block(Block::bordered()
                 .title(Line::from(" References ".bold()))
                 .border_set(border::THICK))
-            .render(side_panel[0], buf);
+            .render(main[1], buf);
 
         Paragraph::new(Line::from("children cards"))
             .block(Block::bordered()
                 .title(Line::from(" Cards ".bold()))
                 .border_set(border::THICK))
-            .render(side_panel[1], buf);
+            .render(main[2], buf);
     }
 }
