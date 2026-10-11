@@ -11,6 +11,16 @@ use ratatui::{
     Frame,
 };
 
+pub fn main_layout(area: Rect) -> Vec::<Rect> {
+    let main = Layout::default()
+        .constraints([
+            Constraint::Min(0),
+            Constraint::Length(1)
+        ])
+        .split(area);
+    vec![main[0], main[1]]
+}
+
 pub fn card_layout(area: Rect) -> Vec::<Rect> {
     let main = Layout::default()
         .direction(Direction::Horizontal)

@@ -6,7 +6,7 @@ use ratatui::{
     style::Stylize,
     symbols::border,
     text::{Line,Text},
-    widgets::{Block,Paragraph,Widget},
+    widgets::{Block,Paragraph,Widget,Wrap},
     DefaultTerminal, 
     Frame,
 };
@@ -22,12 +22,16 @@ pub enum State {
     #[default]
     DisplayAllCards,
     ShowCard,
+    EnteringCmd,
 }
 
 pub enum Message {
+    AppendToCmd(char),
+    CmdMode,
+    DeleteChar,
     IncrementSelected,
     DecrementSelected,
-    ShowSelectedCard,
+    ShowCard,
     DisplayAllCards,
     Exit,
     NoMessage,
@@ -40,6 +44,7 @@ pub struct App {
     card_list: Option<Vec::<ZkCard>>,
     state: State,
     selected_index: usize,
+    partial_cmd: String
 }
 
 impl App {
@@ -75,6 +80,22 @@ impl App {
         }
     }
 
+    pub fn get_selected(&self) -> usize {
+        self.selected_index
+    }
+
+    fn append_to_cmd(&mut self, c: char) {
+        self.partial_cmd.push(c);
+    }
+
+    fn delete_char(&mut self) {
+        self.partial_cmd.pop();
+    }
+
+    fn change_state(&mut self, state: State) {
+        self.state = state;
+    }
+
     fn get_message(&mut self) -> io::Result<Message> {
         match event::read()? {
             Event::Key(key_event) if key_event.kind == KeyEventKind::Press => {
@@ -83,13 +104,14 @@ impl App {
                     KeyCode::Char('q') => return Ok(Message::Exit),
                     _ => {}
                 };
-                // state specifig key binds
+                // state specific key binds
                 match self.state {
                     State::DisplayAllCards => {
                         return match key_event.code {
                             KeyCode::Char('j') => Ok(Message::IncrementSelected),
                             KeyCode::Char('k') => Ok(Message::DecrementSelected),
-                            KeyCode::Enter => Ok(Message::ShowSelectedCard),
+                            KeyCode::Char(':') => Ok(Message::CmdMode),
+                            KeyCode::Enter => Ok(Message::ShowCard),
                             _ => Ok(Message::NoMessage)
                         };
                     },
@@ -98,6 +120,14 @@ impl App {
                             KeyCode::Esc => Ok(Message::DisplayAllCards),
                             _ => Ok(Message::NoMessage)
                         };
+                    },
+                    State::EnteringCmd => {
+                        return match key_event.code {
+                            KeyCode::Esc => Ok(Message::DisplayAllCards),
+                            KeyCode::Backspace => Ok(Message::DeleteChar),
+                            KeyCode::Char(a) => Ok(Message::AppendToCmd(a)),
+                            _ => Ok(Message::NoMessage),
+                        }
                     }
                 }
             },
@@ -108,10 +138,13 @@ impl App {
 
     fn handle_message(&mut self, message: Message) {
         match message {
+            Message::AppendToCmd(a) => self.append_to_cmd(a),
+            Message::CmdMode => self.change_state(State::EnteringCmd),
+            Message::DeleteChar => self.delete_char(),
             Message::IncrementSelected => self.increment_selected(),
             Message::DecrementSelected => self.decrement_selected(),
-            Message::ShowSelectedCard => self.state = State::ShowCard,
-            Message::DisplayAllCards => self.state = State::DisplayAllCards,
+            Message::ShowCard => self.change_state(State::ShowCard),
+            Message::DisplayAllCards => self.change_state(State::DisplayAllCards),
             Message::Exit => self.exit(),
             Message::NoMessage => {},
         };
@@ -127,6 +160,7 @@ impl Widget for &App {
         match self.state {
             State::DisplayAllCards => self.render_display_cards(area,buf),
             State::ShowCard => self.render_show_card(area, buf),
+            State::EnteringCmd => self.render_display_cards(area,buf),
         }
     }
 
@@ -159,6 +193,7 @@ impl App {
         Paragraph::new(card_content)
             .block(Block::bordered()
                 .title(box_name))
+            .wrap(Wrap { trim: true })
             .render(main[0], buf);
     }
 
@@ -194,9 +229,14 @@ impl App {
 
         let side = Text::from(Line::from("side panel"));
 
+        let main = widgets::main_layout(area);
+
         Paragraph::new(content)
             .block(block)
-            .render(area, buf);
+            .render(main[0], buf);
+
+        Text::from(self.partial_cmd.clone())
+            .render(main[1], buf);
 
     }
 
@@ -229,3 +269,19 @@ impl App {
         }
     }
 }
+
+#[test]
+fn selected_value() {
+    let mut app = App::default();
+    app.increment_selected();
+    assert_eq!(app.get_selected(), 1usize);
+    app.increment_selected();
+    assert_eq!(app.get_selected(), 2usize);
+    app.decrement_selected();
+    assert_eq!(app.get_selected(), 1usize);
+    app.decrement_selected();
+    assert_eq!(app.get_selected(), 0usize);
+    app.decrement_selected();
+    assert_eq!(app.get_selected(), 0usize);
+}
+
