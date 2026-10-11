@@ -15,7 +15,7 @@ pub fn main_layout(area: Rect) -> Vec::<Rect> {
     let main = Layout::default()
         .constraints([
             Constraint::Min(0),
-            Constraint::Length(1)
+            Constraint::Length(3)
         ])
         .split(area);
     vec![main[0], main[1]]

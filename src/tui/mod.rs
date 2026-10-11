@@ -3,7 +3,7 @@ use crossterm::event::{self, Event, KeyCode, KeyEventKind, KeyEvent};
 use ratatui::{
     buffer::Buffer, 
     layout::{Constraint, Direction, Layout,Rect},
-    style::Stylize,
+    style::{Style,Stylize},
     symbols::border,
     text::{Line,Text},
     widgets::{Block,Paragraph,Widget,Wrap},
@@ -242,7 +242,20 @@ impl App {
             .block(block)
             .render(main[0], buf);
 
-        Text::from(self.partial_cmd.clone())
+        let filter_block = match self.state {
+            State::EnteringCmd => {
+                Block::bordered()
+                    .title("Filter")
+                    .border_style(Style::new().white().bold())
+            },
+            _ => {
+                Block::bordered()
+                    .title("Filter")
+            }
+        };
+
+        Paragraph::new(Text::from(self.partial_cmd.clone()))
+            .block(filter_block)
             .render(main[1], buf);
 
     }
