@@ -99,16 +99,11 @@ impl App {
     fn get_message(&mut self) -> io::Result<Message> {
         match event::read()? {
             Event::Key(key_event) if key_event.kind == KeyEventKind::Press => {
-                // global key binds
-                match key_event.code {
-                    KeyCode::Char('q') => return Ok(Message::Exit),
-                    _ => {}
-                };
-                // state specific key binds
                 match self.state {
                     State::DisplayAllCards => {
                         return match key_event.code {
                             KeyCode::Char('j') => Ok(Message::IncrementSelected),
+                            KeyCode::Char('q') => Ok(Message::Exit),
                             KeyCode::Char('k') => Ok(Message::DecrementSelected),
                             KeyCode::Char(':') => Ok(Message::CmdMode),
                             KeyCode::Enter => Ok(Message::ShowCard),
@@ -118,6 +113,7 @@ impl App {
                     State::ShowCard => {
                         return match key_event.code {
                             KeyCode::Esc => Ok(Message::DisplayAllCards),
+                            KeyCode::Char('q') => Ok(Message::Exit),
                             _ => Ok(Message::NoMessage)
                         };
                     },
