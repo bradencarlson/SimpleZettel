@@ -28,13 +28,14 @@ pub enum State {
 pub enum Message {
     AppendToCmd(char),
     CmdMode,
-    DeleteChar,
-    IncrementSelected,
     DecrementSelected,
-    ShowCard,
+    DeleteChar,
     DisplayAllCards,
+    ExecuteCmd,
     Exit,
+    IncrementSelected,
     NoMessage,
+    ShowCard,
 }
 
 #[derive(Debug,Default)]
@@ -44,6 +45,7 @@ pub struct App {
     card_list: Option<Vec::<ZkCard>>,
     state: State,
     selected_index: usize,
+    pattern: Option<Regex>,
     partial_cmd: String
 }
 
@@ -96,6 +98,18 @@ impl App {
         self.state = state;
     }
 
+    fn execute_cmd(&mut self) {
+        if let Ok(pat) = Regex::new(self.partial_cmd.as_str()) {
+            if let Some(ref bx) = self.current_box {
+                self.card_list = match bx.get_cards(Some(&pat)) {
+                    Ok(list) => Some(list),
+                    Err(_e) => None
+                };
+                self.selected_index = 0;
+            }
+        };
+    }
+
     fn get_message(&mut self) -> io::Result<Message> {
         match event::read()? {
             Event::Key(key_event) if key_event.kind == KeyEventKind::Press => {
@@ -122,6 +136,7 @@ impl App {
                             KeyCode::Esc => Ok(Message::DisplayAllCards),
                             KeyCode::Backspace => Ok(Message::DeleteChar),
                             KeyCode::Char(a) => Ok(Message::AppendToCmd(a)),
+                            KeyCode::Enter => Ok(Message::ExecuteCmd),
                             _ => Ok(Message::NoMessage),
                         }
                     }
@@ -136,13 +151,14 @@ impl App {
         match message {
             Message::AppendToCmd(a) => self.append_to_cmd(a),
             Message::CmdMode => self.change_state(State::EnteringCmd),
-            Message::DeleteChar => self.delete_char(),
-            Message::IncrementSelected => self.increment_selected(),
             Message::DecrementSelected => self.decrement_selected(),
-            Message::ShowCard => self.change_state(State::ShowCard),
+            Message::DeleteChar => self.delete_char(),
             Message::DisplayAllCards => self.change_state(State::DisplayAllCards),
+            Message::ExecuteCmd => self.execute_cmd(),
             Message::Exit => self.exit(),
+            Message::IncrementSelected => self.increment_selected(),
             Message::NoMessage => {},
+            Message::ShowCard => self.change_state(State::ShowCard),
         };
     }
 
@@ -206,14 +222,9 @@ impl App {
 
         let content = match self.current_box {
             Some(ref bx) => {
-                if let Ok(cards) = bx.get_cards(None) {
-                    match self.get_card_list() {
-                        Some(list) => Text::from(list),
-                        None => Text::from("")
-                    }
-                    
-                } else {
-                    Text::from("")
+                match self.get_card_lines() {
+                    Some(list) => Text::from(list),
+                    None => Text::from("")
                 }
             },
             None => Text::from("")
@@ -236,32 +247,29 @@ impl App {
 
     }
 
-    fn get_card_list(&self) -> Option<Vec::<Line>> {
-        match self.card_list {
-            Some(ref cards) => {
-                let max = match cards.iter()
-                    .map(|c| c.get_number_length())
-                    .max() {
-                        Some(m) => m, 
-                        None => 20
-                };
-                let mut lines = Vec::<Line>::new();
-                let mut counter: usize = 0;
-                for card in cards.iter() {
-                    let mut s = card.format_number(max);
-                    s.push_str(card.get_header().as_str());
-                    let mut line: Line = s.into();
-                    if counter == self.selected_index {
-                        line = line.bold().blue();
-                    }
-                    lines.push(line);
-                    counter += 1;
+    fn get_card_lines(&self) -> Option<Vec::<Line>> {
+        if let Some(ref cards) = self.card_list { 
+            let max = match cards.iter()
+                .map(|c| c.get_number_length())
+                .max() {
+                    Some(m) => m+4,
+                    None => 20
+            };
+            let mut lines = Vec::<Line>::new();
+            let mut counter: usize = 0;
+            for card in cards.iter() {
+                let mut s = card.format_number(max);
+                s.push_str(card.get_header().as_str());
+                let mut line: Line = s.into();
+                if counter == self.selected_index {
+                    line = line.bold().blue();
                 }
-                Some(lines)
-            },
-            None => {
-                None
+                lines.push(line);
+                counter += 1;
             }
+            Some(lines)
+        } else {
+            None
         }
     }
 }
