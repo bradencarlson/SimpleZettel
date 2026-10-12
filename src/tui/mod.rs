@@ -45,7 +45,6 @@ pub struct App {
     card_list: Option<Vec::<ZkCard>>,
     state: State,
     selected_index: usize,
-    pattern: Option<Regex>,
     partial_cmd: String
 }
 
@@ -54,7 +53,7 @@ impl App {
         while !self.exit {
             terminal.draw(|frame| self.draw(frame))?;
             let msg = self.get_message()?;
-            self.handle_message(msg);
+            self.handle_messages(msg);
         }
         Ok(())
     }
@@ -110,56 +109,62 @@ impl App {
         };
     }
 
-    fn get_message(&mut self) -> io::Result<Message> {
+    fn get_message(&mut self) -> io::Result<Vec::<Message>> {
+        let mut v = Vec::<Message>::new();
         match event::read()? {
             Event::Key(key_event) if key_event.kind == KeyEventKind::Press => {
                 match self.state {
                     State::DisplayAllCards => {
-                        return match key_event.code {
-                            KeyCode::Char('j') => Ok(Message::IncrementSelected),
-                            KeyCode::Char('q') => Ok(Message::Exit),
-                            KeyCode::Char('k') => Ok(Message::DecrementSelected),
-                            KeyCode::Char(':') => Ok(Message::CmdMode),
-                            KeyCode::Enter => Ok(Message::ShowCard),
-                            _ => Ok(Message::NoMessage)
+                        match key_event.code {
+                            KeyCode::Char('j') => v.push(Message::IncrementSelected),
+                            KeyCode::Char('q') => v.push(Message::Exit),
+                            KeyCode::Char('k') => v.push(Message::DecrementSelected),
+                            KeyCode::Char(':') => v.push(Message::CmdMode),
+                            KeyCode::Enter => v.push(Message::ShowCard),
+                            _ => v.push(Message::NoMessage)
                         };
                     },
                     State::ShowCard => {
-                        return match key_event.code {
-                            KeyCode::Esc => Ok(Message::DisplayAllCards),
-                            KeyCode::Char('q') => Ok(Message::Exit),
-                            _ => Ok(Message::NoMessage)
+                        match key_event.code {
+                            KeyCode::Esc => v.push(Message::DisplayAllCards),
+                            KeyCode::Char('q') => v.push(Message::Exit),
+                            _ => v.push(Message::NoMessage)
                         };
                     },
                     State::EnteringCmd => {
-                        return match key_event.code {
-                            KeyCode::Esc => Ok(Message::DisplayAllCards),
-                            KeyCode::Backspace => Ok(Message::DeleteChar),
-                            KeyCode::Char(a) => Ok(Message::AppendToCmd(a)),
-                            KeyCode::Enter => Ok(Message::ExecuteCmd),
-                            _ => Ok(Message::NoMessage),
+                        match key_event.code {
+                            KeyCode::Esc => v.push(Message::DisplayAllCards),
+                            KeyCode::Backspace => v.push(Message::DeleteChar),
+                            KeyCode::Char(a) => v.push(Message::AppendToCmd(a)),
+                            KeyCode::Enter => {
+                                v.push(Message::ExecuteCmd);
+                                v.push(Message::DisplayAllCards);
+                            },
+                            _ => v.push(Message::NoMessage),
                         }
                     }
                 }
             },
             _ => {}
         };
-        Ok(Message::NoMessage)
+        Ok(v)
     }
 
-    fn handle_message(&mut self, message: Message) {
-        match message {
-            Message::AppendToCmd(a) => self.append_to_cmd(a),
-            Message::CmdMode => self.change_state(State::EnteringCmd),
-            Message::DecrementSelected => self.decrement_selected(),
-            Message::DeleteChar => self.delete_char(),
-            Message::DisplayAllCards => self.change_state(State::DisplayAllCards),
-            Message::ExecuteCmd => self.execute_cmd(),
-            Message::Exit => self.exit(),
-            Message::IncrementSelected => self.increment_selected(),
-            Message::NoMessage => {},
-            Message::ShowCard => self.change_state(State::ShowCard),
-        };
+    fn handle_messages(&mut self, messages: Vec::<Message>) {
+        for msg in messages.iter() {
+            match msg {
+                Message::AppendToCmd(a) => self.append_to_cmd(*a),
+                Message::CmdMode => self.change_state(State::EnteringCmd),
+                Message::DecrementSelected => self.decrement_selected(),
+                Message::DeleteChar => self.delete_char(),
+                Message::DisplayAllCards => self.change_state(State::DisplayAllCards),
+                Message::ExecuteCmd => self.execute_cmd(),
+                Message::Exit => self.exit(),
+                Message::IncrementSelected => self.increment_selected(),
+                Message::NoMessage => {},
+                Message::ShowCard => self.change_state(State::ShowCard),
+            };
+        }
     }
 
     pub fn exit(&mut self) {
