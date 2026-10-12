@@ -25,8 +25,8 @@ pub fn card_layout(area: Rect) -> Vec::<Rect> {
     let main = Layout::default()
         .direction(Direction::Horizontal)
         .constraints(vec![
-            Constraint::Percentage(65),
-            Constraint::Percentage(35)
+            Constraint::Percentage(85),
+            Constraint::Percentage(15)
         ])
         .split(area);
 

@@ -1,4 +1,5 @@
 use std::cmp::Ordering;
+
 use std::fs::{self, File};
 use std::ffi::OsStr;
 use std::io::{BufRead,BufReader};
@@ -40,13 +41,13 @@ pub struct ZkCard {
     references: Vec::<ZkRef>,
 }
 
-#[derive(Debug,Clone)]
+#[derive(Debug,Clone,PartialEq)]
 pub enum ZkPath {
     Path(PathBuf),
     Invalid
 }
 
-#[derive(Debug,Clone)]
+#[derive(Debug,Clone,PartialEq)]
 pub struct ZkRef {
     path: ZkPath,
     label: String,
@@ -208,12 +209,6 @@ impl ZkCard {
         let mut refs = Vec::<ZkRef>::new();
         if let Ok(f) = File::open(&self.path) {
             let reader = BufReader::new(f);
-            let parent = match &self.path.parent() {
-                Some(p) => p.clone(),
-                None => {
-                    return Err(ZkError::Other(String::from("failed to get parent of card")));
-                }
-            };
             let mut iter = reader.lines();
             let reference = Regex::new(r"\[(?<linkname>[^\]]+)\]\((?<link>[^\)]+)\)").unwrap();
             while let Some(line_result) = iter.next() {
@@ -221,7 +216,7 @@ impl ZkCard {
                     if reference.is_match(&line) {
                         let mut matches = reference.captures_iter(&line);
                         while let Some(f_name) = matches.next() {
-                            let mut p = parent.with_file_name(&f_name["linkname"]);
+                            let mut p = self.path.clone().with_file_name(&f_name["linkname"]);
                             let md = OsStr::new("md");
                             if let Some(md) = p.extension() {
                             } else {
@@ -373,3 +368,26 @@ fn card_properties() {
     assert_eq!( header, &expected_header);
 
 }
+
+#[test]
+fn references() {
+    let card: ZkCard = PathBuf::from("tests/files/1.md").into();
+    let v = card.get_references().expect("failed to get references from tests/files/1.md");
+    println!("{:?}", v);
+    assert!(v.contains(
+            &ZkRef {
+                path: ZkPath::Path(PathBuf::from("tests/files/2.md")),
+                label: String::from("2")
+            }
+            )
+    );
+    assert!(v.contains(
+            &ZkRef {
+                path: ZkPath::Path(PathBuf::from("tests/files/new-file.md")),
+                label: String::from("new-file")
+            }
+            )
+    );
+}
+
+
