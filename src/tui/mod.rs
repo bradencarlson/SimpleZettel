@@ -263,8 +263,7 @@ impl App {
         };
 
         let block = Block::bordered()
-            .title(Line::from(box_name.bold()))
-            .border_set(border::THICK);
+            .title(Line::from(box_name.bold()));
 
         let side = Text::from(Line::from("side panel"));
 
