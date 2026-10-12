@@ -85,6 +85,15 @@ impl App {
         self.selected_index
     }
 
+    pub fn get_selected_card(&self) -> Option<&ZkCard> {
+        match self.card_list {
+            Some(ref list) => {
+                Some(&list[self.selected_index])
+            },
+            None => None
+        }
+    }
+
     fn append_to_cmd(&mut self, c: char) {
         self.partial_cmd.push(c);
     }
@@ -207,11 +216,29 @@ impl App {
             }
         };
 
+        let refs = match self.get_selected_card() {
+            Some(c) => {
+                match c.get_references() {
+                    Ok(v) => v.iter().map(|r| r.to_string()).collect::<String>().to_string(),
+                    Err(e) => String::from("error getting refs")
+                }
+            },
+            None => {
+                String::from("no refs")
+            }
+        };
+
         Paragraph::new(card_content)
             .block(Block::bordered()
                 .title(box_name))
             .wrap(Wrap { trim: true })
             .render(main[0], buf);
+
+        Paragraph::new(refs)
+            .block(Block::bordered()
+                .title(" References ")
+            )
+            .render(main[1], buf);
     }
 
     fn render_display_cards(&self, area: Rect, buf: &mut Buffer) {

@@ -1,5 +1,6 @@
 use std::cmp::Ordering;
 use std::fs::{self, File};
+use std::ffi::OsStr;
 use std::io::{BufRead,BufReader};
 use std::path::PathBuf;
 use std::process::Command;
@@ -57,6 +58,13 @@ impl std::fmt::Display for ZkMatch {
         for line in &self.matches {
             let _ = write!(f, "{}: {}\n", line.lineno, line.content);
         }
+        Ok(())
+    }
+}
+
+impl std::fmt::Display for ZkRef {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
+        let _ = write!(f, "{}\n",self.label);
         Ok(())
     }
 }
@@ -196,6 +204,44 @@ impl ZkCard {
         }
     }
 
+    pub fn get_references(&self) -> Result<Vec::<ZkRef>, ZkError> {
+        let mut refs = Vec::<ZkRef>::new();
+        if let Ok(f) = File::open(&self.path) {
+            let reader = BufReader::new(f);
+            let parent = match &self.path.parent() {
+                Some(p) => p.clone(),
+                None => {
+                    return Err(ZkError::Other(String::from("failed to get parent of card")));
+                }
+            };
+            let mut iter = reader.lines();
+            let reference = Regex::new(r"\[(?<linkname>[^\]]+)\]\((?<link>[^\)]+)\)").unwrap();
+            while let Some(line_result) = iter.next() {
+                if let Ok(line) = line_result {
+                    if reference.is_match(&line) {
+                        let mut matches = reference.captures_iter(&line);
+                        while let Some(f_name) = matches.next() {
+                            let mut p = parent.with_file_name(&f_name["linkname"]);
+                            let md = OsStr::new("md");
+                            if let Some(md) = p.extension() {
+                            } else {
+                                p.add_extension("md");
+                            }
+                            let zkp = ZkRef {
+                                path: ZkPath::Path(p),
+                                label: String::from(&f_name["linkname"]),
+                            };
+                            refs.push(zkp);
+                        }
+                    }
+                }
+            }
+        } else {
+            return Err(ZkError::Access(self.path.to_path_buf()))
+        }
+        Ok(refs)
+    }
+
     pub fn get_content(&self) -> String {
         if let Ok(s) = fs::read_to_string(&self.path) {
             s
@@ -294,35 +340,6 @@ impl std::cmp::Ord for ZkCard {
     }
 }
 
-/*fn get_references(path: &PathBuf) -> Result<Vec::<ZkRef>, ZkError> {
-    let mut refs = Vec::<ZkRef>::new();
-    if let Ok(f) = File::open(path) {
-        let reader = BufReader::new(f);
-        let mut iter = reader.lines();
-        let reference = Regex::new(r"\[(?<linkname>[^\]]+)\]\((?<link>[^\)]+)\)").unwrap();
-        while let Some(line_result) = iter.next() {
-            if let Ok(line) = line_result {
-                if reference.is_match(&line) {
-                    let mut matches = reference.captures_iter(&line);
-                    while let Some(f_name) = matches.next() {
-                        /*let p: ZkPath = match utils::note_path_from_name(&f_name["link"], None, None) {
-                            Ok(pth) => ZkPath::Path(pth),
-                            Err(_) => ZkPath::Invalid
-                        };
-                        let zkp = ZkRef {
-                            path: p,
-                            label: String::from(&f_name["linkname"]),
-                        };
-                        refs.push(zkp);*/
-                    }
-                }
-            }
-        }
-    } else {
-        return Err(ZkError::Access(path.to_path_buf()))
-    }
-    Ok(refs)
-}*/
 
 #[test]
 fn ordering() {
