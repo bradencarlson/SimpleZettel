@@ -150,9 +150,9 @@ impl ZkBox {
         }
     }
 
-    pub fn show_card(&self, name: &String, show_cmds: &ZkShowCommands) -> Result<(), ZkError> {
+    pub fn show_card(&self, name: &String, show_cmds: &ZkShowCommands, use_cmd: bool) -> Result<(), ZkError> {
         let card = self.find_card(name)?;
-        ft::show_note(&card, show_cmds)?;
+        ft::show_note(&card, show_cmds, use_cmd)?;
         Ok(())
     }
     

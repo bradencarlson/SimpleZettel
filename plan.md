@@ -34,8 +34,8 @@ List of subcommands desired:
 - [x], [x] edit: for editing an existing note
 - [x], [x] rm: for removing an existing note
 - [x], [x] show: for showing an existing note
-    - [ ], [ ] `--path`: only show filepath
-    - [ ], [ ] `--print`: don't use user specified commands, just print the file
+    - [ ], [x] `--path`: only show filepath
+    - [x], [x] `--print`: don't use user specified commands, just print the file
       contents to screen (maybe there should be a check on the filetype here)
     - user should be able to specify a note in a different box for all of the
       above commands

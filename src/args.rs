@@ -89,7 +89,7 @@ pub fn parse_args() -> ArgMatches {
             .arg(
                 Arg::new("name")
                 .required(true)
-                .help("Name of the note to edit.")
+                .help("Name of the note to edit")
             )
         )
         .subcommand(
@@ -104,6 +104,20 @@ pub fn parse_args() -> ArgMatches {
         .subcommand(
             Command::new("show")
             .about("show a note")
+            .arg(
+                Arg::new("path")
+                .required(false)
+                .long("path")
+                .action(ArgAction::SetTrue)
+                .help("Only display the cards path, not the contents")
+            )
+            .arg(
+                Arg::new("print")
+                .required(false)
+                .long("print")
+                .action(ArgAction::SetTrue)
+                .help("Print card content to screen")
+            )
             .arg(
                 Arg::new("name")
                 .required(true)

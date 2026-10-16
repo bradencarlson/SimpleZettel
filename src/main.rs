@@ -155,7 +155,7 @@ fn main() {
         Some(("show", sub_m)) => {
             if let Some(bx) = bx {
                 if let Some(name) = sub_m.get_one::<String>("name") {
-                    match bx.show_card(name, config.get_show_cmds()) {
+                    match bx.show_card(name, config.get_show_cmds(), !sub_m.get_flag("print")) {
                         Ok(_) => {},
                         Err(e) => {
                             error::warning(&e.to_string());
