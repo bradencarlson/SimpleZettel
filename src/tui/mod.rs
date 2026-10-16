@@ -306,7 +306,7 @@ impl App {
                 s.push_str(card.get_header().as_str());
                 let mut line: Line = s.into();
                 if counter == self.selected_index {
-                    line = line.bold().blue();
+                    line = line.blue();
                 }
                 lines.push(line);
                 counter += 1;
