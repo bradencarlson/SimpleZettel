@@ -256,7 +256,7 @@ impl ZkBox {
         }
     }
 
-    fn find_card(&self, name: &String) -> Result<ZkCard, ZkError> {
+    pub fn find_card(&self, name: &String) -> Result<ZkCard, ZkError> {
         let mut path = self.path.clone();
         path.push(name);
         let iter = match fs::read_dir(&self.path) {

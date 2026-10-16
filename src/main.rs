@@ -155,12 +155,23 @@ fn main() {
         Some(("show", sub_m)) => {
             if let Some(bx) = bx {
                 if let Some(name) = sub_m.get_one::<String>("name") {
-                    match bx.show_card(name, config.get_show_cmds(), !sub_m.get_flag("print")) {
-                        Ok(_) => {},
-                        Err(e) => {
-                            error::warning(&e.to_string());
-                        }
-                    };
+                    if sub_m.get_flag("path") {
+                        let card = match bx.find_card(name) {
+                            Ok(c) => c,
+                            Err(e) => {
+                                error::warning(&e.to_string());
+                                return;
+                            }
+                        };
+                        println!("{}", card.get_path().display());
+                    } else { 
+                        match bx.show_card(name, config.get_show_cmds(), !sub_m.get_flag("print")) {
+                            Ok(_) => {},
+                            Err(e) => {
+                                error::warning(&e.to_string());
+                            }
+                        };
+                    }
                 }
             }
         },
