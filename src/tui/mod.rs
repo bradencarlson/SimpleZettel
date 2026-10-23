@@ -28,6 +28,7 @@ pub enum State {
 
 pub enum Message {
     AppendToCmd(char),
+    ClearCmd,
     CmdMode,
     DecrementSelected,
     DeleteChar,
@@ -132,6 +133,11 @@ impl App {
         };
     }
 
+    fn clear_cmd(&mut self) {
+        self.partial_cmd = String::new();
+        self.execute_cmd();
+    }
+
     fn get_message(&mut self) -> io::Result<Vec::<Message>> {
         let mut v = Vec::<Message>::new();
         match event::read()? {
@@ -143,6 +149,7 @@ impl App {
                             KeyCode::Char('q') => v.push(Message::Exit),
                             KeyCode::Char('k') => v.push(Message::DecrementSelected),
                             KeyCode::Char(':') => v.push(Message::CmdMode),
+                            KeyCode::Char('c') => v.push(Message::ClearCmd),
                             KeyCode::Enter => v.push(Message::ShowCard),
                             _ => v.push(Message::NoMessage)
                         };
@@ -178,6 +185,7 @@ impl App {
         for msg in messages.iter() {
             match msg {
                 Message::AppendToCmd(a) => self.append_to_cmd(*a),
+                Message::ClearCmd => self.clear_cmd(),
                 Message::CmdMode => self.change_state(State::EnteringCmd),
                 Message::DecrementSelected => self.decrement_selected(),
                 Message::DeleteChar => self.delete_char(),
