@@ -12,6 +12,7 @@ use ratatui::{
 };
 
 use crate::boxes::{self, ZkBox, notes::ZkCard};
+use crate::config::{ZkCmd};
 
 pub mod widgets;
 
@@ -31,6 +32,7 @@ pub enum Message {
     DecrementSelected,
     DeleteChar,
     DisplayAllCards,
+    EditCurrentCard,
     ExecuteCmd,
     Exit,
     IncrementSelected,
@@ -53,7 +55,7 @@ impl App {
         while !self.exit {
             terminal.draw(|frame| self.draw(frame))?;
             let msg = self.get_message()?;
-            self.handle_messages(msg);
+            self.handle_messages(msg, terminal);
         }
         Ok(())
     }
@@ -106,6 +108,13 @@ impl App {
         self.state = state;
     }
 
+    fn edit_card(&mut self) {
+        match self.card_list {
+            Some(ref v) => {v[self.selected_index].edit(&ZkCmd::Invalid).unwrap();},
+            None => {}
+        };
+    }
+
     fn execute_cmd(&mut self) {
         if let Ok(pat) = Regex::new(self.partial_cmd.as_str()) {
             if let Some(ref bx) = self.current_box {
@@ -137,6 +146,7 @@ impl App {
                         match key_event.code {
                             KeyCode::Esc => v.push(Message::DisplayAllCards),
                             KeyCode::Char('q') => v.push(Message::Exit),
+                            KeyCode::Char('e') => v.push(Message::EditCurrentCard),
                             _ => v.push(Message::NoMessage)
                         };
                     },
@@ -159,7 +169,7 @@ impl App {
         Ok(v)
     }
 
-    fn handle_messages(&mut self, messages: Vec::<Message>) {
+    fn handle_messages(&mut self, messages: Vec::<Message>, terminal: &mut DefaultTerminal) {
         for msg in messages.iter() {
             match msg {
                 Message::AppendToCmd(a) => self.append_to_cmd(*a),
@@ -167,8 +177,15 @@ impl App {
                 Message::DecrementSelected => self.decrement_selected(),
                 Message::DeleteChar => self.delete_char(),
                 Message::DisplayAllCards => self.change_state(State::DisplayAllCards),
+                Message::EditCurrentCard => {
+                    self.edit_card();
+                    terminal.clear();
+                },
                 Message::ExecuteCmd => self.execute_cmd(),
-                Message::Exit => self.exit(),
+                Message::Exit => {
+                    self.exit();
+                    terminal.clear();
+                },
                 Message::IncrementSelected => self.increment_selected(),
                 Message::NoMessage => {},
                 Message::ShowCard => self.change_state(State::ShowCard),
