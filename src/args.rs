@@ -11,6 +11,14 @@ pub fn parse_args() -> ArgMatches {
             .action(ArgAction::Set)
             .help("specify a box other than the current one")
         )
+        .arg(
+            Arg::new("tui")
+            .required(false)
+            .short('t')
+            .long("tui")
+            .action(ArgAction::SetTrue)
+            .help("launch the tui")
+        )
         .subcommand(
             Command::new("box")
                 .about("command for managing boxes")

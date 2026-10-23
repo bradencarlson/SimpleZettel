@@ -68,188 +68,237 @@ fn main() {
         }
     };
 
-    let mut app = App::default();
-    app.set_config(config);
+    if matches.get_flag("tui") {
 
-    app.set_box(bx);
+        let mut app = App::default();
+        app.set_config(config);
 
-    ratatui::run(|terminal| app.run(terminal));
+        app.set_box(bx);
 
-    /*
+        ratatui::run(|terminal| app.run(terminal));
+    } else {
 
-    match matches.subcommand() {
-        Some(("box", sub_m)) => {
-            match sub_m.subcommand() {
-                Some(("ls", ssub_m)) => {
-                    let all = ssub_m.get_flag("all");
-                    match boxes::list_boxes(base_dir, all, color) {
-                        Ok(_) => {},
-                        Err(e) => {
-                            error::warning(&e.to_string());
-                        }
-                    };
-                },
-                Some(("add", ssub_m)) => {
-                    if let Some(name) = ssub_m.get_one::<String>("name") {
-                        match boxes::add_box(base_dir, &name) {
+        match matches.subcommand() {
+            Some(("box", sub_m)) => {
+                match sub_m.subcommand() {
+                    Some(("ls", ssub_m)) => {
+                        let all = ssub_m.get_flag("all");
+                        match boxes::list_boxes(base_dir, all, color) {
                             Ok(_) => {},
                             Err(e) => {
                                 error::warning(&e.to_string());
                             }
                         };
-                    }
-                },
-                Some(("rm", ssub_m)) => {
-                    if let Some(name) = ssub_m.get_one::<String>("name") {
-                        match boxes::remove_tracking(base_dir, &name) {
-                            Ok(_) => {
-                                error::info("successfully removed box");
-                            },
-                            Err(e) => {
-                                error::warning(&e.to_string());
-                            }
-                        };
-                    }
-                },
-                Some(("track", ssub_m)) => {
-                    if let Some(name) = ssub_m.get_one::<String>("name") {
-                        match boxes::track(base_dir, &name) {
-                            Ok(_) => {},
-                            Err(e) => {
-                                error::warning(&e.to_string());
-                            }
-                        };
-                    }
-                },
-                _ => {
-                    match boxes::list_boxes(base_dir, false, color) {
-                        Ok(_) => {},
-                        Err(e) => {
-                            error::warning(&e.to_string());
-                        }
-                    };
-                }
-            };
-        },
-        Some(("add", sub_m)) => {
-            if let Some(bx) = bx {
-                if let Some(name) = sub_m.get_one::<String>("name") {
-                    match bx.add_card(&name, editor) {
-                        Ok(_) => {},
-                        Err(e) => {
-                            error::warning(&e.to_string());
-                        }
-                    };
-                }
-            }
-        },
-        Some(("use", sub_m)) => {
-            if let Some(name) = sub_m.get_one::<String>("name") {
-                match boxes::use_box(base_dir, &name, color) {
-                    Ok(_) => {},
-                    Err(e) => {
-                        error::warning(&e.to_string());
-                    }
-                }
-            }
-        },
-        Some(("edit", sub_m)) => {
-            if let Some(bx) = bx {
-                if let Some(name) = sub_m.get_one::<String>("name") {
-                    match bx.edit_card(name, editor) {
-                        Ok(_) => {},
-                        Err(e) => {
-                            error::warning(&e.to_string());
-                        }
-                    };
-                }
-            }
-        },
-        Some(("rm", sub_m)) => {
-            if let Some(bx) = bx {
-                if let Some(name) = sub_m.get_one::<String>("name") {
-                    match bx.rm_card(name) {
-                        Ok(_) => {},
-                        Err(e) => {
-                            error::warning(&e.to_string());
-                        }
-                    };
-                }
-            }
-        },
-        Some(("show", sub_m)) => {
-            if let Some(bx) = bx {
-                if let Some(name) = sub_m.get_one::<String>("name") {
-                    match bx.show_card(name, config.get_show_cmds()) {
-                        Ok(_) => {},
-                        Err(e) => {
-                            error::warning(&e.to_string());
-                        }
-                    };
-                }
-            }
-        },
-        Some(("ls", sub_m)) => {
-            if let Some(bx) = bx {
-                let pattern = match sub_m.get_one::<String>("pattern") {
-                    Some(pat) => {
-                        match Regex::new(pat) {
-                            Ok(p) => Some(p),
-                            Err(e) => {
-                                error::warning(&e.to_string());
-                                None
-                            }
+                    },
+                    Some(("add", ssub_m)) => {
+                        if let Some(name) = ssub_m.get_one::<String>("name") {
+                            match boxes::add_box(base_dir, &name) {
+                                Ok(_) => {},
+                                Err(e) => {
+                                    error::warning(&e.to_string());
+                                }
+                            };
                         }
                     },
-                    None => {
-                        match sub_m.get_one::<String>("number") {
-                            Some(n) => {
-                                let mut pat = String::from("^");
-                                pat.push_str(n.as_str());
-                                match Regex::new(&pat) {
-                                    Ok(p) => Some(p),
-                                    Err(e) => {
-                                        error::warning(&e.to_string());
-                                        None
-                                    }
+                    Some(("rm", ssub_m)) => {
+                        if let Some(name) = ssub_m.get_one::<String>("name") {
+                            match boxes::remove_tracking(base_dir, &name) {
+                                Ok(_) => {
+                                    error::info("successfully removed box");
+                                },
+                                Err(e) => {
+                                    error::warning(&e.to_string());
                                 }
-                            },
-                            None => None
+                            };
                         }
+                    },
+                    Some(("track", ssub_m)) => {
+                        if let Some(name) = ssub_m.get_one::<String>("name") {
+                            match boxes::track(base_dir, &name) {
+                                Ok(_) => {},
+                                Err(e) => {
+                                    error::warning(&e.to_string());
+                                }
+                            };
+                        }
+                    },
+                    _ => {
+                        match boxes::list_boxes(base_dir, false, color) {
+                            Ok(_) => {},
+                            Err(e) => {
+                                error::warning(&e.to_string());
+                            }
+                        };
                     }
                 };
-                match bx.list_cards(pattern.as_ref(), Some(config.get_prefix()), Some(style)) {
-                    Ok(_) => {},
+            },
+            Some(("add", sub_m)) => {
+                if let Some(bx) = bx {
+                    if let Some(name) = sub_m.get_one::<String>("name") {
+                        match bx.add_card(&name, editor) {
+                            Ok(_) => {},
+                            Err(e) => {
+                                error::warning(&e.to_string());
+                            }
+                        };
+                    }
+                }
+            },
+            Some(("use", sub_m)) => {
+                if let Some(name) = sub_m.get_one::<String>("name") {
+                    match boxes::use_box(base_dir, &name, color) {
+                        Ok(_) => {},
+                        Err(e) => {
+                            error::warning(&e.to_string());
+                        }
+                    }
+                }
+            },
+            Some(("edit", sub_m)) => {
+                if let Some(bx) = bx {
+                    if let Some(name) = sub_m.get_one::<String>("name") {
+                        match bx.edit_card(name, editor) {
+                            Ok(_) => {},
+                            Err(e) => {
+                                error::warning(&e.to_string());
+                            }
+                        };
+                    }
+                }
+            },
+            Some(("rm", sub_m)) => {
+                if let Some(bx) = bx {
+                    if let Some(name) = sub_m.get_one::<String>("name") {
+                        match bx.rm_card(name) {
+                            Ok(_) => {},
+                            Err(e) => {
+                                error::warning(&e.to_string());
+                            }
+                        };
+                    }
+                }
+            },
+            Some(("show", sub_m)) => {
+                if let Some(bx) = bx {
+                    if let Some(name) = sub_m.get_one::<String>("name") {
+                        match bx.show_card(name, config.get_show_cmds()) {
+                            Ok(_) => {},
+                            Err(e) => {
+                                error::warning(&e.to_string());
+                            }
+                        };
+                    }
+                }
+            },
+            Some(("ls", sub_m)) => {
+                if let Some(bx) = bx {
+                    let pattern = match sub_m.get_one::<String>("pattern") {
+                        Some(pat) => {
+                            match Regex::new(pat) {
+                                Ok(p) => Some(p),
+                                Err(e) => {
+                                    error::warning(&e.to_string());
+                                    None
+                                }
+                            }
+                        },
+                        None => {
+                            match sub_m.get_one::<String>("number") {
+                                Some(n) => {
+                                    let mut pat = String::from("^");
+                                    pat.push_str(n.as_str());
+                                    match Regex::new(&pat) {
+                                        Ok(p) => Some(p),
+                                        Err(e) => {
+                                            error::warning(&e.to_string());
+                                            None
+                                        }
+                                    }
+                                },
+                                None => None
+                            }
+                        }
+                    };
+                    match bx.list_cards(pattern.as_ref(), Some(config.get_prefix()), Some(style)) {
+                        Ok(_) => {},
+                        Err(e) => {
+                            error::warning(&e.to_string());
+                        }
+                    };
+                }
+            },
+            Some(("config", _sub_m)) => {
+                match config::get_config() {
+                    Ok(_) => {
+                        error::info("config check passed");
+                    },
+                    Err(ZkError::ConfigNotExists) => {
+                        error::info("no config file found");
+                    },
+                    Err(ZkError::ConfigRead) => {
+                        error::warning("config file exists but cannot be read");
+                    },
+                    Err(ZkError::ConfigError) => {
+                        error::warning("there are errors in the config file");
+                    },
                     Err(e) => {
                         error::warning(&e.to_string());
                     }
                 };
-            }
-        },
-        Some(("config", _sub_m)) => {
-            match config::get_config() {
-                Ok(_) => {
-                    error::info("config check passed");
-                },
-                Err(ZkError::ConfigNotExists) => {
-                    error::info("no config file found");
-                },
-                Err(ZkError::ConfigRead) => {
-                    error::warning("config file exists but cannot be read");
-                },
-                Err(ZkError::ConfigError) => {
-                    error::warning("there are errors in the config file");
-                },
-                Err(e) => {
-                    error::warning(&e.to_string());
+            },
+            Some(("import", sub_m)) => {
+                if let Some(bx) = bx {
+                    if let Some(p) = sub_m.get_one::<String>("path") {
+                        let path = PathBuf::from(p);
+                        match bx.import_file(&path) {
+                            Ok(_) => {},
+                            Err(e) => {
+                                error::warning(&e.to_string());
+                            }
+                        };
+                    }
                 }
-            };
-        },
-        Some(("import", sub_m)) => {
-            if let Some(bx) = bx {
-                if let Some(p) = sub_m.get_one::<String>("path") {
-                    let path = PathBuf::from(p);
-                    match bx.import_file(&path) {
+            },
+            Some(("search", sub_m)) => {
+                if let Some(bx) = bx {
+                    if let Some(needle) = sub_m.get_one::<String>("needle") {
+                        if let Ok(r) = Regex::new(needle) {
+                            match bx.search_cards(&r) {
+                                Ok(v) => {
+                                    for m in v.iter() {
+                                        println!("{}", m);
+                                    }
+                                },
+                                Err(e) => {
+                                    error::warning(&e.to_string());
+                                }
+                            };
+                            
+                        } else {
+                            error::warning("failed to parse pattern");
+                        }
+                    }
+                }
+            },
+            Some(("mv", sub_m)) => {
+                if let Some(bx) = bx {
+                    if let Some(old) = sub_m.get_one::<String>("old") {
+                        if let Some(new) = sub_m.get_one::<String>("new") {
+                            match bx.move_card(&old, &new) {
+                                Ok(_) => {
+                                    error::info("card renamed successfully.");
+                                },
+                                Err(e) => {
+                                    error::warning(&e.to_string());
+                                }
+                            };
+                        }
+                    }
+                }
+            },
+            _ => {
+                if let Some(bx) = bx {
+                    match bx.list_cards(None, Some(config.get_prefix()), Some(style)) {
                         Ok(_) => {},
                         Err(e) => {
                             error::warning(&e.to_string());
@@ -257,54 +306,7 @@ fn main() {
                     };
                 }
             }
-        },
-        Some(("search", sub_m)) => {
-            if let Some(bx) = bx {
-                if let Some(needle) = sub_m.get_one::<String>("needle") {
-                    if let Ok(r) = Regex::new(needle) {
-                        match bx.search_cards(&r) {
-                            Ok(v) => {
-                                for m in v.iter() {
-                                    println!("{}", m);
-                                }
-                            },
-                            Err(e) => {
-                                error::warning(&e.to_string());
-                            }
-                        };
-                        
-                    } else {
-                        error::warning("failed to parse pattern");
-                    }
-                }
-            }
-        },
-        Some(("mv", sub_m)) => {
-            if let Some(bx) = bx {
-                if let Some(old) = sub_m.get_one::<String>("old") {
-                    if let Some(new) = sub_m.get_one::<String>("new") {
-                        match bx.move_card(&old, &new) {
-                            Ok(_) => {
-                                error::info("card renamed successfully.");
-                            },
-                            Err(e) => {
-                                error::warning(&e.to_string());
-                            }
-                        };
-                    }
-                }
-            }
-        },
-        _ => {
-            if let Some(bx) = bx {
-                match bx.list_cards(None, Some(config.get_prefix()), Some(style)) {
-                    Ok(_) => {},
-                    Err(e) => {
-                        error::warning(&e.to_string());
-                    }
-                };
-            }
-        }
-    };*/
+        };
+    }
 
 }
