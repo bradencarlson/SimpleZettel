@@ -69,6 +69,7 @@ fn main() {
     };
 
     let mut app = App::default();
+    app.set_config(config);
 
     app.set_box(bx);
 

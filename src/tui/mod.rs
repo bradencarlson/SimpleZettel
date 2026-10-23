@@ -12,7 +12,7 @@ use ratatui::{
 };
 
 use crate::boxes::{self, ZkBox, notes::ZkCard};
-use crate::config::{ZkCmd};
+use crate::config::{ZkCmd, ZkConfig};
 
 pub mod widgets;
 
@@ -47,7 +47,8 @@ pub struct App {
     card_list: Option<Vec::<ZkCard>>,
     state: State,
     selected_index: usize,
-    partial_cmd: String
+    partial_cmd: String,
+    config: ZkConfig,
 }
 
 impl App {
@@ -68,6 +69,10 @@ impl App {
             };
         }
         self.current_box = bx;
+    }
+
+    pub fn set_config(&mut self, config: ZkConfig) {
+        self.config = config;
     }
 
     fn draw(&self, frame: &mut Frame) {
@@ -110,7 +115,7 @@ impl App {
 
     fn edit_card(&mut self) {
         match self.card_list {
-            Some(ref v) => {v[self.selected_index].edit(&ZkCmd::Invalid).unwrap();},
+            Some(ref v) => {v[self.selected_index].edit(&self.config.get_editor()).unwrap();},
             None => {}
         };
     }
