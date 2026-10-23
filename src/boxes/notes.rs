@@ -148,7 +148,7 @@ impl ZkCard {
                     if status.success() {
                         hashes.push_path(&self.path)?;
                         if hashes.equal() {
-                            return Ok(())
+                            return Err(ZkError::NoChangeToCard);
                         }
                         Ok(())
                     } else {

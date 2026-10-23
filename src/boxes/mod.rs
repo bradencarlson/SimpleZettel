@@ -131,10 +131,19 @@ impl ZkBox {
 
     pub fn edit_card(&self, name: &String, editor: &ZkCmd) -> Result<(), ZkError> {
         let card = self.find_card(name)?;
-        card.edit(editor)?;
-        vcs::add(&self.path)?;
-        vcs::commit(&self.path)?;
-        Ok(())
+        match card.edit(editor) {
+            Err(ZkError::NoChangeToCard) => {
+                Ok(())
+            },
+            Err(e) => {
+                Err(e)
+            },
+            Ok(()) => {
+                vcs::add(&self.path)?;
+                vcs::commit(&self.path)?;
+                Ok(())
+            }
+        }
     }
 
     pub fn rm_card(&self, name: &String) -> Result<(), ZkError> {

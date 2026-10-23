@@ -121,3 +121,11 @@ fn hashpair() {
     assert_matches!(hp.get_second(), &Some(_));
 
 }
+
+fn hashfiles() {
+    let mut hp = HashPair::new();
+    let path = PathBuf::from("./tests/files/1.md");
+    hp.push_path(&path);
+    hp.push_path(&path);
+    assert!(hp.equal());
+}
