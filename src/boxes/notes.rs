@@ -64,14 +64,17 @@ impl std::fmt::Display for ZkMatch {
 impl From<PathBuf> for ZkCard {
     fn from(path: PathBuf) -> Self {
         let number = ZkCard::get_number(&path);
-        let header = match ZkCard::get_first_header(&path) {
-            Ok(s) => s,
-            Err(_e) => String::from("No valid header")
-        };
+
         let filetype = match ft::get_filetype(&path) {
             Ok(f) => f,
             Err(_e) => FileType::Markdown
         };
+
+        let header = match ZkCard::get_first_header(&path, &filetype) {
+            Ok(s) => s,
+            Err(_e) => String::from("No valid header")
+        };
+
         ZkCard {
             path: path,
             number: number,
@@ -175,24 +178,31 @@ impl ZkCard {
         }
     }
 
-    pub fn get_first_header(path: &PathBuf) -> Result<String, ZkError> {
-        if let Ok(f) = File::open(path) {
-            let reader = BufReader::new(f);
-            let header = Regex::new("^[[:space:]]*#[[:space:]]*(?<label>.*)").unwrap();
-            let mut iter = reader.lines();
-            while let Some(line_result) = iter.next() {
-                if let Ok(line) = line_result {
-                    if header.is_match(&line) {
-                        let mut matches = header.captures_iter(&line);
-                        if let Some(h) = matches.next() {
-                            return Ok(String::from(&h["label"]));
+    pub fn get_first_header(path: &PathBuf, filetype: &FileType) -> Result<String, ZkError> {
+        match filetype {
+            FileType::Markdown => { 
+                if let Ok(f) = File::open(path) {
+                    let reader = BufReader::new(f);
+                    let header = Regex::new("^[[:space:]]*#[[:space:]]*(?<label>.*)").unwrap();
+                    let mut iter = reader.lines();
+                    while let Some(line_result) = iter.next() {
+                        if let Ok(line) = line_result {
+                            if header.is_match(&line) {
+                                let mut matches = header.captures_iter(&line);
+                                if let Some(h) = matches.next() {
+                                    return Ok(String::from(&h["label"]));
+                                }
+                            }
                         }
                     }
+                    return Err(ZkError::NoteHeader);
+                } else {
+                    Err(ZkError::Access(path.to_path_buf()))
                 }
+            },
+            FileType::PDF => {
+                return Ok(String::new());
             }
-            return Err(ZkError::NoteHeader);
-        } else {
-            Err(ZkError::Access(path.to_path_buf()))
         }
     }
 
@@ -347,4 +357,12 @@ fn card_properties() {
     let expected_header = String::from("File 1");
     assert_eq!( header, &expected_header);
 
+}
+
+#[cfg(feature = "filetypes")]
+#[test]
+fn headers() {
+    let card: ZkCard = PathBuf::from("tests/files/1.1.pdf").into();
+    let header = card.get_header();
+    assert_eq!( header, &String::new() );
 }
