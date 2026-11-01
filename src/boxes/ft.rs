@@ -40,8 +40,8 @@ pub fn get_filetype(path: &Path) -> Result<FileType, ZkError> {
     }
 }
 
-pub fn show_note(card: &ZkCard, show_cmds: &ZkShowCommands) -> Result<(), ZkError> {
-    if !cfg!(feature = "filetypes") {
+pub fn show_note(card: &ZkCard, show_cmds: &ZkShowCommands, use_cmd: bool) -> Result<(), ZkError> {
+    if !cfg!(feature = "filetypes") || !use_cmd {
         print_note(card)?;
         return Ok(());
     }

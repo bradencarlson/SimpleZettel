@@ -131,10 +131,19 @@ impl ZkBox {
 
     pub fn edit_card(&self, name: &String, editor: &ZkCmd) -> Result<(), ZkError> {
         let card = self.find_card(name)?;
-        card.edit(editor)?;
-        vcs::add(&self.path)?;
-        vcs::commit(&self.path)?;
-        Ok(())
+        match card.edit(editor) {
+            Err(ZkError::NoChangeToCard) => {
+                Ok(())
+            },
+            Err(e) => {
+                Err(e)
+            },
+            Ok(()) => {
+                vcs::add(&self.path)?;
+                vcs::commit(&self.path)?;
+                Ok(())
+            }
+        }
     }
 
     pub fn rm_card(&self, name: &String) -> Result<(), ZkError> {
@@ -150,9 +159,9 @@ impl ZkBox {
         }
     }
 
-    pub fn show_card(&self, name: &String, show_cmds: &ZkShowCommands) -> Result<(), ZkError> {
+    pub fn show_card(&self, name: &String, show_cmds: &ZkShowCommands, use_cmd: bool) -> Result<(), ZkError> {
         let card = self.find_card(name)?;
-        ft::show_note(&card, show_cmds)?;
+        ft::show_note(&card, show_cmds, use_cmd)?;
         Ok(())
     }
     
@@ -256,7 +265,7 @@ impl ZkBox {
         }
     }
 
-    fn find_card(&self, name: &String) -> Result<ZkCard, ZkError> {
+    pub fn find_card(&self, name: &String) -> Result<ZkCard, ZkError> {
         let mut path = self.path.clone();
         path.push(name);
         let iter = match fs::read_dir(&self.path) {
