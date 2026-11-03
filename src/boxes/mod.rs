@@ -269,14 +269,14 @@ impl ZkBox {
         let mut path = self.path.clone();
         path.push(name);
         let iter = match fs::read_dir(&self.path) {
-            Ok(it) => it, 
+            Ok(it) => it,
             Err(_e) => {
                 return Err(ZkError::Access(self.path.clone()));
             }
         };
         for entry in iter {
             let entry = match entry {
-                Ok(e) => e, 
+                Ok(e) => e,
                 Err(_) => {
                     break;
                 }
@@ -293,15 +293,25 @@ impl ZkBox {
         Err(ZkError::NoteNotExists)
     }
 
-    pub fn pretty_print(&self,prefix: &str, style: Option<anstyle::Style>) {
-        match style {
-            Some(s) => {
-                println!("{s}{}{s:#}{}", prefix, self.name());
-            },
-            None => {
-                println!("{}{}", prefix, self.name());
-            }
-        };
+    pub fn pretty_print(&self,prefix: &str,
+        prefix_style: Option<anstyle::Style>,
+        name_style: Option<anstyle::Style>) {
+            match prefix_style {
+                Some(s) => {
+                    print!("{s}{}{s:#}", prefix);
+                },
+                None => {
+                    print!("{}", prefix);
+                }
+            };
+            match name_style {
+                Some(s) => {
+                    println!("{s}{}{s:#}", self.name());
+                },
+                None => {
+                    println!("{}", self.name());
+                }
+            };
     }
 }
 
@@ -403,14 +413,17 @@ pub fn add_box(base_dir: &PathBuf, name: &String) -> Result<(), ZkError> {
 
 pub fn list_boxes(base_dir: &PathBuf, all: bool, color: &u8) -> Result<(), ZkError> {
     let style = anstyle::Style::new().fg_color(Some(anstyle::Ansi256Color::from(*color).into())).bold();
+    let hidden_style = anstyle::Style::new().dimmed();
     let bxs = get_boxes(base_dir)?;
     for b in bxs.iter() {
         let prefix = match b.is_current() {
             true => "->",
             false => "  ",
         };
-        if b.is_tracked() || all {
-            b.pretty_print(&prefix, Some(style));
+        if b.is_tracked() {
+            b.pretty_print(&prefix, Some(style), None);
+        } else if all {
+            b.pretty_print(&prefix, None, Some(hidden_style));
         }
     }
     Ok(())
