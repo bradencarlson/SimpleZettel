@@ -2,7 +2,6 @@ use std::env;
 use std::fs;
 use std::io;
 use std::hash::{DefaultHasher, Hash, Hasher};
-use std::assert_matches;
 use std::path::{Path, PathBuf};
 
 use crate::error::ZkError;
@@ -113,12 +112,12 @@ fn hashpair() {
     let mut hp = HashPair::new();
     let x = 506;
     hp.push(&x);
-    assert_matches!(hp.get_first(), &Some(_));
+    hp.get_first().unwrap();
     assert_eq!(hp.len(), 1);
     let y = 102;
     hp.push(&y);
     assert_eq!(hp.len(), 2);
-    assert_matches!(hp.get_second(), &Some(_));
+    hp.get_second().unwrap();
 
 }
 
